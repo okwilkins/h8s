@@ -49,8 +49,10 @@ talosctl apply-config --insecure --nodes $WORKER_NODE_IP \
 ```
 
 After, wait for the VMs to automatically restart. Because of this, you may need to reset your IPs and config:
-CONTROL_PLANE_IP=192.168.xxx.xxx
 
+```bash
+CONTROL_PLANE_IP=192.168.xxx.xxx
+```
 
 Once they restart, you will see in the control plane VM the following log:
 
