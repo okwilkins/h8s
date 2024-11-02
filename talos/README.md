@@ -1,5 +1,7 @@
 # Talos
 
+Talos Linux is a specialised operating system built specifically for running Kubernetes clusters. It's designed to be minimal, secure, and immutable, meaning the system files remain read-only and cannot be modified during runtime.
+
 This page will get you setup and running with TalosOS VMs running locally in VMWare.
 
 ## Getting Started
