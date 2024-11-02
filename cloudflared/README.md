@@ -25,4 +25,3 @@ kubectl create secret generic cloudflared-token \
 ```
 
 This secret is used by the Cloudflared deployment.
-docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token eyJhIjoiM2Y0OTRkMzA3ODdkMzczOWRlZWZmMzMxNTg0NmQ4OTUiLCJ0IjoiN2Y1MTAxY2ItMzhiMS00YzliLTk3ODUtYmI1NTU0M2I5NGQzIiwicyI6Ik1qazROVFU0TnpJdFlUbGpZeTAwTkdGakxUazJOekF0TmprMk16azFNMlF6TWpkbSJ9
