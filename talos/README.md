@@ -26,15 +26,15 @@ WORKER_NODE_IP=192.168.xxx.xxx
 Download the VMWare patch for Talos:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/siderolabs/talos/master/website/content/v$TALOS_VER/talos-guides/install/virtualized-platforms/vmware/cp.patch.yaml \
-    --output-dir talos
-sed -i "s/<VIP>/$CONTROL_PLANE_IP/g" talos/cp.patch.yaml
+curl -fsSLO https://raw.githubusercontent.com/siderolabs/talos/master/website/content/v$TALOS_VER/talos-guides/install/virtualized-platforms/vmware/cp.patch.yaml
+sed -i "s/<VIP>/$CONTROL_PLANE_IP/g" cp.patch.yaml
 ```
 
 Generate the Talos configs:
 ```bash
 talosctl gen config talos-cluster https://$CONTROL_PLANE_IP:6443 \
-    --config-patch-control-plane @talos/cp.patch.yaml \
+    --config-patch-control-plane @cp.patch.yaml \
+    --config-patch @cilium_patch.yaml \
     --output-dir $XDG_CONFIG_HOME/talos
 ```
 
