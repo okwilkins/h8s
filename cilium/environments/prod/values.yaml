@@ -842,7 +842,7 @@ ingressController:
 gatewayAPI:
   # -- Enable support for Gateway API in cilium
   # This will automatically set enable-envoy-config as well.
-  enabled: false
+  enabled: true
   # -- Enable proxy protocol for all GatewayAPI listeners. Note that _only_ Proxy protocol traffic will be accepted once this is enabled.
   enableProxyProtocol: false
   # -- Enable Backend Protocol selection support (GEP-1911) for Gateway API via appProtocol.
@@ -873,7 +873,7 @@ gatewayAPI:
   # Host Network related configuration
   hostNetwork:
     # -- Configure whether the Envoy listeners should be exposed on the host network.
-    enabled: false
+    enabled: true
     # Specify the nodes where the Ingress listeners should be exposed
     nodes:
       # -- Specify the labels of the nodes where the Ingress listeners should be exposed
