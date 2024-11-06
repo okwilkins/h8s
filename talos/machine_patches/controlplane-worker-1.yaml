@@ -4,6 +4,3 @@ machine:
     disk: /dev/nvme0n1
   network:
     hostname: controlplane-worker-1
-cluster:
-  # Allow the control plane to also be used for scheduling pods
-  allowSchedulingOnControlPlanes: true
