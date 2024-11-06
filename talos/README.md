@@ -8,7 +8,31 @@ This page will get you setup and running with TalosOS VMs running locally in VMW
 
 ### TalosOS ISOs
 
-To create the VMs within VMWare, go to the [TalosOS releases page](https://github.com/siderolabs/talos/releases) and download an ISO appropriate for your system.
+To generate the appropriate ISO for the system the [Talos Linux Image Factory can be used](https://factory.talos.dev/). This gives a nice UI to retrieve system-appropriate ISOs. Instead of using the UI, a schematic file is used:
+
+```bash
+curl -X POST --data-binary @factory/intel_n100_bare_metal.yaml https://factory.talos.dev/schematics
+```
+
+This will return:
+
+```bash
+{"id":"ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62"}
+```
+
+This ID can then be used in the [machine config patch](machine_config/main_config.yaml):
+
+```yaml
+machine:
+  install:
+    image: factory.talos.dev/installer/ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62:v1.8.2
+```
+
+The machine config patch can then be applied to a given machine with:
+
+```bash
+talosctl -n <IP> apply-config -f ./machine_config/main_config.yaml
+```
 
 ### Installing the VMs
 
@@ -33,8 +57,8 @@ sed -i "s/<VIP>/$CONTROL_PLANE_IP/g" cp.patch.yaml
 Generate the Talos configs:
 ```bash
 talosctl gen config talos-cluster https://$CONTROL_PLANE_IP:6443 \
-    --config-patch-control-plane @cp.patch.yaml \
-    --config-patch @cilium_patch.yaml \
+    --config-patch @patch_install.yaml \
+    --config-patch @patch_cilium.yaml \
     --output-dir $XDG_CONFIG_HOME/talos
 ```
 
