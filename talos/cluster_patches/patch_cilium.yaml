@@ -1,0 +1,8 @@
+cluster:
+  network:
+    # Disable Flannel CNI so Cilium can instead be used
+    cni:
+      name: none
+  proxy:
+    # Disable the defaly kube-proxy so Cilium can handle this instead
+    disabled: true

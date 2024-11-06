@@ -1,0 +1,9 @@
+machine:
+  install:
+    image: factory.talos.dev/installer/ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62:v1.8.2
+    disk: /dev/nvme0n1
+  network:
+    hostname: controlplane-worker-2
+  cluster:
+    # Allow the control plane to also be used for scheduling pods
+    allowSchedulingOnControlPlanes: true
