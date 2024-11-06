@@ -25,7 +25,7 @@ talosctl gen config \
     -o $XDG_CONFIG_HOME/talos/talosconfig \
     --force \
     talos-homelab \
-    https://$NODE_IP_1:6443
+    https://$NODE_1_IP:6443
 
 echo "Generating config for controlplane-worker-1..."
 talosctl gen config \
