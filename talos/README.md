@@ -20,7 +20,7 @@ This will return:
 {"id":"ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62"}
 ```
 
-This ID can then be used in the [machine config patch](machine_configs/controlplane-worker-1.yaml):
+This ID can then be used in each of the [machine config patch](machine_configs/controlplane-worker-1.yaml):
 
 ```yaml
 machine:
@@ -28,90 +28,80 @@ machine:
     image: factory.talos.dev/installer/ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62:v1.8.2
 ```
 
-The machine config patch can then be applied to a given machine with:
 
-```bash
-talosctl -n <IP> apply-config -f ./machine_config/main_config.yaml
-```
+### Initalising the Cluster
 
-### Installing the VMs
-
-To begin with, create VMWare VMs. The naming can be arbitary but I created two VMs. One named `talos-control-plane-1` and the other `talos-worker-1`.
-Once the VMs have booted up, get the IP Addresses of these from the main screen.
+In my homelab I have two GMKtec G3s that each have an Intel N100 CPU, 32GB RAM and 1TB of NVME storage. With the ISOs loaded onto a computer, it will display its IP. You can also get this IP from the router.
 
 Set your variables:
 
 ```bash
-TALOS_VER=1.8
-CONTROL_PLANE_IP=192.168.xxx.xxx
-WORKER_NODE_IP=192.168.xxx.xxx
-```
-
-Download the VMWare patch for Talos:
-
-```bash
-curl -fsSLO https://raw.githubusercontent.com/siderolabs/talos/master/website/content/v$TALOS_VER/talos-guides/install/virtualized-platforms/vmware/cp.patch.yaml
-sed -i "s/<VIP>/$CONTROL_PLANE_IP/g" cp.patch.yaml
+export NODE_1_IP=192.168.xxx.xxx
+export NODE_2_IP=192.168.xxx.xxx
 ```
 
 Generate the Talos configs:
 ```bash
-talosctl gen config talos-cluster https://$CONTROL_PLANE_IP:6443 \
-    --config-patch @patch_install.yaml \
-    --config-patch @patch_cilium.yaml \
-    --output-dir $XDG_CONFIG_HOME/talos
+bash scripts/gen_configs.sh
 ```
 
-Apply the Talos config to control plane VM:
+Apply the Talos configs:
 ```bash
-talosctl apply-config --insecure --nodes $CONTROL_PLANE_IP \
-    --file $XDG_CONFIG_HOME/talos/controlplane.yaml
+bash scripts/apply_configs.sh
 ```
 
-Apply config to worker node(s):
-```bash
-talosctl apply-config --insecure --nodes $WORKER_NODE_IP \
-    --file $XDG_CONFIG_HOME/talos/worker.yaml
-```
-
-After, wait for the VMs to automatically restart. Because of this, you may need to reset your IPs and config:
-
-```bash
-CONTROL_PLANE_IP=192.168.xxx.xxx
-```
-
-Once they restart, you will see in the control plane VM the following log:
-
-```txt
-"etcd is waiting to join the cluster, if this node is the first node in the cluster, please run `talosctl bootstrap` against one of the following IPs:
-```
-
-To bootstrap ETCD run:
+Wait for the nodes to automatically restart. Then run bootstrap the cluster with:
 
 ```bash
 talosctl bootstrap \
-    -e $CONTROL_PLANE_IP \
-    -n $CONTROL_PLANE_IP \
+    --nodes $NODE_1_IP \
+    --endpoints $NODE_1_IP \
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig 
 ```
 
-Add the following endpoints for your VMs to your Talos config with:
+***NOTE:*** It doesn't matter which controlplane-worker we do this for. As both nodes are control planes, it doesn't matter which one is chosen to bootstrap.
+
+
+You can generate your kubeconfig like so, it will be placed in your current working directory:
 
 ```bash
-talosctl config endpoint $CONTROL_PLANE_IP \
-    --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
-
-talosctl config node $CONTROL_PLANE_IP \
+talosctl kubeconfig ./ \
+    --nodes $NODE_1_IP,$NODE_2_IP \
+    --endpoints $NODE_1_IP, $NODE_2_IP \
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
 ```
 
-The following will make a temp dir for the kubeconfig for your K8s cluster. **WARNING:** This will overwrite your pre-existing config. Use with caution!
+Enjoy your cluster!
+
+
+### Patching Nodes
+
+There will be times where you will need to patch the underlying system itself. You can do this by applying patches, like in this example:
+
 ```bash
-TMP_DIR=$(mktemp -d)
-talosctl kubeconfig $TMP_DIR \
+talosctl patch mc \
+    --patch @cluster_patches/patch_cilium.yaml \
+    --patch @cluster_patches/patch_control_plane_scheduling.yaml \
+    --nodes $NODE_1_IP \
+    --endpoints $NODE_1_IP \
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
-export KUBECONFIG=$KUBECONFIG:$HOME/.kube/config:$TMP_DIR/kubeconfig
-kubectl config view --flatten > $HOME/.kube/config
 ```
 
-Finally, inspect the config and ensure you have the correct IP.
+### Saving Talos Nodes, Endpoints and Talosconfig Location
+
+To save the need to manually (which can be tedious) apply the `nodes`, `endpoints` and `talosconfig` flags, you can run the following:
+
+```bash
+export TALOSCONFIG=$XDG_CONFIG_HOME/talos/talosconfig
+
+talosctl config endpoint \
+    $NODE_1_IP $NODE_2_IP \
+    --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
+
+talosctl config nodes \
+    $NODE_1_IP $NODE_2_IP \
+    --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
+```
+
+It is probably a good idea to save `TALOSCONFIG` to your shell's config also.
+
