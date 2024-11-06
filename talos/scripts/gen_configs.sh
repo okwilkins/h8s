@@ -33,6 +33,7 @@ talosctl gen config \
     --output-types controlplane \
     -o $XDG_CONFIG_HOME/talos/controlplane-worker-1.yaml \
     --force \
+    --config-patch @machine_patches/controlplane-worker-1.yaml \
     talos-homelab \
     https://$NODE_1_IP:6443
 
@@ -42,6 +43,7 @@ talosctl gen config \
     --output-types controlplane \
     -o $XDG_CONFIG_HOME/talos/controlplane-worker-2.yaml \
     --force \
+    --config-patch @machine_patches/controlplane-worker-2.yaml \
     talos-homelab \
     https://$NODE_2_IP:6443
 
