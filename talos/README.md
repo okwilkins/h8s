@@ -2,7 +2,6 @@
 
 Talos Linux is a specialised operating system built specifically for running Kubernetes clusters. It's designed to be minimal, secure, and immutable, meaning the system files remain read-only and cannot be modified during runtime.
 
-This page will get you setup and running with TalosOS VMs running locally in VMWare.
 
 ## Getting Started
 
@@ -11,7 +10,7 @@ This page will get you setup and running with TalosOS VMs running locally in VMW
 To generate the appropriate ISO for the system the [Talos Linux Image Factory can be used](https://factory.talos.dev/). This gives a nice UI to retrieve system-appropriate ISOs. Instead of using the UI, a schematic file is used:
 
 ```bash
-curl -X POST --data-binary @factory/intel_n100_bare_metal.yaml https://factory.talos.dev/schematics
+curl -X POST --data-binary @iso_factory_patches/intel_n100_bare_metal.yaml https://factory.talos.dev/schematics
 ```
 
 This will return:
@@ -20,7 +19,7 @@ This will return:
 {"id":"ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62"}
 ```
 
-This ID can then be used in each of the [machine config patch](machine_configs/controlplane-worker-1.yaml):
+This ID can then be used in each of the [machine config patches](./machine_patches):
 
 ```yaml
 machine:
