@@ -29,5 +29,11 @@ helm upgrade prometheus-stack prometheus-community/kube-prometheus-stack \
     --install \
     --namespace "monitoring" \
     --create-namespace \
-    -f environments/${ENV_NAME}/values.yaml
+    -f environments/base/values.yaml
+```
+
+To deploy any Kubernetes manifest files, run the following:
+
+```bash
+kubectl apply -f environments/${ENV_NAME}
 ```
