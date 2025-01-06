@@ -2,6 +2,12 @@
 
 Sealed Secrets are "one-way" encrypted K8s Secrets that can be created by anyone, but can only be decrypted by the controller running in the target cluster recovering the original object.
 
+To read more on Sealed Secrets here:
+https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
+
+To read more about Kubeseal, go here:
+https://github.com/bitnami-labs/sealed-secrets
+
 ## Installing
 
 ```bash
