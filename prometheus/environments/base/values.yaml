@@ -3,4 +3,6 @@
 namespaceOverride: monitoring
 grafana:
   admin:
-    existingSecret: asdasd
+    existingSecret: grafana-admin
+    userKey: username
+    passwordKey: password
