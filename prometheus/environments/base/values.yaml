@@ -1,3 +1,6 @@
 # https://github.com/prometheus-community/helm-charts/blob/48bfc62579d5cdbd6e8496ac92ef9def26140292/charts/kube-prometheus-stack/values.yaml
 
 namespaceOverride: monitoring
+grafana:
+  admin:
+    existingSecret: asdasd
