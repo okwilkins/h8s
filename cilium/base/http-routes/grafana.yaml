@@ -7,6 +7,8 @@ spec:
   parentRefs:
     - name: default-gateway
       namespace: default
+  hostnames:
+    - grafana.okwilkins.dev
   rules:
     - matches:
         - path:
