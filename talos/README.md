@@ -78,9 +78,10 @@ Enjoy your cluster!
 There will be times where you will need to patch the underlying system itself. You can do this by applying patches, like in this example:
 
 ```bash
-talosctl patch mc \
+ talosctl patch mc \
     --patch @cluster_patches/patch_cilium.yaml \
     --patch @cluster_patches/patch_control_plane_scheduling.yaml \
+    --patch @cluster_patches/patch_openebs.yaml \
     --nodes $NODE_1_IP \
     --endpoints $NODE_1_IP \
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
