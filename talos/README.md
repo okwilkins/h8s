@@ -81,7 +81,6 @@ There will be times where you will need to patch the underlying system itself. Y
  talosctl patch mc \
     --patch @cluster_patches/patch_cilium.yaml \
     --patch @cluster_patches/patch_control_plane_scheduling.yaml \
-    --patch @cluster_patches/patch_openebs.yaml \
     --nodes $NODE_1_IP \
     --endpoints $NODE_1_IP \
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
