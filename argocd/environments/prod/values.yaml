@@ -40,3 +40,11 @@ redis:
       namespace: monitoring
       additionalLabels:
         release: prometheus-stack
+dex:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+      additionalLabels:
+        release: prometheus-stack
