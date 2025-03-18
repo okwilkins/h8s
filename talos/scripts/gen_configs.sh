@@ -51,3 +51,11 @@ talosctl gen config \
     talos-homelab \
     https://$NODE_2_IP:6443
 
+
+talosctl config endpoint \
+    $NODE_1_IP $NODE_2_IP \
+    --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
+
+talosctl config nodes \
+    $NODE_1_IP $NODE_2_IP \
+    --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
