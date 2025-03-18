@@ -47,4 +47,11 @@ dex:
       enabled: true
       namespace: monitoring
       additionalLabels:
+notifications:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+      additionalLabels:
         release: prometheus-stack
