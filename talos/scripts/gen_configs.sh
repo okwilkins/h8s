@@ -34,6 +34,7 @@ talosctl gen config \
     -o $XDG_CONFIG_HOME/talos/controlplane-worker-1.yaml \
     --force \
     --config-patch @machine_patches/controlplane-worker-1.yaml \
+    --config-patch @machine_patches/dns-resolvers.yaml \
     --config-patch @cluster_patches/patch_cilium.yaml \
     --config-patch @cluster_patches/patch_control_plane_scheduling.yaml \
     talos-homelab \
@@ -46,6 +47,7 @@ talosctl gen config \
     -o $XDG_CONFIG_HOME/talos/controlplane-worker-2.yaml \
     --force \
     --config-patch @machine_patches/controlplane-worker-2.yaml \
+    --config-patch @machine_patches/dns-resolvers.yaml \
     --config-patch @cluster_patches/patch_cilium.yaml \
     --config-patch @cluster_patches/patch_control_plane_scheduling.yaml \
     talos-homelab \
