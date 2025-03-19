@@ -6,13 +6,6 @@ I use this to facilitate connections to my K8s cluster over the web.
 
 ## Installation
 
-### Manifest Deployment
-
-```bash
-CLUSTER_ENV=prod
-kubectl apply -k environments/$CLUSTER_ENV
-```
-
 ### Cloudflared Token
 
 Follow the steps [provided by Cloudflare](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) to create a tunnel. This guide should provide instructions on token generation. Once you have your token, you may run the following command:
