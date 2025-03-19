@@ -34,6 +34,6 @@ There are several steps to take when creating new routes:
 2. This cluster uses [Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) for public access to the cluster. When creating a new public hostname for the Tunnel for the cluster follow these steps:
     - When giving a value for a new subdomain, make sure it is the same as the value given in your route's `spec.hostnames`.
     - The path can be kept as `/`, or make it the same as the `spec.rules.matches.path.value`.
-    - For the service, reference `spec.listeners.port` and `spec.listeners.protocol` values  in the `spec.listeners` within your Gateway.
+    - For the service, reference `spec.listeners.port` and `spec.listeners.protocol` values in the `spec.listeners` within your Gateway.
         - The URL for this will be the IP address assigned to the Gateway, for example `http://1.0.0.0:8080`.
 
