@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cloudflared
-  namespace: cloudflare
+  namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -13,6 +13,7 @@ spec:
     path: cloudflared/environments/prod
   destination:
     server: https://kubernetes.default.svc
+    namespace: cloudflare
   syncPolicy:
     automated:
       prune: true
