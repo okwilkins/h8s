@@ -35,6 +35,7 @@ talosctl gen config \
     --force \
     --config-patch @machine_patches/controlplane-worker-1.yaml \
     --config-patch @machine_patches/dns-resolvers.yaml \
+    --config-patch @machine_patches/forward-kube-dns-to-host.yaml \
     --config-patch @cluster_patches/patch_cilium.yaml \
     --config-patch @cluster_patches/patch_control_plane_scheduling.yaml \
     talos-homelab \
@@ -48,6 +49,7 @@ talosctl gen config \
     --force \
     --config-patch @machine_patches/controlplane-worker-2.yaml \
     --config-patch @machine_patches/dns-resolvers.yaml \
+    --config-patch @machine_patches/forward-kube-dns-to-host.yaml \
     --config-patch @cluster_patches/patch_cilium.yaml \
     --config-patch @cluster_patches/patch_control_plane_scheduling.yaml \
     talos-homelab \

@@ -1,0 +1,5 @@
+# https://www.talos.dev/v1.9/kubernetes-guides/network/deploying-cilium/#known-issues
+machine:
+  features:
+    hostDNS:
+      forwardKubeDNSToHost: false
