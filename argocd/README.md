@@ -17,6 +17,18 @@ helm upgrade argocd argo/argo-cd \
     -f environments/${CLUSTER_ENV}/values.yaml
 ```
 
+### App of Apps
+
+Installing the app of apps will install everything the cluster needs to get going. It is based from [ArgoCD's docs found here](https://github.com/argoproj/argo-cd/blob/a06cdb3880fe89f2e0512b07a4b2df2cfe83634e/docs/operator-manual/cluster-bootstrapping.md).
+
+![alt](https://github.com/argoproj/argo-cd/blob/a06cdb3880fe89f2e0512b07a4b2df2cfe83634e/docs/assets/application-of-applications.png)
+
+To install the app of apps, that will install everything else, run:
+
+```bash
+kubectl apply -f environments/$CLUSTER_ENV/apps/
+```
+
 ## Web UI
 
 To gain access to the admin account via the web UI, run this command:

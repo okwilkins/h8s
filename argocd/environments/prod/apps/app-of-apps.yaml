@@ -1,0 +1,16 @@
+# App of Apps pattern derived here: https://github.com/argoproj/argo-cd/blob/a06cdb3880fe89f2e0512b07a4b2df2cfe83634e/docs/operator-manual/cluster-bootstrapping.md
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/okwilkins/h8s
+    targetRevision: HEAD
+    path: argocd/environments/prod/apps/
