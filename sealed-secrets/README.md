@@ -17,7 +17,7 @@ echo -n bar | kubectl create secret generic mysecret --dry-run=client --from-fil
 
 # This is the important bit:
 kubeseal --controller-name sealed-secrets \
-    --controller-namespace default \
+    --controller-namespace kubeseal \
     -f mysecret.yaml \
     -w mysealedsecret.yaml
 
