@@ -1,5 +1,7 @@
 # https://artifacthub.io/packages/helm/argo/argo-cd/7.8.12?modal=template&template=aggregate-roles.yaml 
 
+global:
+  domain: okwilkins.dev
 controller:
   metrics:
     enabled: true
@@ -9,6 +11,9 @@ controller:
       additionalLabels:
         release: prometheus-stack
 server:
+  # As HTTPS is dealt with with Cloudflared, internally use HTTP
+  extraArgs:
+    - --insecure
   metrics:
     enabled: true
     serviceMonitor:
