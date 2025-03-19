@@ -14,3 +14,8 @@ spec:
     repoURL: https://github.com/okwilkins/h8s
     targetRevision: HEAD
     path: argocd/environments/prod/apps/
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
