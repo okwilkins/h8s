@@ -1,4 +1,6 @@
+# https://github.com/cloudflare/argo-tunnel-examples/tree/cd94169d69c9573171d15c0ce0168f726abada7c/named-tunnel-k8s
 apiVersion: apps/v1
+# TODO: Possibly make this into a daemonset to distribute traffic across nodes better
 kind: Deployment
 metadata:
   labels:
@@ -12,7 +14,6 @@ spec:
       pod: cloudflared
   template:
     metadata:
-      creationTimestamp: null
       labels:
         pod: cloudflared
     spec:
@@ -35,7 +36,7 @@ spec:
                 secretKeyRef:
                   name: cloudflared-token
                   key: token
-          image: cloudflare/cloudflared:latest
+          image: cloudflare/cloudflared:2025.2.1
           name: cloudflared
           livenessProbe:
             httpGet:
