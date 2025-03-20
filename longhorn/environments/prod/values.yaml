@@ -1,0 +1,6 @@
+# https://artifacthub.io/packages/helm/longhorn/longhorn/1.8.1?modal=values
+metrics:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: prometheus-stack
