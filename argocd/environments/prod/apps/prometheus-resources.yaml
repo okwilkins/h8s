@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: promethues-resources
+  name: prometheus-resources
   namespace: argocd
   annotations:
     # -101 so namespaces etc go in before the prom Helm charts
