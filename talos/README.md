@@ -46,6 +46,9 @@ Generate the Talos configs:
 bash scripts/gen_configs.sh
 ```
 
+***NOTE***: It is a good idea to save the configs generated from this script. This is because it contains certificates and keys to access the nodes!
+This can be found at `$XDG_CONFIG_HOME/talos/secret.yaml`.
+
 Apply the Talos configs:
 ```bash
 bash scripts/apply_configs.sh
