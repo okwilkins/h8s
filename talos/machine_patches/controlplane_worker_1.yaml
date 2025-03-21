@@ -1,6 +1,6 @@
 machine:
   install:
-    image: factory.talos.dev/installer/06004909c4c001b732becbf4ffee66681b22a456508cf1198e1de2a954a45ee5:v1.9.5
+    image: factory.talos.dev/installer/01fe315852ccb7495f41284d2f04081155571a202259813ada7fb1e28b8d3774:v1.9.5
     disk: /dev/nvme0n1
   network:
     hostname: controlplane-worker-1
