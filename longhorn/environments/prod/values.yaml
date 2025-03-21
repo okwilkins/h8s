@@ -1,10 +1,9 @@
 # https://artifacthub.io/packages/helm/longhorn/longhorn/1.8.1?modal=values
-longhorn:
-  preUpgradeChecker:
-    # https://github.com/longhorn/longhorn/issues/8707
-    jobEnabled: false
-metrics:
-  serviceMonitor:
-    enabled: true
-    additionalLabels:
-      release: prometheus-stack
+preUpgradeChecker:
+  # https://github.com/longhorn/longhorn/issues/8707
+  jobEnabled: false
+# metrics:
+#   serviceMonitor:
+#     enabled: true
+#     additionalLabels:
+#       release: prometheus-stack
