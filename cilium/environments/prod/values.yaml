@@ -102,4 +102,4 @@ hubble:
   ui:
     enabled: true
 hostFirewall:
-  enabled: true
+  enabled: false
