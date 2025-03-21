@@ -10,7 +10,9 @@ Talos Linux is a specialised operating system built specifically for running Kub
 To generate the appropriate ISO for the system the [Talos Linux Image Factory can be used](https://factory.talos.dev/). This gives a nice UI to retrieve system-appropriate ISOs. Instead of using the UI, a schematic file is used:
 
 ```bash
-curl -X POST --data-binary @iso_factory_patches/intel_n100_bare_metal.yaml https://factory.talos.dev/schematics
+curl -X POST \
+    --data-binary @iso_factory_patch.yaml \
+    https://factory.talos.dev/schematics
 ```
 
 This will return:
