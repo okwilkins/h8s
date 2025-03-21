@@ -1,0 +1,83 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: host-firewall-control-plane
+spec:
+  description: control-plane specific access rules
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/control-plane: ""
+  ingress:
+    # Allow access to kube api from anywhere.
+    - fromEntities:
+        - world
+        - cluster
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+    # Allow access to talos from anywhere.
+    # https://www.talos.dev/v1.9/learn-more/talos-network-connectivity/
+    - fromEntities:
+        - world
+        - cluster
+      toPorts:
+        - ports:
+            # talosctl, control plane nodes 
+            - port: "50000"
+              protocol: TCP
+            # worker nodes
+            - port: "50001"
+              protocol: TCP
+    # Allow kube-proxy-replacement from kube-apiserver
+    - fromEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+            - port: "4244"
+              protocol: TCP
+    # Allow access from hubble-relay to hubble-peer (running on the node)
+    - fromEndpoints:
+        - matchLabels:
+            k8s-app: hubble-relay
+      toPorts:
+        - ports:
+            - port: "4244"
+              protocol: TCP
+    # Allow metrics-server to scrape
+    - fromEndpoints:
+        - matchLabels:
+            k8s-app: metrics-server
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+    # Allow ICMP Ping from/to anywhere.
+    - icmps:
+        - fields:
+            - type: 8
+              family: IPv4
+            - type: 128
+              family: IPv6
+    # Allow cilium tunnel/health checks from other nodes.
+    - fromEntities:
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "8472"
+              protocol: UDP
+            - port: "4240"
+              protocol: TCP
+    # Allow access to etcd and api from other nodes.
+    - fromEntities:
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "2379"
+              protocol: TCP
+            - port: "2380"
+              protocol: TCP
+            - port: "51871"
+              protocol: UDP
