@@ -31,13 +31,11 @@ echo "Generating config for controlplane-worker-1..."
 talosctl gen config \
     --with-secrets $TALOS_SECRET_FILE \
     --output-types controlplane \
-    -o $XDG_CONFIG_HOME/talos/controlplane-worker-1.yaml \
+    -o $XDG_CONFIG_HOME/talos/controlplane_worker_1.yaml \
     --force \
-    --config-patch @machine_patches/controlplane-worker-1.yaml \
-    --config-patch @machine_patches/dns-resolvers.yaml \
-    --config-patch @machine_patches/forward-kube-dns-to-host.yaml \
-    --config-patch @cluster_patches/patch_cilium.yaml \
-    --config-patch @cluster_patches/patch_control_plane_scheduling.yaml \
+    --config-patch @machine_patches/controlplane_worker_1.yaml \
+    --config-patch @machine_patches/machine_patch.yaml \
+    --config-patch @cluster_patch.yaml \
     talos-homelab \
     https://$NODE_1_IP:6443
 
@@ -45,13 +43,11 @@ echo "Generating config for controlplane-worker-2..."
 talosctl gen config \
     --with-secrets $TALOS_SECRET_FILE \
     --output-types controlplane \
-    -o $XDG_CONFIG_HOME/talos/controlplane-worker-2.yaml \
+    -o $XDG_CONFIG_HOME/talos/controlplane_worker_2.yaml \
     --force \
-    --config-patch @machine_patches/controlplane-worker-2.yaml \
-    --config-patch @machine_patches/dns-resolvers.yaml \
-    --config-patch @machine_patches/forward-kube-dns-to-host.yaml \
-    --config-patch @cluster_patches/patch_cilium.yaml \
-    --config-patch @cluster_patches/patch_control_plane_scheduling.yaml \
+    --config-patch @machine_patches/controlplane_worker_2.yaml \
+    --config-patch @machine_patches/machine_patch.yaml \
+    --config-patch @cluster_patch.yaml \
     talos-homelab \
     https://$NODE_2_IP:6443
 
