@@ -1,0 +1,11 @@
+# Patch for N100 CPU-based nodes
+customization:
+  systemExtensions:
+    officialExtensions:
+      # Supports N100 CPUs
+      - siderolabs/i915-ucode
+      # Distributed Replicated Storage System for Piraeus/LINSTOR
+      - siderolabs/drbd
+  secureboot:
+    # Include well-known UEFI certificates into auto-enrollment database (SecureBoot ISO only)
+    includeWellKnownCertificates: true
