@@ -46,6 +46,8 @@ Generate the Talos configs:
 bash scripts/gen_configs.sh
 ```
 
+***NOTE***: This script dictates the version of [Cilium](../cilium/README.md) that will be installed into the cluster. Change the `CILIUM_VER` inside to change versions. When changing versions or any changes to the Cilium Helm chart's values were made, run the steps below.
+
 ***NOTE***: It is a good idea to save the configs generated from this script. This is because it contains certificates and keys to access the nodes!
 This can be found at `$XDG_CONFIG_HOME/talos/secret.yaml`.
 
@@ -113,7 +115,6 @@ It is probably a good idea to save `TALOSCONFIG` to your shell's config also.
 
 There will be times where the entire cluster will need to be installed from scratch. There are two steps to get everything in the cluster:
 
-1. Follow the [install steps with Cilium](../cilium/README.md).
-2. The Sealed Secrets secret will also need to be placed back into the cluster. Follow the [sealed secrets README](../sealed-secrets/README.md) for details on how to do this.
-3. Wait for Cilium to be installed then [install ArgoCD](../argocd/README.md). This will install the rest of the cluster for you.
+1. The Sealed Secrets secret will also need to be placed back into the cluster. Follow the [sealed secrets README](../sealed-secrets/README.md) for details on how to do this.
+2. Wait for Cilium to be installed then [install ArgoCD](../argocd/README.md). This will install the rest of the cluster for you.
 
