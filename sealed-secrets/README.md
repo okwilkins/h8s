@@ -53,7 +53,7 @@ This will save the certificate (`sealed-secrets.crt`) and the private key (`seal
 
 ## Restoring the Private Key
 
-In the event that the `sealed-secrets-key` gets destroyed, save you certificate and private key to `sealed-secrets.crt` and `sealed-secrets.key` respectively. Then run these commands to restore the secret:
+In the event that the `sealed-secrets-key` gets destroyed, save your certificate and private key to `sealed-secrets.crt` and `sealed-secrets.key` respectively. Then run these commands to restore the secret:
 
 ```bash
 kubectl create secret tls sealed-secrets-key --cert sealed-secrets.crt --key sealed-secrets.key --namespace kubeseal
