@@ -69,9 +69,9 @@ talosctl bootstrap \
 You can generate your kubeconfig like so, it will be placed in your current working directory:
 
 ```bash
-talosctl kubeconfig ./ \
-    --nodes $NODE_1_IP,$NODE_2_IP \
-    --endpoints $NODE_1_IP, $NODE_2_IP \
+talosctl kubeconfig ./config \
+    --nodes $NODE_1_IP \
+    --endpoints $NODE_1_IP \
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
 ```
 
