@@ -23,7 +23,7 @@ fi
 
 # Generate the Cilium manifests here so that when the cluster starts it can network via Cilium's CNI
 # Also gen here so that sensitive keys are not committed  to a repo
-CILIUM_VER="1.16.3"
+CILIUM_VER="1.17.2"
 echo "Generating Cilium version $CILIUM_VER manifests..."
 helm repo add cilium https://helm.cilium.io/
 export CILIUM_MANIFEST=$(
