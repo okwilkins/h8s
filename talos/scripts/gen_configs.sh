@@ -25,18 +25,22 @@ fi
 # Also gen here so that sensitive keys are not committed  to a repo
 CILIUM_VER="1.17.2"
 echo "Generating Cilium version $CILIUM_VER manifests..."
+
+TMP_CILIUM_FILE=$(mktemp /tmp/cilium_patch.XXXXXX)
 helm repo add cilium https://helm.cilium.io/
-export CILIUM_MANIFEST=$(
-    helm template cilium cilium/cilium \
-        --version $CILIUM_VER \
-        --namespace kube-system \
-        -f ../cilium/environments/prod/values.yaml
-)
+helm template cilium cilium/cilium \
+    --version $CILIUM_VER \
+    --namespace kube-system \
+    -f ../cilium/environments/prod/values.yaml > $TMP_CILIUM_FILE
 
 TMP_FILE=$(mktemp /tmp/cilium_patch.XXXXXX)
-yq --null-input '.cluster.inlineManifests = [{"name": "cilium", "contents": env(CILIUM_MANIFEST)}]' | \
-    # For some reason YQ's literal style doesn't work so using sed to put in the pipe char...?
-    sed 's/contents:\([[:space:]]*\)/contents: |/' > $TMP_FILE
+cat > $TMP_FILE <<EOF
+cluster:
+  inlineManifests:
+    - name: cilium
+      contents: |
+$(sed 's/^/        /' $TMP_CILIUM_FILE)
+EOF
 
 echo "Generating talosconfig..."
 talosctl gen config \
@@ -73,6 +77,7 @@ talosctl gen config \
     talos-homelab \
     https://$NODE_2_IP:6443
 
+rm $TMP_CILIUM_FILE
 rm $TMP_FILE
 
 talosctl config endpoint \
