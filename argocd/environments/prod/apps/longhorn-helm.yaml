@@ -21,18 +21,12 @@ spec:
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
       ref: h8s
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      path: longhorn/environments/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
-  # To allow Longhorn to have permissions to function within Talos
-  managedNamespaceMetadata:
-    labels:
-      pod-security.kubernetes.io/enforce: privileged
-      pod-security.kubernetes.io/enforce-version: latest
-      pod-security.kubernetes.io/audit: privileged
-      pod-security.kubernetes.io/audit-version: latest
-      pod-security.kubernetes.io/warn: privileged
-      pod-security.kubernetes.io/warn-version: latest
   syncPolicy:
     automated:
       prune: true
@@ -40,5 +34,4 @@ spec:
       allowEmpty: false
     syncOptions:
       - PruneLast=true
-      - CreateNamespace=true
       - ServerSideApply=true
