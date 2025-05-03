@@ -6,3 +6,11 @@ grafana:
     existingSecret: grafana-admin
     userKey: username
     passwordKey: password
+persistence:
+  enabled: true
+  type: sts
+  accessModes:
+    - ReadWriteOnce
+  size: 20Gi
+  finalizers:
+    - kubernetes.io/pvc-protection
