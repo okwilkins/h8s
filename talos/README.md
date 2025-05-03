@@ -26,7 +26,7 @@ This ID can then be used in each of the [machine config patches](./machine_patch
 ```yaml
 machine:
   install:
-    image: factory.talos.dev/installer/ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62:v1.8.2
+    image: factory.talos.dev/installer/ed036d0640097a4e7af413ee089851a12963cd2e2e1715f8866d551d17c2ec62:v1.10.0
 ```
 
 
