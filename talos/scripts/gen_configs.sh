@@ -36,6 +36,7 @@ talosctl gen config \
     -o $XDG_CONFIG_HOME/talos/controlplane_worker_1.yaml \
     --force \
     --config-patch @machine_patches/controlplane_worker_1.yaml \
+    --config-patch @machine_patches/machine_patch.yaml \
     --config-patch @cluster_patch.yaml \
     talos-homelab \
     https://$NODE_1_IP:6443
@@ -47,6 +48,7 @@ talosctl gen config \
     -o $XDG_CONFIG_HOME/talos/controlplane_worker_2.yaml \
     --force \
     --config-patch @machine_patches/controlplane_worker_2.yaml \
+    --config-patch @machine_patches/machine_patch.yaml \
     --config-patch @cluster_patch.yaml \
     talos-homelab \
     https://$NODE_2_IP:6443
