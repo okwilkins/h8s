@@ -4,5 +4,3 @@ customization:
     officialExtensions:
       # Supports N100 CPUs
       - siderolabs/i915-ucode
-      # Distributed Replicated Storage System for Piraeus/LINSTOR
-      - siderolabs/drbd

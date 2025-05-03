@@ -1,9 +1,0 @@
-machine:
-  # https://github.com/piraeusdatastore/piraeus-operator/blob/7d3b14a0e16e6468b4a4f8b5383b0ad01120c506/docs/how-to/talos.md
-  # Distributed Replicated Storage System for Piraeus/LINSTOR
-  kernel:
-    modules:
-      - name: drbd
-        parameters:
-          - usermode_helper=disabled
-      - name: drbd_transport_tcp
