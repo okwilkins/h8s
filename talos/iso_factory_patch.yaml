@@ -4,3 +4,6 @@ customization:
     officialExtensions:
       # Supports N100 CPUs
       - siderolabs/i915-ucode
+      # Longhorn support
+      - siderolabs/iscsi-tools
+      - siderolabs/util-linux-tools
