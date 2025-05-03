@@ -1,5 +1,6 @@
 # https://artifacthub.io/packages/helm/cilium/cilium/1.17.2?modal=values 
 
+# -- (string) Kubernetes service host - use "auto" for automatic lookup from the cluster-info ConfigMap (kubeadm-based clusters only)
 ipam:
   # -- Configure IP Address Management mode.
   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
