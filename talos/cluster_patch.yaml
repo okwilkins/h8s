@@ -1,3 +1,7 @@
 cluster:
   # Allow the control plane to also be used for scheduling pods
   allowSchedulingOnControlPlanes: true
+  network:
+    # Disable Flannel CNI so Cilium can instead be used
+    cni:
+      name: none
