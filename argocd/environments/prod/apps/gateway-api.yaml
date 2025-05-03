@@ -7,10 +7,13 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://github.com/kubernetes-sigs/gateway-api
-    targetRevision: v1.2.1
-    path: config/crd
+  sources:
+    - repoURL: https://github.com/kubernetes-sigs/gateway-api
+      targetRevision: v1.2.1
+      path: config/crd
+    - repoURL: https://github.com/kubernetes-sigs/gateway-api
+      targetRevision: v1.2.1
+      path: config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
