@@ -4,7 +4,7 @@ Cilium is an open source, cloud native solution for providing, securing, and obs
 
 ## Installing
 
-The settings for Cilium were carefully followed from the [Talos guide on depoying a Cilium CNI](https://www.talos.dev/v1.8/kubernetes-guides/network/deploying-cilium).
+The settings for Cilium were carefully followed from the [Talos guide on deploying a Cilium CNI](https://www.talos.dev/v1.8/kubernetes-guides/network/deploying-cilium).
 For other OSes/systems you will want to follow a different set of instructions and Helm values!
 The TalosOS cluster I setup doesn't use the standard kube-proxy also. Please bare this in mind when using the values here.
 Also note that because of TalosOS' bareboned nature, the `SYS_MODULE` capability for the agents had to be turned off. This is because TalosOS does not have the relevant binaries and the deployment will break.
