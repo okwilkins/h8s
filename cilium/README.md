@@ -13,7 +13,7 @@ Also note that because of TalosOS' bareboned nature, the `SYS_MODULE` capability
 CLUSTER_ENV=prod
 
 helm repo add cilium https://helm.cilium.io/
-helm upgrade cilium cilium/cilium --version 1.16.3 \
+helm upgrade cilium cilium/cilium --version 1.17.2 \
     --install \
     --namespace kube-system \
     -f environments/$CLUSTER_ENV/values.yaml    
