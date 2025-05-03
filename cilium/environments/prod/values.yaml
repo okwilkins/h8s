@@ -76,6 +76,11 @@ gatewayAPI:
 # Valid options are "true" or "false".
 # ref: https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/
 kubeProxyReplacement: false
+# Prerequisite for Gateway API without kube-proxy replacement
+# -- Configure N-S k8s service loadbalancing
+nodePort:
+  # -- Enable the Cilium NodePort service implementation.
+  enabled: true
 # -- Configure cgroup related configuration
 cgroup:
   autoMount:
