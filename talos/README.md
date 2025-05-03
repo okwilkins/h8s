@@ -46,8 +46,6 @@ Generate the Talos configs:
 bash scripts/gen_configs.sh
 ```
 
-***NOTE***: This script dictates the version of [Cilium](../cilium/README.md) that will be installed into the cluster. Change the `CILIUM_VER` inside to change versions. When changing versions or any changes to the Cilium Helm chart's values were made, run the steps below.
-
 ***NOTE***: It is a good idea to save the configs generated from this script. This is because it contains certificates and keys to access the nodes!
 This can be found at `$XDG_CONFIG_HOME/talos/secret.yaml`.
 
