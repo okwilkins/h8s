@@ -21,7 +21,7 @@ spec:
       path: argocd/environments/prod
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
-      path: argocd/environments/prod/namespace.yaml
+      path: argocd/environments/prod
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
