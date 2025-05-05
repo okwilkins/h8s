@@ -1,0 +1,10 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: grafana-operator-dashboard
+spec:
+  url: https://grafana.com/api/dashboards/22785/revisions/2/download
+  folderRef: grafana-operator
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
