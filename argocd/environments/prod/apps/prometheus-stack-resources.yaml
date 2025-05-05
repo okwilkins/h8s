@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: prometheus-stack-resources
   namespace: argocd
-  annotations:
-    # -101 so namespaces etc go in before the prom Helm charts
-    argocd.argoproj.io/sync-wave: "-101"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
