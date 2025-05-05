@@ -11,3 +11,9 @@ spec:
   resources:
     requests:
       memory: 512Mi
+  bootstrap:
+    initdb:
+      database: superbaxel
+      owner: superbaxel
+      secret:
+        name: cnpg-harbor-prod-app-user-credentials
