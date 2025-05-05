@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: prometheus-community
+      targetRevision: 71.2.0
+      helm:
+        releaseName: kube-prometheus-stack
+        valueFiles:
+          - $h8s/prometheus/environments/prod/values.yaml
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      ref: h8s
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      path: prometheus/environments/prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - PruneLast=true
+      - ServerSideApply=true
