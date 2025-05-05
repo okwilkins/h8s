@@ -1,6 +1,5 @@
 # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack/71.2.0?modal=values 
 
-namespaceOverride: monitoring
 grafana:
   admin:
     existingSecret: grafana-admin
