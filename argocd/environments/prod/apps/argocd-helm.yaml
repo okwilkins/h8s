@@ -19,9 +19,11 @@ spec:
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
       path: argocd/environments/prod
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      path: argocd/environments/prod/namespace.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
   syncPolicy:
     automated:
       prune: true
@@ -30,4 +32,3 @@ spec:
     syncOptions:
       - PruneLast=true
       - ServerSideApply=true
-      - CreateNamespace=true
