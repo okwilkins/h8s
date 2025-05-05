@@ -4,6 +4,7 @@ resources:
   - ./grafana-operator
   - ./argocd
   - ./kubernetes
+  - ./cloudnative-pg
 patches:
   - target:
       group: grafana.integreatly.org
