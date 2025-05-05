@@ -3,6 +3,8 @@
 namespaceOverride: monitoring
 prometheus:
   prometheusSpec:
+    # Allow to scrape from all namespaces
+    serviceMonitorNamespaceSelector: {}
     storageSpec:
       volumeClaimTemplate:
         spec:
