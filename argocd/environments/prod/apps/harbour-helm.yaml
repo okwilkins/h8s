@@ -15,6 +15,7 @@ spec:
         releaseName: harbor
   destination:
     server: https://kubernetes.default.svc
+    namespace: harbor
   syncPolicy:
     automated:
       prune: true
@@ -23,3 +24,4 @@ spec:
     syncOptions:
       - PruneLast=true
       - ServerSideApply=true
+      - CreateNamespace=true
