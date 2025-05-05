@@ -15,3 +15,7 @@ This section deploys a full Prometheus stack. This includes the following tools:
 
 To read more, go to the [Prometheus Operator docs](https://prometheus-operator.dev/docs/getting-started/introduction/).
 
+## Grafana Operator
+
+[Grafana Operator](https://grafana.github.io/grafana-operator) used to declaratively manage the state of dashboards.
+

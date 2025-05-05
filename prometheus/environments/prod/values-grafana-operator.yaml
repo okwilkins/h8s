@@ -1,0 +1,8 @@
+# https://github.com/grafana/grafana-operator/blob/v5.17.1/deploy/helm/grafana-operator/values.yaml
+
+namespaceOverride: monitoring
+serviceMonitor:
+  enabled: true
+  namespace: monitoring
+  additionalLabels:
+    release: prometheus-stack
