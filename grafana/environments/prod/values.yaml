@@ -4,5 +4,3 @@ namespaceOverride: monitoring
 serviceMonitor:
   enabled: true
   namespace: monitoring
-  additionalLabels:
-    release: prometheus-stack

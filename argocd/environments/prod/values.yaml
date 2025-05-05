@@ -8,8 +8,6 @@ controller:
     serviceMonitor:
       enabled: true
       namespace: monitoring
-      additionalLabels:
-        release: prometheus-stack
 server:
   config:
     url: https://argocd.okwilkins.dev
@@ -21,45 +19,33 @@ server:
     serviceMonitor:
       enabled: true
       namespace: monitoring
-      additionalLabels:
-        release: prometheus-stack
 repoServer:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
       namespace: monitoring
-      additionalLabels:
-        release: prometheus-stack
 applicationSet:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
       namespace: monitoring
-      additionalLabels:
-        release: prometheus-stack
 redis:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
       namespace: monitoring
-      additionalLabels:
-        release: prometheus-stack
 dex:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
       namespace: monitoring
-      additionalLabels:
-        release: prometheus-stack
 notifications:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
       namespace: monitoring
-      additionalLabels:
-        release: prometheus-stack

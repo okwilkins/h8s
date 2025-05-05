@@ -2,8 +2,7 @@
 preUpgradeChecker:
   # https://github.com/longhorn/longhorn/issues/8707
   jobEnabled: false
-# metrics:
-#   serviceMonitor:
-#     enabled: true
-#     additionalLabels:
-#       release: prometheus-stack
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
