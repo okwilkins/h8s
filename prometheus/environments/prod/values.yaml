@@ -1,16 +1,36 @@
 # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack/71.2.0?modal=values 
 
 namespaceOverride: monitoring
+prometheus:
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
 grafana:
   admin:
     existingSecret: grafana-admin
     userKey: username
     passwordKey: password
-persistence:
-  enabled: true
-  type: sts
-  accessModes:
-    - ReadWriteOnce
-  size: 20Gi
-  finalizers:
-    - kubernetes.io/pvc-protection
+  persistence:
+    enabled: true
+    storageClassName: longhorn
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
