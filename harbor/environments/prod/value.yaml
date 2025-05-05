@@ -1,0 +1,9 @@
+# https://artifacthub.io/packages/helm/bitnami/harbor/25.0.0?modal=values
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    additionalLabels:
+      release: prometheus-stack
