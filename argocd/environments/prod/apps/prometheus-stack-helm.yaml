@@ -23,6 +23,7 @@ spec:
       path: prometheus/environments/prod
   destination:
     server: https://kubernetes.default.svc
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
