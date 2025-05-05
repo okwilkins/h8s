@@ -7,7 +7,6 @@ controller:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
 server:
   config:
     url: https://argocd.okwilkins.dev
@@ -18,34 +17,28 @@ server:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
 repoServer:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
 applicationSet:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
 redis:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
 dex:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
 notifications:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
