@@ -1,0 +1,13 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-keycloak-prod
+spec:
+  description: Postgres cluster for the Keycloak
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.4
+  instances: 1
+  storage:
+    size: 1Gi
+  resources:
+    requests:
+      memory: 256Mi
