@@ -4,6 +4,3 @@ metadata:
   name: grafana-operator
 spec:
   title: Grafana Operator
-  instanceSelector:
-    matchLabels:
-      dashboards: grafana

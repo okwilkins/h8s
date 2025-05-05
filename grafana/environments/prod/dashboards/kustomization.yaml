@@ -2,3 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./grafana-operator
+patches:
+  - target:
+      group: grafana.integreatly.org
+    patch: |-
+      - op: add
+        path: /spec/instanceSelector
+        value:
+          matchLabels:
+            dashboards: grafana
