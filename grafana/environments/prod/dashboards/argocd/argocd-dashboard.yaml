@@ -1,0 +1,7 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: argocd-dashboard
+spec:
+  url: https://grafana.com/api/dashboards/14584/revisions/1/download
+  folderRef: argocd
