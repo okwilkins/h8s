@@ -1,7 +1,3 @@
-# Talos OS
-talos/cp.patch.yaml
-
-
 # Terraform
 # Local .terraform directories
 **/.terraform/*
