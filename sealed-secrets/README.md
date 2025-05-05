@@ -13,7 +13,11 @@ https://github.com/bitnami-labs/sealed-secrets
 ```bash
 # Create a json/yaml-encoded Secret somehow:
 # (note use of `--dry-run` - this is just a local file!)
-echo -n bar | kubectl create secret generic mysecret --dry-run=client --from-file=foo=/dev/stdin -o yaml > mysecret.yaml
+kubectl create secret generic mysecret \
+  --from-literal=key1=value1 \
+  --from-literal=key2=value2 \
+  --dry-run=client -o yaml > mysecret.yaml
+
 
 # This is the important bit:
 kubeseal --controller-name sealed-secrets \
@@ -35,6 +39,8 @@ A `.env` file can be converted into a Kubernetes secret like so:
 ```bash
 kubectl create secret generic my-secret --from-env-file=.env
 ```
+
+NOTE: You may also want to add a namespace to the secret created, before encrypting. This is because when secrets are encrypted, they are by default strict in scope. See `--scope strict`.
 
 ## Saving the Private Key
 
