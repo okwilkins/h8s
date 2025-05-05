@@ -3,6 +3,9 @@
 namespaceOverride: monitoring
 prometheus:
   prometheusSpec:
+    # Stops the need to have to specify release tags
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
     storageSpec:
       volumeClaimTemplate:
         spec:
