@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  # https://www.keycloak.org/operator/installation#_installing_by_using_kubectl_without_operator_lifecycle_manager
+  source:
+    repoURL: https://github.com/keycloak/keycloak-k8s-resources
+    targetRevision: 26.2.3
+    path: kubernetes
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keycloak
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - PruneLast=true
+      - CreateNamespace=true
