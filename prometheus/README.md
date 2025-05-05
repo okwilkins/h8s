@@ -3,7 +3,6 @@
 This section deploys a full Prometheus stack. This includes the following tools:
 
 - Prometheus
-- Grafana
 - Alertmanager
 - ServiceMonitor
 - PodMonitor
@@ -14,9 +13,4 @@ This section deploys a full Prometheus stack. This includes the following tools:
 - ScrapeConfig
 
 To read more, go to the [Prometheus Operator docs](https://prometheus-operator.dev/docs/getting-started/introduction/).
-
-## Grafana Operator
-
-[Grafana Operator](https://grafana.github.io/grafana-operator) used to declaratively manage the state of Grafana instances and associated resources, such as dashboards.
-As such, Grafana from the Prometheus operator stack has been disabled.
 
