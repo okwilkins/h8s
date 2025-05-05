@@ -1,0 +1,7 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: k8s-system-coredns
+spec:
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/tags/v2.7.4/dashboards/k8s-system-coredns.json
+  folderRef: kubernetes

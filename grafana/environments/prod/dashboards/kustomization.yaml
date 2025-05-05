@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ./grafana-operator
   - ./argocd
+  - ./kubernetes
 patches:
   - target:
       group: grafana.integreatly.org
