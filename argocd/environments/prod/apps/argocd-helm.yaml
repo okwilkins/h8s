@@ -22,6 +22,9 @@ spec:
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
       path: argocd/environments/prod
+    - repoURL: https://github.com/argoproj/argo-cd/
+      targetRevision: 2.14.11
+      path: manifests/cluster-rbac/application-controller
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
