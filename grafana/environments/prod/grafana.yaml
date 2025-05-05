@@ -23,3 +23,11 @@ spec:
                     secretKeyRef:
                       name: grafana-admin-credentials
                       key: password
+  persistentVolumeClaim:
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+          storageClassName: longhorn
