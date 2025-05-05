@@ -24,13 +24,4 @@ alertmanager:
             requests:
               storage: 10Gi
 grafana:
-  admin:
-    existingSecret: grafana-admin
-    userKey: username
-    passwordKey: password
-  persistence:
-    enabled: true
-    storageClassName: longhorn
-    accessModes:
-      - ReadWriteOnce
-    size: 5Gi
+  enabled: false
