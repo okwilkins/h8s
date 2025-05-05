@@ -18,3 +18,5 @@ spec:
       secret:
         name: cnpg-harbor-prod-app-user-credentials
   enableSuperuserAccess: false
+  monitoring:
+    enablePodMonitor: true
