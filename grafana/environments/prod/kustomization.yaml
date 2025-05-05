@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - ./datasources
+  - ./dashboards
   - ./grafana.yaml
   - ./admin-credentials.yaml
