@@ -1,8 +1,7 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
 metadata:
-  name: prometheus
-  namespace: monitoring
+  name: prom-default
 spec:
   instanceSelector:
     matchLabels:
@@ -11,7 +10,7 @@ spec:
     name: prom-default
     type: prometheus
     access: proxy
-    url: prometheus-stack-kube-prom-prometheus.monitoring.svc.cluster.local:9090
+    url: http://prometheus-stack-kube-prom-prometheus.monitoring.svc.cluster.local:9090
     isDefault: true
     jsonData:
       tlsSkipVerify: true
