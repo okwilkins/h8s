@@ -10,5 +10,5 @@ resources:
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.2.1/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
   # Gateways and routes
   - ./gateways/default.yaml
-  # - ./http-routes/grafana.yaml
+  - ./http-routes/grafana.yaml
   - ./http-routes/argocd.yaml
