@@ -1,0 +1,7 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cloudnative-pg-dashboard
+spec:
+  url: https://raw.githubusercontent.com/cloudnative-pg/grafana-dashboards/refs/tags/cluster-v0.0.4/charts/cluster/grafana-dashboard.json
+  folderRef: cloudnative-pg
