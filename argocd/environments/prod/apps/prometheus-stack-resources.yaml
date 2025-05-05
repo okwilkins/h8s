@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-stack-resources
+  namespace: argocd
+  annotations:
+    # -101 so namespaces etc go in before the prom Helm charts
+    argocd.argoproj.io/sync-wave: "-101"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      path: prometheus/environments/prod
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - PruneLast=true
