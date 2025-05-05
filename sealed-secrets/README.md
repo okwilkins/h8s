@@ -40,7 +40,7 @@ A `.env` file can be converted into a Kubernetes secret like so:
 kubectl create secret generic my-secret --from-env-file=.env
 ```
 
-NOTE: You may also want to add a namespace to the secret created, before encrypting. This is because when secrets are encrypted, they are by default strict in scope. See `--scope strict`.
+NOTE: You will also want to add a namespace and properly define the secret name to the secret created, before encrypting. This is because when secrets are encrypted, they are by default strict in scope. See `--scope strict`.
 
 ## Saving the Private Key
 
