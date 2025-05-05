@@ -6,6 +6,9 @@ prometheus:
     # Stops the need to have to specify release tags
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
+    # Stops the need to be in the same namespace
+    serviceMonitorNamespaceSelector: {}
+    podMonitorNamespaceSelector: {}
     storageSpec:
       volumeClaimTemplate:
         spec:
