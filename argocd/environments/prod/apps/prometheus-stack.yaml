@@ -12,10 +12,10 @@ spec:
   project: default
   sources:
     - repoURL: https://prometheus-community.github.io/helm-charts
-      chart: prometheus-community
+      chart: kube-prometheus-stack
       targetRevision: 71.2.0
       helm:
-        releaseName: kube-prometheus-stack
+        releaseName: prometheus-stack
         valueFiles:
           - $h8s/prometheus/environments/prod/values.yaml
     - repoURL: https://github.com/okwilkins/h8s
