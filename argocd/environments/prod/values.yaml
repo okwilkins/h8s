@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/argo/argo-cd/7.8.13?modal=template&template=aggregate-roles.yaml 
+# https://artifacthub.io/packages/helm/argo/argo-cd/7.9.0?modal=values
 
 global:
   domain: argocd.okwilkins.dev
@@ -7,7 +7,6 @@ controller:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       additionalLabels:
         release: prometheus-stack
 server:
@@ -20,7 +19,6 @@ server:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       additionalLabels:
         release: prometheus-stack
 repoServer:
@@ -28,7 +26,6 @@ repoServer:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       additionalLabels:
         release: prometheus-stack
 applicationSet:
@@ -36,7 +33,6 @@ applicationSet:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       additionalLabels:
         release: prometheus-stack
 redis:
@@ -44,7 +40,6 @@ redis:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       additionalLabels:
         release: prometheus-stack
 dex:
@@ -52,7 +47,6 @@ dex:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       additionalLabels:
         release: prometheus-stack
 notifications:
@@ -60,6 +54,5 @@ notifications:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       additionalLabels:
         release: prometheus-stack
