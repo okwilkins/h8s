@@ -11,12 +11,12 @@ spec:
   resources:
     requests:
       memory: 512Mi
-  bootstrap:
-    initdb:
-      database: superbaxel
-      owner: superbaxel
-      secret:
-        name: cnpg-harbor-prod-app-user-credentials
+  managed:
+    roles:
+      - name: superbaxel
+        passwordSecret:
+          name: cnpg-harbor-prod-app-user-credentials
+          key: password
   enableSuperuserAccess: false
   monitoring:
     enablePodMonitor: true
