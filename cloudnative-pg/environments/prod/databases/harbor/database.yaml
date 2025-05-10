@@ -1,0 +1,10 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: harbor-core
+  namespace: harbor
+spec:
+  name: harbor_core
+  owner: superbaxel
+  cluster:
+    name: cnpg-harbor-prod
