@@ -17,6 +17,10 @@ spec:
       owner: superbaxel
       secret:
         name: cnpg-harbor-prod-app-user-credentials
+  managed:
+    databases:
+      - name: harbor_core
+        owner: superbaxel
   enableSuperuserAccess: false
   monitoring:
     enablePodMonitor: true
