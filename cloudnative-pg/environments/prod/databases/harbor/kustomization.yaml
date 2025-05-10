@@ -3,4 +3,5 @@ kind: Kustomization
 namespace: harbor
 resources:
   - ./cluster.yaml
+  - ./database.yaml
   - ./user-credential-secret.yaml
