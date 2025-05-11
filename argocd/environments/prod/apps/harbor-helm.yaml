@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: registry-1.docker.io/bitnamicharts/harbor
-      chart: my-release
-      targetRevision: 26.0.1
+    - repoURL: https://helm.goharbor.io
+      chart: harbor
+      targetRevision: 1.17.0
       helm:
         releaseName: harbor
         valueFiles:

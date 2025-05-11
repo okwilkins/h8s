@@ -1,15 +1,14 @@
 # https://artifacthub.io/packages/helm/bitnami/harbor/25.0.0?modal=values
 
 externalURL: https://harbor.okwilkins.dev
-postgresql:
-  enabled: false
-externalDatabase:
-  host: cnpg-harbor-prod-rw.harbor.svc.cluster.local
-  port: 5432
-  user: superbaxel
-  coreDatabase: harbor_core
-  existingSecret: cnpg-harbor-prod-app-user-credentials
-  existingSecretPasswordKey: password
+database:
+  type: external
+  external:
+    host: cnpg-harbor-prod-rw.harbor.svc.cluster.local
+    port: 5432
+    username: superbaxel
+    coreDatabase: harbor_core
+    existingSecret: cnpg-harbor-prod-app-user-credentials
 metrics:
   enabled: true
   serviceMonitor:
