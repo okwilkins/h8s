@@ -5,3 +5,5 @@ cluster:
     # Disable Flannel CNI so Cilium can instead be used
     cni:
       name: none
+  proxy:
+    disabled: true

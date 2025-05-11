@@ -1,6 +1,10 @@
-# Longhorn support
 machine:
+  features:
+    kubePrism:
+      enabled: true
+      port: 7445
   kubelet:
+    # Longhorn support
     extraMounts:
       - destination: /var/lib/longhorn
         type: bind
