@@ -5,6 +5,8 @@ expose:
   type: clusterIP
   tls:
     enabled: false
+existingSecretAdminPassword: harbor-admin-credentials
+existingSecretAdminPasswordKey: password
 database:
   type: external
   external:
