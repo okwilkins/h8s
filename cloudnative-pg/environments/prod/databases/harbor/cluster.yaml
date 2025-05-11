@@ -14,6 +14,9 @@ spec:
   managed:
     roles:
       - name: superbaxel
+        ensure: present
+        login: true
+        superuser: false
         passwordSecret:
           name: cnpg-harbor-prod-app-user-credentials
           key: password
