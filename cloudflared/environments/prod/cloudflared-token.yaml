@@ -1,14 +1,19 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
 metadata:
-  creationTimestamp: null
   name: cloudflared-token
   namespace: cloudflare
 spec:
-  encryptedData:
-    token: AgCaz12RRG4MWWooJDQgJPNhkCNLG0OhT+6NY7d484xIc8cRH+Pu5sWbt+/fSC/94Kblf1wUKzo7wuZ2XLgM9MTmE9dODHAvvdQRL/cTvm1XBCyFW0kEFIvYf7gATxjn7EKhv5XwewkvxTI8EQRTKkmz3UOSHkU6wkr4G8me2EQzxp8En3CChtLcEYEBKJRhx7s9cUX405as3Dvlr6M0NybNtwE/0t8zsByD9JAl7/6T392Sp71uDqrlzWDjMcMmez2gbXGr9o/vctzXQXNZNZW865DwzK5mnVpehBw80KXcjj6PGq/ZmGlMsOKXSJMt139kiYMhC8VxrbHDm2al0XaYvcUVbA+RfEt/4U+XTeYpgdBLemR7apJz0sb17NAE3HiC7ShansZv3uAshnu3nm16YZX8U/nSjJc4TZrYzvkig0z8xZhs6MlfzmOqxsmvVvpiQc73jhYM6Xk/ZGYEoOOexdt2gGaxYqiWsf4BtQMqFjh7FpCbL47IwVQLpNbsDAXuG4EjgRLr5slzOMX+2dw5Gs/PVmy+bNE1jsA+JLGCE9op37zCyxpHJlJ9o3RnlEYrLlO0LNrisaFMBV20eMECmY89tVc3x807f2tWEBSQKdDywicV49vWf8nO7dkJb/A4J3z7mlXNNSuPnWS7tlLJCAD+AJeK7LXoxnAc3UrIAMBW9v3ctqqRR+7+bB0MmRhcxcMTIWMxVO4j9kXXy+VUb4C/jUZLxJ35Bb+NaVGREHGT7RK5bKy6MoQRYD/T64N76v8pycVNzEJy7H+g7hAeceouBcdB7HgsO8PdvzO+Zu/9STDe+xZh2uhuPJBTUNTNYIFjThLASY3YcrOf0EPRwqskRm3EnoPCQq8oxZunudmu7goideQJyHaYXg+Ttlm/fLx+adUoR3ECt3FIR66D9ti8QIlWn0vLaeTb+eI6VO5Tvcpwyc6t
-  template:
-    metadata:
-      creationTimestamp: null
-      name: cloudflared-token
-      namespace: cloudflare
+  refreshInterval: 5m
+  secretStoreRef:
+    name: aws-secretstore
+    kind: ClusterSecretStore
+  target:
+    name: cloudflared-token
+    creationPolicy: Orphan
+    deletionPolicy: Retain
+  data:
+    - secretKey: token
+      remoteRef:
+        key: cloudflared-token
+        property: token
