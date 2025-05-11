@@ -27,7 +27,7 @@ Installing the app of apps will install everything the cluster needs to get goin
 To install the app of apps, that will install everything else, run:
 
 ```bash
-kubectl apply -f environments/$CLUSTER_ENV/app-of-apps.yaml
+kubectl apply -k environments/$CLUSTER_ENV
 ```
 
 ## Web UI
