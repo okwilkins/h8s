@@ -1,6 +1,10 @@
 # https://artifacthub.io/packages/helm/bitnami/harbor/25.0.0?modal=values
 
 externalURL: https://harbor.okwilkins.dev
+expose:
+  type: clusterIP
+  tls:
+    enabled: false
 database:
   type: external
   external:
