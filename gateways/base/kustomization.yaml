@@ -12,3 +12,4 @@ resources:
   - ./gateways/default.yaml
   - ./http-routes/grafana.yaml
   - ./http-routes/argocd.yaml
+  - ./http-routes/harbor.yaml
