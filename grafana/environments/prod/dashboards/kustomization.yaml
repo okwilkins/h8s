@@ -5,6 +5,7 @@ resources:
   - ./argocd
   - ./kubernetes
   - ./cloudnative-pg
+  - ./harbor
 patches:
   - target:
       group: grafana.integreatly.org
