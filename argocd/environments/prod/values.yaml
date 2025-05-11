@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/argo/argo-cd/7.9.0?modal=values
+# https://artifacthub.io/packages/helm/argo/argo-cd/8.0.0?modal=values
 
 global:
   domain: argocd.okwilkins.dev
