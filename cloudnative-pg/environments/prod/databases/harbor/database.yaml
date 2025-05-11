@@ -5,6 +5,6 @@ metadata:
   namespace: harbor
 spec:
   name: harbor_core
-  owner: superbaxel
+  owner: harbor
   cluster:
     name: cnpg-harbor-prod
