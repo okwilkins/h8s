@@ -113,6 +113,6 @@ It is probably a good idea to save `TALOSCONFIG` to your shell's config also.
 
 There will be times where the entire cluster will need to be installed from scratch. There are two steps to get everything in the cluster:
 
-1. The Sealed Secrets secret will also need to be placed back into the cluster. Follow the [sealed secrets README](../sealed-secrets/README.md) for details on how to do this.
+1. Follow the instructions in the [External Secrets section](../external-secrets-operator/README.md) to get important secrets into the cluster.
 2. Wait for Cilium to be installed then [install ArgoCD](../argocd/README.md). This will install the rest of the cluster for you.
 

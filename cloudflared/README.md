@@ -6,13 +6,12 @@ I use this to facilitate connections to my K8s cluster over the web.
 
 ## Cloudflared Token
 
-The following script will create a [sealed-secret](../sealed-secrets/README.md) for the token that provides access to the Cloudflare tunnel.
-This will create a file called `cloudflared-token.yaml` the secret contains a single key called `token`. Place this where needed, after creation.
-
 To get the values for the first 3 variables:
 - `CLOUDFLARE_ACCOUNT_ID`: Read [this guide here](https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/).
 - `CLOUDFLARE_API_KEY`: Go to your [accounts api-tokens page](https://dash.cloudflare.com/profile/api-tokens). Create an API key with permissions for `Cloudflate One Connector: cloudflared` with `Read`.
 - `TUNNEL_NAME`: The name of the tunnel to use for the cluster. [Read more here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/).
+
+Place the `TUNNEL_TOKEN` into a secret in your cloud platform. Put the key name as `token` and the value the contents of the script below:
 
 ```bash
 CLOUDFLARE_ACCOUNT_ID="<account ID>"
@@ -31,16 +30,8 @@ TUNNEL_TOKEN=$(
         -H "Authorization: Bearer $CLOUDFLARE_API_KEY" | \
     jq -r '.result'
 )
-# Create the secret manifest
-kubectl create secret generic cloudflared-token \
-    --dry-run=client \
-    --from-literal="token=$TUNNEL_TOKEN" \
-    --namespace cloudflare -o yaml > cloudflared-token.yaml
-# Encrypt via Kubeseal
-kubeseal --controller-name sealed-secrets \
-    --controller-namespace kubeseal \
-    -f cloudflared-token.yaml \
-    -w cloudflared-token.yaml 
+
+echo $TUNNEL_TOKEN
 ```
 
 This secret is used by the Cloudflared deployment.
