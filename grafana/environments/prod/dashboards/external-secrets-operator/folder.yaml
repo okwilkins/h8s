@@ -1,0 +1,6 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: external-secrets-operator
+spec:
+  title: External Secrets Operator

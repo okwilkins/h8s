@@ -6,6 +6,7 @@ resources:
   - ./kubernetes
   - ./cloudnative-pg
   - ./harbor
+  - ./external-secrets-operator
 patches:
   - target:
       group: grafana.integreatly.org
