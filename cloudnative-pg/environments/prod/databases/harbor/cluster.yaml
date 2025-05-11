@@ -13,7 +13,7 @@ spec:
       memory: 512Mi
   managed:
     roles:
-      - name: superbaxel
+      - name: harbor
         ensure: present
         login: true
         superuser: false

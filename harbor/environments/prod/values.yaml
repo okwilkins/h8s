@@ -12,7 +12,7 @@ database:
   external:
     host: cnpg-harbor-prod-rw.harbor.svc.cluster.local
     port: 5432
-    username: superbaxel
+    username: harbor
     coreDatabase: harbor_core
     existingSecret: cnpg-harbor-prod-app-user-credentials
 metrics:
