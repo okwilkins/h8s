@@ -1,5 +1,9 @@
 # https://artifacthub.io/packages/helm/cilium/cilium/1.17.2?modal=values 
 
+# -- (string) Kubernetes service host - use "auto" for automatic lookup from the cluster-info ConfigMap
+k8sServiceHost: localhost
+# -- (string) Kubernetes service port
+k8sServicePort: 7445
 # -- (string) Kubernetes service host - use "auto" for automatic lookup from the cluster-info ConfigMap (kubeadm-based clusters only)
 ipam:
   # -- Configure IP Address Management mode.
@@ -75,7 +79,7 @@ gatewayAPI:
 # -- Configure the kube-proxy replacement in Cilium BPF datapath
 # Valid options are "true" or "false".
 # ref: https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/
-kubeProxyReplacement: false
+kubeProxyReplacement: true
 # Prerequisite for Gateway API without kube-proxy replacement
 # -- Configure N-S k8s service loadbalancing
 nodePort:
