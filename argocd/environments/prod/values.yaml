@@ -2,6 +2,9 @@
 
 global:
   domain: argocd.okwilkins.dev
+# Terminate SSL at ingress and let Cilium handle it past there
+params:
+  server.insecure: true
 controller:
   metrics:
     enabled: true
