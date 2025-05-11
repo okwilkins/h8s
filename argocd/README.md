@@ -6,7 +6,7 @@ Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes.
 
 ```bash
 export CLUSTER_ENV=prod
-export ARGOCD_HELM_VER=7.9.0
+export ARGOCD_HELM_VER=8.0.0
 
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
