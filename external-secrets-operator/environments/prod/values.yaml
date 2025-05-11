@@ -1,0 +1,4 @@
+# https://artifacthub.io/packages/helm/external-secrets-operator/external-secrets/0.16.2?modal=values
+
+serviceMonitor:
+  enabled: true
