@@ -6,7 +6,7 @@ metadata:
 spec:
   refreshInterval: 5m
   secretStoreRef:
-    name: aws-secretstore
+    name: vault-secretstore
     kind: ClusterSecretStore
   target:
     name: cloudflared-token
@@ -15,5 +15,5 @@ spec:
   data:
     - secretKey: token
       remoteRef:
-        key: cloudflared-token
+        key: cloudflare/cloudflared-token
         property: token
