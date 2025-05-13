@@ -3,6 +3,9 @@ kind: CiliumL2AnnouncementPolicy
 metadata:
   name: default-policy
 spec:
+  serviceSelector:
+    matchLabels:
+      expose-via-l2: "true"
   interfaces:
     - ^eth[0-9]+
   externalIPs: true
