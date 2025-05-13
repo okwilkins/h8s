@@ -17,6 +17,12 @@ kubectl exec -ti vault-0 -n vault -- vault operator init
 
 ***BE SURE TO SAVE THE OUTPUT SOMEWHERE SAFE!***
 
+You will then need to unseal the server:
+
+```bash
+kubectl exec -ti vault-0 -n vault -- vault operator unseal
+```
+
 ### Kubernetes Service Accounts
 
 In order for ESO to use a service account to access Vault, run the following:
