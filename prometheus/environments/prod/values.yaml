@@ -9,6 +9,9 @@ prometheus:
     # Stops the need to be in the same namespace
     serviceMonitorNamespaceSelector: {}
     podMonitorNamespaceSelector: {}
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -20,6 +23,9 @@ prometheus:
               storage: 20Gi
 alertmanager:
   alertmanagerSpec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
     storage:
       volumeClaimTemplate:
         spec:
