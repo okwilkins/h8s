@@ -1,11 +1,8 @@
-# https://artifacthub.io/packages/helm/hashicorp/vault/0.4.0?modal=values
+# https://artifacthub.io/packages/helm/hashicorp/vault/0.30.0?modal=values
 
 server:
   standalone:
     enabled: true
-    persistentVolumeClaimRetentionPolicy:
-      whenDeleted: Retain
-      whenScaled: Retain
     config: |-
       ui = true
 
@@ -30,6 +27,9 @@ server:
     enabled: false
   dev:
     enabled: false
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
 serverTelemetry:
   serviceMonitor:
     enabled: true
