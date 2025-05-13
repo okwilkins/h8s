@@ -7,6 +7,6 @@ spec:
     matchLabels:
       cilium.io/l2-announce-on-lan: "true"
   interfaces:
-    - ^eth[0-9]+
+    - ^enp3s0$
   externalIPs: true
   loadBalancerIPs: true
