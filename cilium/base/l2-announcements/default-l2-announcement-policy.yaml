@@ -1,0 +1,9 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default-policy
+spec:
+  interfaces:
+    - ^eth[0-9]+
+  externalIPs: true
+  loadBalancerIPs: true
