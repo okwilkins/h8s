@@ -31,10 +31,10 @@ vault write auth/kubernetes/config \
 
 vault policy write external-secrets-reader - <<EOF
 path "secret/data/*" {
-  capabilities = ["read"]
+  capabilities = ["create", "read", "update", "delete", "patch"]
 }
 path "secret/metadata/*" {
-  capabilities = ["list"]
+  capabilities = ["list", "delete"]
 }
 EOF
 
@@ -44,7 +44,6 @@ vault write auth/kubernetes/role/external-secrets-vault-auth \
     policies=external-secrets-reader \
     ttl=24h
 ```
-
 
 
 ### Pod Rescheduling
