@@ -6,3 +6,6 @@ spec:
   blocks:
     - start: 192.1.168.100
       stop: 192.1.168.254
+  serviceSelector:
+    matchLabels:
+      cilium.io/ip-pool-designation: home-lan-services

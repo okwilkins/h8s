@@ -5,7 +5,7 @@ metadata:
 spec:
   serviceSelector:
     matchLabels:
-      expose-via-l2: "true"
+      cilium.io/l2-announce-on-lan: "true"
   interfaces:
     - ^eth[0-9]+
   externalIPs: true
