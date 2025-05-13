@@ -12,17 +12,47 @@ Vault is a tool for securely accessing secrets. A secret is anything that you wa
 If installing for the first time, you will need to [initialise the vault](https://developer.hashicorp.com/vault/docs/commands/operator/init). Run:
 
 ```bash
-kubectl exec -ti vault-0 -- vault operator init
+kubectl exec -ti vault-0 -n vault -- vault operator init
 ```
 
 ***BE SURE TO SAVE THE OUTPUT SOMEWHERE SAFE!***
+
+### Kubernetes Service Accounts
+
+In order for ESO to use a service account to access Vault, run the following:
+
+```bash
+kubectl exec -ti vault-0 -n vault -- /bin/sh
+vault login
+vault auth enable kubernetes
+vault write auth/kubernetes/config \
+    kubernetes_host=https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT \
+    kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
+
+vault policy write external-secrets-reader - <<EOF
+path "secret/data/*" {
+  capabilities = ["read"]
+}
+path "secret/metadata/*" {
+  capabilities = ["list"]
+}
+EOF
+
+vault write auth/kubernetes/role/external-secrets-vault-auth \
+    bound_service_account_names=external-secrets-vault-auth \
+    bound_service_account_namespaces=external-secrets \
+    policies=external-secrets-reader \
+    ttl=24h
+```
+
+
 
 ### Pod Rescheduling
 
 Whenever the pod(s) for Vault are rescheduled, they will need to be [unsealed](https://developer.hashicorp.com/vault/docs/concepts/seal) again. Run:
 
 ```bash
-kubectl exec -ti vault-0 -- vault operator unseal
+kubectl exec -ti vault-0 -n vault -- vault operator unseal
 ```
 
 Enter in 3 of the keys produced from the [first time installation](#first-time-installation).
