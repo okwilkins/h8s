@@ -3,6 +3,9 @@
 server:
   standalone:
     enabled: true
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
     config: |-
       ui = true
 
