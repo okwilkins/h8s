@@ -13,6 +13,11 @@ spec:
       targetRevision: 0.30.0
       helm:
         releaseName: vault
+        valueFiles:
+          - $h8s/vault/environments/prod/values.yaml
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      ref: h8s
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
       path: vault/environments/prod

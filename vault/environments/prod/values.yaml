@@ -1,0 +1,7 @@
+# https://artifacthub.io/packages/helm/hashicorp/vault/0.4.0?modal=values
+
+serverTelemetry:
+  serviceMonitor:
+    enabled: true
+    prometheusRules:
+      enabled: true
