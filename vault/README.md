@@ -25,15 +25,16 @@ In order for ESO to use a service account to access Vault, run the following:
 kubectl exec -ti vault-0 -n vault -- /bin/sh
 vault login
 vault auth enable kubernetes
+vault secrets enable -path=kubernetes-homelab kv-v2
 vault write auth/kubernetes/config \
     kubernetes_host=https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT \
     kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
 
 vault policy write external-secrets-reader - <<EOF
-path "secret/data/*" {
+path "kubernetes-homelab/data/*" {
   capabilities = ["create", "read", "update", "delete", "patch"]
 }
-path "secret/metadata/*" {
+path "kubernetes-homelab/metadata/*" {
   capabilities = ["list", "delete"]
 }
 EOF
