@@ -4,6 +4,10 @@
 k8sServiceHost: localhost
 # -- (string) Kubernetes service port
 k8sServicePort: 7445
+# -- Configure L2 announcements
+l2announcements:
+  # -- Enable L2 announcements
+  enabled: true
 # -- (string) Kubernetes service host - use "auto" for automatic lookup from the cluster-info ConfigMap (kubeadm-based clusters only)
 ipam:
   # -- Configure IP Address Management mode.
