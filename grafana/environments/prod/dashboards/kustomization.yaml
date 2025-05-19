@@ -8,6 +8,7 @@ resources:
   - ./harbor
   - ./external-secrets-operator
   - ./vault
+  - ./external-dns
 patches:
   - target:
       group: grafana.integreatly.org
