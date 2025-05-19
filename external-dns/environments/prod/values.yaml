@@ -11,3 +11,17 @@ env:
       secretKeyRef:
         name: etcd-urls
         key: ETCD_FULL_URLS
+  - name: ETCD_CA_FILE
+    value: /etc/etcd-certs/ETCD_CA
+  - name: ETCD_CERT_FILE
+    value: /etc/etcd-certs/ETCD_CLIENT_CRT
+  - name: ETCD_KEY_FILE
+    value: /etc/etcd-certs/ETCD_CLIENT_KEY
+extraVolumes:
+  - name: etcd-client-certs-volume
+    secret:
+      secretName: etcd-client-certs
+extraVolumeMounts:
+  - name: etcd-client-certs-volume
+    mountPath: /etc/etcd-certs
+    readOnly: true
