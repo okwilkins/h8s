@@ -1,18 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: coredns-helm
+  name: coredns
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  sources:
-    - repoURL: https://coredns.github.io/helm
-      chart: coredns
-      targetRevision: 1.42.1
-      helm:
-        releaseName: coredns-home-lan
+  source:
+    repoURL: https://github.com/okwilkins/h8s
+    targetRevision: HEAD
+    path: coredns/environments/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
@@ -23,4 +21,3 @@ spec:
       allowEmpty: false
     syncOptions:
       - PruneLast=true
-      - ServerSideApply=true
