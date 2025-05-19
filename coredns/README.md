@@ -5,6 +5,10 @@ CoreDNS integrates with Kubernetes via the Kubernetes plugin, or with etcd with 
 
 This also replaces the default [TalosOS](../talos/README.md) CoreDNS installation for flexibility of settings and GitOps with [ArgoCD](../argocd/README.md).
 
+## Features
+
+The deployments [found in base](./base/) include a CRON job that downloads [StevenBlack's hosts list](https://github.com/StevenBlack/hosts) daily. This acts as a ad and malware blocker.
+
 ## Installation
 
 To begin the cluster from scratch, CoreDNS will need to be installed before ArgoCD. This is that it can properly function:
