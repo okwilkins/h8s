@@ -1,0 +1,27 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: etcd-client-certs
+  namespace: external-dns
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    name: vault-secretstore
+    kind: ClusterSecretStore
+  target:
+    name: etcd-client-certs
+    creationPolicy: Orphan
+    deletionPolicy: Retain
+  data:
+    - secretKey: ETCD_CA
+      remoteRef:
+        key: external-dns/etcd-client-certs
+        property: ETCD_CA
+    - secretKey: ETCD_CLIENT_CRT
+      remoteRef:
+        key: external-dns/etcd-client-certs
+        property: ETCD_CLIENT_CRT
+    - secretKey: ETCD_CLIENT_KEY
+      remoteRef:
+        key: external-dns/etcd-client-certs
+        property: ETCD_CLIENT_KEY
