@@ -14,3 +14,7 @@ export CLUSTER_ENV=prod
 kubectl apply -k environments/$CLUSTER_ENV
 ```
 
+## Extra Information
+
+Manifests were mainly derived from the TalosOS templates for CoreDNS. Find them [here](https://github.com/siderolabs/talos/blob/7aeb15f73094a23aea1d6b263ca2eca061c8a257/internal/app/machined/pkg/controllers/k8s/templates/core-dns-template.yaml).
+
