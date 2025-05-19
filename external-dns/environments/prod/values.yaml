@@ -1,0 +1,7 @@
+# https://artifacthub.io/packages/helm/external-dns/external-dns/1.16.1?modal=values
+
+provider:
+  # https://github.com/kubernetes-sigs/external-dns/blob/master/charts/external-dns/README.md#providers
+  name: coredns
+serviceMonitor:
+  enabled: true
