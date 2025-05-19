@@ -5,9 +5,9 @@ provider:
   name: coredns
 serviceMonitor:
   enabled: true
-extraEnv:
+env:
   - name: ETCD_URLS
     valueFrom:
       secretKeyRef:
         name: etcd-urls
-        key: URL_1
+        key: ETCD_FULL_URLS
