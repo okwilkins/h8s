@@ -14,9 +14,16 @@ spec:
             - name: blocklist-storage
               persistentVolumeClaim:
                 claimName: coredns-blocklist
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            runAsNonRoot: true
           containers:
             - name: updater
               image: curlimages/curl
+              securityContext:
+                allowPrivilegeEscalation: false
               command:
                 - /bin/sh
                 - -c
