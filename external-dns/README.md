@@ -10,7 +10,7 @@ To allow External DNS to configure [CoreDNS](../coredns/README.md), it needs to 
 export NODE_IP=$(talosctl etcd status | awk -F '\\s\\s' '{print $1}' | awk 'NR==2')
 
 # ETCD URL
-echo "https://$NODE_IP"
+echo "https://$NODE_IP:2379"
 
 # ETCD CA
 talosctl get etcdrootsecret -o yaml | yq 'select(.node == env(NODE_IP)) | .spec.etcdCA.crt' | base64 -d
