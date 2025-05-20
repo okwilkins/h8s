@@ -13,6 +13,7 @@ metadata:
     cilium.io/ip-pool-designation: home-lan
     cilium.io/l2-announce-on-lan: "true"
 spec:
+  type: LoadBalancer
   selector:
     k8s-app: kube-dns
   clusterIP: 10.96.0.10
