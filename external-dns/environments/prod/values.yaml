@@ -9,18 +9,18 @@ env:
   - name: ETCD_URLS
     valueFrom:
       secretKeyRef:
-        name: etcd-urls
-        key: ETCD_FULL_URLS
+        name: etcd
+        key: ETCD_URL
   - name: ETCD_CA_FILE
-    value: /etc/etcd-certs/ETCD_CA
+    value: /etc/etcd-certs/etcd-ca.crt
   - name: ETCD_CERT_FILE
-    value: /etc/etcd-certs/ETCD_CLIENT_CRT
+    value: /etc/etcd-certs/etcd-client.crt
   - name: ETCD_KEY_FILE
-    value: /etc/etcd-certs/ETCD_CLIENT_KEY
+    value: /etc/etcd-certs/etcd-client.key
 extraVolumes:
   - name: etcd-client-certs-volume
     secret:
-      secretName: etcd-client-certs
+      secretName: etcd
 extraVolumeMounts:
   - name: etcd-client-certs-volume
     mountPath: /etc/etcd-certs
