@@ -9,6 +9,7 @@ resources:
   - ./external-secrets-operator
   - ./vault
   - ./external-dns
+  - ./loki/
 patches:
   - target:
       group: grafana.integreatly.org
