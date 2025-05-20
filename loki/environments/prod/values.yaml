@@ -32,6 +32,8 @@ test:
 # that it's working correctly
 lokiCanary:
   enabled: false
+gateway:
+  enabled: false
 write:
   replicas: 0
 read:
