@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - ./folder.yaml
   - ./loki-dashboard.yaml
+  - ./promtail-dashboard.yaml
+  - ./loki-and-promtail-dashboard.yaml

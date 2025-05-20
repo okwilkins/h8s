@@ -1,0 +1,7 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: promtail-dashboard
+spec:
+  url: https://grafana.com/api/dashboards/20881/revisions/1/download
+  folderRef: loki
