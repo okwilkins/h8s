@@ -10,6 +10,8 @@ metadata:
     k8s-app: kube-dns
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: CoreDNS
+    cilium.io/ip-pool-designation: home-lan
+    cilium.io/l2-announce-on-lan: "true"
 spec:
   selector:
     k8s-app: kube-dns
