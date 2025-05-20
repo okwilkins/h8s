@@ -1,0 +1,34 @@
+# https://artifacthub.io/packages/helm/grafana/promtail/6.16.6?modal=values
+
+# https://www.talos.dev/v1.10/learn-more/knowledge-base/#logging-kubernetes-audit-logs-with-loki
+# Get audit logs
+extraArgs:
+  - -config.expand-env
+# this is required so that the promtail process can read the kube-apiserver audit logs written as `nobody` user
+containerSecurityContext:
+  capabilities:
+    add:
+      - DAC_READ_SEARCH
+extraVolumes:
+  - name: audit-logs
+    hostPath:
+      path: /var/log/audit/kube
+extraVolumeMounts:
+  - name: audit-logs
+    mountPath: /var/log/audit/kube
+    readOnly: true
+config:
+  snippets:
+    extraScrapeConfigs: |
+      - job_name: auditlogs
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: auditlogs
+              host: ${HOSTNAME}
+              __path__: /var/log/audit/kube/*.log
+  clients:
+    - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+serviceMonitor:
+  enabled: true
