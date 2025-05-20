@@ -35,11 +35,11 @@ lokiCanary:
 gateway:
   enabled: false
 write:
-  replicas: 0
+  replicas: 1
 read:
-  replicas: 0
+  replicas: 1
 backend:
-  replicas: 0
+  replicas: 1
 # -- DEPRECATED Monitoring section determines which monitoring features to enable, this section is being replaced
 # by https://github.com/grafana/meta-monitoring-chart
 monitoring:
