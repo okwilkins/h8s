@@ -1,0 +1,45 @@
+# https://artifacthub.io/packages/helm/grafana/loki/6.29.0?modal=values
+
+loki:
+  commonConfig:
+    # Default is 3 but 3 replicas adds a lot of added resource usage
+    # https://github.com/grafana/loki/issues/8899
+    replication_factor: 1
+  storage:
+    ring:
+      instance_addr: 127.0.0.1
+      kvstore:
+        store: inmemory
+    type: filesystem
+    filesystem:
+      directory: /loki
+  singleBinary:
+    replicas: 1
+  # https://grafana.com/docs/loki/latest/configuration/#schema_config
+  schemaConfig:
+    configs:
+      - from: 2025-04-01
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+test:
+  # Turned off as Canary not used, deployment will not work otherwise
+  enabled: false
+# The Loki canary pushes logs to and queries from this loki installation to test
+# that it's working correctly
+lokiCanary:
+  enabled: false
+write:
+  replicas: 0
+read:
+  replicas: 0
+backend:
+  replicas: 0
+# -- DEPRECATED Monitoring section determines which monitoring features to enable, this section is being replaced
+# by https://github.com/grafana/meta-monitoring-chart
+monitoring:
+  serviceMonitor:
+    enabled: true
