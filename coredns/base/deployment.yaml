@@ -63,6 +63,9 @@ spec:
             - name: config-volume
               mountPath: /etc/coredns
               readOnly: true
+            - name: blocklist-volume
+              mountPath: /blocklist/stevenblack-hosts
+              readOnly: true
           ports:
             - name: dns
               protocol: UDP
@@ -103,3 +106,6 @@ spec:
             items:
               - key: Corefile
                 path: Corefile
+        - name: blocklist-volume
+          persistentVolumeClaim:
+            claimName: coredns-blocklist
