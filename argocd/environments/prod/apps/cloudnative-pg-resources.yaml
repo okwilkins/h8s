@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/okwilkins/h8s
     targetRevision: HEAD
-    path: cloudnative-pg/environments/prod
+    path: storage/cloudnative-pg/environments/prod
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:

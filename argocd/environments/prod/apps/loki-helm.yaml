@@ -13,7 +13,7 @@ spec:
       targetRevision: 6.29.0
       helm:
         valueFiles:
-          - $h8s/loki/environments/prod/values.yaml
+          - $h8s/observability/loki/environments/prod/values.yaml
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
       ref: h8s

@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/okwilkins/h8s
     targetRevision: HEAD
-    path: cloudflared/environments/prod
+    path: networking/cloudflared/environments/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: cloudflare
