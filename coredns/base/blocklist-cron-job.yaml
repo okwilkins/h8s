@@ -34,6 +34,7 @@ spec:
                   TEMP_HOSTS_FILE="/tmp/stevenblack-hosts.tmp"
                   STEVENBLACK_URL="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
                   echo "Attempting to download blocklist from $STEVENBLACK_URL"
+                  mkdir -p "$BLOCKLIST_DIR"
                   curl -fsSL "$STEVENBLACK_URL" -o "$TEMP_HOSTS_FILE"
                   if [ -s "$TEMP_HOSTS_FILE" ]; then
                       if ! cmp -s "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"; then
