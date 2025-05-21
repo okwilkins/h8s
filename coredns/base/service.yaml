@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: kube-dns
-  namespace: kube-system
+  name: coredns-lan
+  namespace: coredns-lan
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9153"
   labels:
-    k8s-app: kube-dns
+    k8s-app: coredns-lan
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: CoreDNS
     cilium.io/ip-pool-designation: home-lan
@@ -15,7 +15,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    k8s-app: kube-dns
+    k8s-app: coredns-lan
   clusterIP: 10.96.0.10
   clusterIPs:
     - 10.96.0.10

@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: coredns
-  namespace: kube-system
+  namespace: coredns-lan
   labels:
-    k8s-app: kube-dns
+    k8s-app: coredns-lan
     kubernetes.io/name: CoreDNS
 spec:
   replicas: 2
@@ -14,11 +14,11 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      k8s-app: kube-dns
+      k8s-app: coredns-lan
   template:
     metadata:
       labels:
-        k8s-app: kube-dns
+        k8s-app: coredns-lan
     spec:
       nodeSelector:
         kubernetes.io/os: linux
@@ -32,7 +32,7 @@ spec:
                     - key: k8s-app
                       operator: In
                       values:
-                        - kube-dns
+                        - coredns-lan
                 topologyKey: kubernetes.io/hostname
       serviceAccountName: coredns
       priorityClassName: system-cluster-critical
