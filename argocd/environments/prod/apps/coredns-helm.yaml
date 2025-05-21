@@ -13,7 +13,7 @@ spec:
     path: coredns/environments/prod
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: coredns-lan
   syncPolicy:
     automated:
       prune: true

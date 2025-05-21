@@ -4,8 +4,6 @@ resources:
   - ./service.yaml
   - ./config-map.yaml
   - ./deployment.yaml
-  - ./cluster-role.yaml
-  - ./service-account.yaml
-  - ./cluster-role-binding.yaml
   - ./blocklist-cron-job.yaml
   - ./blocklist-persistent-volume-claim.yaml
+  - ./namespace.yaml

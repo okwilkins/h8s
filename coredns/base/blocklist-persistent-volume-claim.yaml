@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: coredns-blocklist
-  namespace: kube-system
+  namespace: coredns-lan
 spec:
   accessModes:
     - ReadWriteMany
