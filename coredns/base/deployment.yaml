@@ -64,7 +64,7 @@ spec:
               mountPath: /etc/coredns
               readOnly: true
             - name: blocklist-volume
-              mountPath: /blocklist/stevenblack-hosts
+              mountPath: /blocklist
               readOnly: true
           ports:
             - name: dns
