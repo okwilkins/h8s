@@ -30,26 +30,25 @@ spec:
                 - -c
               args:
                 - |
-                  BLOCKLIST_PATH="/blocklist/stevenblack-hosts"
-                  TEMP_HOSTS_FILE="/tmp/stevenblack-hosts.tmp"
-                  STEVENBLACK_URL="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
-                  echo "Attempting to download blocklist from $STEVENBLACK_URL"
-                  mkdir -p "$BLOCKLIST_DIR"
-                  curl -fsSL "$STEVENBLACK_URL" -o "$TEMP_HOSTS_FILE"
+                  BLOCKLIST_PATH="/blocklist/hosts"
+                  TEMP_HOSTS_FILE="/tmp/hosts.tmp"
+                  BLOCKLIST_URL="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro.txt"
+                  echo "Attempting to download blocklist from $BLOCKLIST_URL"
+                  curl -fsSL "$BLOCKLIST_URL" -o "$TEMP_HOSTS_FILE"
                   if [ -s "$TEMP_HOSTS_FILE" ]; then
-                      if ! cmp -s "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"; then
-                          echo "New blocklist downloaded, updating..."
-                          mv "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"
-                          echo "Blocklist updated at $BLOCKLIST_PATH."
-                      else
-                          echo "Blocklist is already up-to-date."
-                          rm "$TEMP_HOSTS_FILE"
-                      fi
+                    if ! cmp -s "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"; then
+                        echo "New blocklist downloaded, updating..."
+                        mv "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"
+                        echo "Blocklist updated at $BLOCKLIST_PATH."
+                    else
+                        echo "Blocklist is already up-to-date."
+                        rm "$TEMP_HOSTS_FILE"
+                    fi
                   else
-                      echo "Failed to download or downloaded an empty blocklist. No changes made."
-                      if [ -f "$TEMP_HOSTS_FILE" ]; then
-                          rm "$TEMP_HOSTS_FILE"
-                      fi
+                    echo "Failed to download or downloaded an empty blocklist. No changes made."
+                    if [ -f "$TEMP_HOSTS_FILE" ]; then
+                        rm "$TEMP_HOSTS_FILE"
+                    fi
                   fi
               volumeMounts:
                 - name: blocklist-storage
