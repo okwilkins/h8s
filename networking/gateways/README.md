@@ -8,7 +8,7 @@ This part of the project deals with the ingress into the cluster via the [Gatewa
 
 ### Deploying Gateway API CRDs
 
-By default, currently Kuberentes does not include the Gateway API by default. [ArgoCD](../argocd/README.md) manages the CRDs needed.
+By default, currently Kuberentes does not include the Gateway API by default. [ArgoCD](../../argocd/README.md) manages the CRDs needed.
 
 ### Deploying Resources
 

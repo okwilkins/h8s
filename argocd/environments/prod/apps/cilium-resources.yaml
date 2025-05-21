@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/okwilkins/h8s
     targetRevision: HEAD
-    path: cilium/environments/prod
+    path: networking/cilium/environments/prod
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:

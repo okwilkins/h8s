@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/okwilkins/h8s
     targetRevision: HEAD
-    path: grafana/environments/prod
+    path: observability/grafana/environments/prod
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:

@@ -5,7 +5,7 @@ Vault is a tool for securely accessing secrets. A secret is anything that you wa
 
 ## Installation
 
-[ArgoCD](../argocd/README.md) handles the installation of Vault. There are some steps to take after ArgoCD has installed everything however.
+[ArgoCD](../../argocd/README.md) handles the installation of Vault. There are some steps to take after ArgoCD has installed everything however.
 
 ### First Time Installation
 
