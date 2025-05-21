@@ -54,6 +54,8 @@ Apply the Talos configs:
 bash scripts/apply_configs.sh
 ```
 
+***WARNING***: You may need to edit the commands with the `--insecure` flag.
+
 Wait for the nodes to automatically restart. Then run bootstrap the cluster with:
 
 ```bash
@@ -113,8 +115,8 @@ It is probably a good idea to save `TALOSCONFIG` to your shell's config also.
 
 There will be times where the entire cluster will need to be installed from scratch. There are two steps to get everything in the cluster:
 
-1. Follow the instructions in the [External Secrets section](../external-secrets-operator/README.md) to get important secrets into the cluster.
-2. Install [CoreDNS section](../coredns/README.md). This will allow ArgoCD to be utilised.
-3. Install Cilium as per the [README](../cilium/README.md).
-4. Wait for Cilium to be installed then [install ArgoCD](../argocd/README.md). This will install the rest of the cluster for you.
+1. Install [CoreDNS section](../coredns/README.md). This will allow ArgoCD to be utilised.
+2. Install Cilium as per the [README](../cilium/README.md).
+3. Wait for Cilium to be installed then [install ArgoCD](../argocd/README.md). This will install the rest of the cluster for you.
+4. Review which secrets need to be added to [Vault](../vault/README.md). Search the repo for `ExternalSecret` manifests for guidance.
 
