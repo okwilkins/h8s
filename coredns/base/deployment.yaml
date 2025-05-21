@@ -34,13 +34,8 @@ spec:
                       values:
                         - coredns-lan
                 topologyKey: kubernetes.io/hostname
-      serviceAccountName: coredns
-      priorityClassName: system-cluster-critical
       tolerations:
         - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
-        - key: node.cloudprovider.kubernetes.io/uninitialized
           operator: Exists
           effect: NoSchedule
       containers:
@@ -92,11 +87,6 @@ spec:
               scheme: HTTP
           securityContext:
             allowPrivilegeEscalation: false
-            capabilities:
-              add:
-                - NET_BIND_SERVICE
-              drop:
-                - ALL
             readOnlyRootFilesystem: true
       dnsPolicy: Default
       volumes:
