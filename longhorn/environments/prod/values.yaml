@@ -5,8 +5,8 @@ persistence:
 preUpgradeChecker:
   # https://github.com/longhorn/longhorn/issues/8707
   jobEnabled: false
-defaultSettings:
-  defaultReplicaCount: 2
+persistence:
+  defaultClassReplicaCount: 2
 metrics:
   enabled: true
   serviceMonitor:
