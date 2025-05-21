@@ -16,7 +16,7 @@ data:
         }
         prometheus :9153
 
-        hosts /blocklist/stevenblack-hosts {
+        hosts /blocklist/hosts {
             fallthrough
         }
         forward . /etc/resolv.conf {
