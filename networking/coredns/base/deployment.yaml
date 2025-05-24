@@ -51,6 +51,8 @@ spec:
           env:
             - name: GOMEMLIMIT
               value: 161MiB
+            - name: GOMAXPROCS
+              value: "1"
           args:
             - -conf
             - /etc/coredns/Corefile
