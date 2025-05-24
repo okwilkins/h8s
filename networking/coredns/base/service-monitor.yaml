@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: coredns-lan
+  namespace: coredns-lan
+spec:
+  endpoints:
+    - port: metrics
+      scheme: http
+      path: /metrics
+  namespaceSelector:
+    matchNames:
+      - coredns-lan
+  selector:
+    matchLabels:
+      k8s-app: coredns-lan
