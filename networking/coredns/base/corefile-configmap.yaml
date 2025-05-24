@@ -5,6 +5,19 @@ metadata:
   namespace: coredns-lan
 data:
   Corefile: |-
+    okwilkins.dev:53 {
+        errors
+        health {
+            lameduck 5s
+        }
+        log . {
+            class error
+        }
+        kubernetes cluster.local
+        k8s_external okwilkins.dev
+        loop
+        loadbalance
+    }
     .:53 {
         errors
         health {
@@ -15,7 +28,6 @@ data:
             class error
         }
         prometheus :9153
-
         hosts /blocklist/hosts {
           fallthrough
         }
