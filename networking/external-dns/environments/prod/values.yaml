@@ -1,5 +1,8 @@
 # https://artifacthub.io/packages/helm/external-dns/external-dns/1.16.1?modal=values
 
+# Target home-lan CoreDNS not the Talos CoreDNS
+extraArgs:
+  - --namespace=coredns-lan
 provider:
   # https://github.com/kubernetes-sigs/external-dns/blob/master/charts/external-dns/README.md#providers
   name: coredns
