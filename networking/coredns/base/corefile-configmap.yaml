@@ -17,7 +17,6 @@ data:
         prometheus :9153
 
         hosts /blocklist/hosts {
-            fallthrough
         }
         loop
         reload
