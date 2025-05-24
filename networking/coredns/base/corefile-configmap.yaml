@@ -17,7 +17,9 @@ data:
         prometheus :9153
 
         hosts /blocklist/hosts {
+          fallthrough
         }
+        forward . 1.1.1.1 1.0.0.1
         loop
         reload
         loadbalance
