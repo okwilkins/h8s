@@ -7,3 +7,4 @@ resources:
   - ./blocklist-cron-job.yaml
   - ./blocklist-persistent-volume-claim.yaml
   - ./namespace.yaml
+  - ./service-monitor.yaml
