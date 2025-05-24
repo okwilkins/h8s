@@ -92,7 +92,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: coredns
+            name: corefile-coredns
             items:
               - key: Corefile
                 path: Corefile
