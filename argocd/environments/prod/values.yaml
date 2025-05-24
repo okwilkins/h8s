@@ -11,6 +11,9 @@ controller:
     serviceMonitor:
       enabled: true
 server:
+  service:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: argocd.okwilkins.dev
   config:
     url: https://argocd.okwilkins.dev
   # As HTTPS is dealt with with Cloudflared, internally use HTTP
