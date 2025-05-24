@@ -3,8 +3,9 @@
 global:
   domain: argocd.okwilkins.dev
 # Terminate SSL at ingress and let Cilium handle it past there
-params:
-  server.insecure: true
+configs:
+  params:
+    server.insecure: true
 controller:
   metrics:
     enabled: true
@@ -14,6 +15,10 @@ server:
   service:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: argocd.okwilkins.dev
+    labels:
+      cilium.io/ip-pool-designation: home-lan
+      cilium.io/l2-announce-on-lan: "true"
+    type: LoadBalancer
   config:
     url: https://argocd.okwilkins.dev
   # As HTTPS is dealt with with Cloudflared, internally use HTTP
