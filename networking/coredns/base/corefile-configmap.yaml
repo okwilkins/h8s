@@ -7,16 +7,14 @@ data:
   Corefile: |-
     okwilkins.dev:53 {
         errors
-        health {
-            lameduck 5s
-        }
         log . {
             class error
         }
-        kubernetes cluster.local
-        k8s_external okwilkins.dev
-        loop
-        loadbalance
+        template IN A {
+            match (^|\.)okwilkins\.dev\.$
+            answer "{{ .Name }} 60 IN A 20.0.0.0"
+            fallthrough
+        }
     }
     .:53 {
         errors
