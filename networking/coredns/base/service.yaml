@@ -6,7 +6,6 @@ metadata:
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9153"
-    external-dns.alpha.kubernetes.io/hostname: argocd.okwilkins.dev
   labels:
     k8s-app: coredns-lan
     kubernetes.io/cluster-service: "true"
