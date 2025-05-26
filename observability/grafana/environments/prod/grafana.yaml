@@ -10,6 +10,8 @@ spec:
       labels:
         cilium.io/ip-pool-designation: home-lan
         cilium.io/l2-announce-on-lan: "true"
+    spec:
+      type: LoadBalancer
   deployment:
     spec:
       template:
