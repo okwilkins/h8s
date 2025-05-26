@@ -5,6 +5,11 @@ metadata:
   labels:
     dashboards: grafana
 spec:
+  service:
+    metadata:
+      labels:
+        cilium.io/ip-pool-designation: home-lan
+        cilium.io/l2-announce-on-lan: "true"
   deployment:
     spec:
       template:
