@@ -93,6 +93,12 @@ There will be times where you will need to patch the underlying system itself. Y
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
 ```
 
+#### ⚠️Node IP Swaps and Stateful Storage
+
+**Potential Pitfall:** When regenerating or applying new Talos machine configurations, be cautious if you re-assign `NODE_1_IP` and `NODE_2_IP`. If these IP addresses are effectively swapped between your physical machines, it can disrupt stateful services, particularly Longhorn.
+
+Longhorn associates specific storage (identified by a disk UUID on the physical disk at `/var/lib/longhorn/`) with a Kubernetes node name (e.g., `controlplane-worker-1`). If an IP swap causes the Kubernetes node name to point to a different physical machine (and thus different storage) than before, Longhorn will detect a "diskUUID doesn't match" error. This renders the Longhorn disks unusable and can halt your workloads.
+
 ### Saving Talos Nodes, Endpoints and Talosconfig Location
 
 To save the need to manually (which can be tedious) apply the `nodes`, `endpoints` and `talosconfig` flags, you can run the following:
