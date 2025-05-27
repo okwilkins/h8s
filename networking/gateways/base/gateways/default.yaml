@@ -3,17 +3,11 @@ kind: Gateway
 metadata:
   name: default-gateway
   namespace: default
-  annotations:
-    lbipam.cilium.io/ips: 20.0.0.0
-    io.cilium/lb-ipam-ips: 20.0.0.0
 spec:
   gatewayClassName: cilium
   infrastructure:
     annotations:
       io.cilium/lb-ipam-ips: 20.0.0.0
-  addresses:
-    - type: IPAddress
-      value: 20.0.0.0
   listeners:
     - protocol: HTTP
       port: 8080
