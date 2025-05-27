@@ -8,4 +8,4 @@ cluster:
   proxy:
     disabled: true
   coreDNS:
-    disabled: true
+    disabled: false
