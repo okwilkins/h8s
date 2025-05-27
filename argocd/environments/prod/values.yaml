@@ -12,13 +12,6 @@ controller:
     serviceMonitor:
       enabled: true
 server:
-  service:
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: argocd.okwilkins.dev
-    labels:
-      cilium.io/ip-pool-designation: home-lan
-      cilium.io/l2-announce-on-lan: "true"
-    type: LoadBalancer
   config:
     url: https://argocd.okwilkins.dev
   # As HTTPS is dealt with with Cloudflared, internally use HTTP
