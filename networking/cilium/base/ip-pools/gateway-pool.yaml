@@ -6,6 +6,5 @@ spec:
   blocks:
     - cidr: 20.0.0.0/32
   serviceSelector:
-    matchExpressions:
-      - key: gateway.networking.k8s.io/gateway
-        operator: Exists
+    matchLabels:
+      io.cilium.gateway/owning-gateway: default-gateway
