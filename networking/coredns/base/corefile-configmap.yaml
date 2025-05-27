@@ -6,7 +6,7 @@ metadata:
 data:
   Corefile: |-
     okwilkins.dev:53 {
-        errors
+        ready
         log . {
             class error
         }
@@ -15,9 +15,9 @@ data:
             answer "{{ .Name }} 60 IN A 20.0.0.0"
             fallthrough
         }
+        errors
     }
     .:53 {
-        errors
         health {
             lameduck 5s
         }
@@ -29,8 +29,15 @@ data:
         hosts /blocklist/hosts {
           fallthrough
         }
-        forward . 1.1.1.1 1.0.0.1
+        forward . tls://1.1.1.1 tls://1.0.0.1 {
+          tls_servername cloudflare-dns.com
+          next NXDOMAIN
+        }
+        forward . tls://8.8.8.8 tls://8.8.4.4 {
+          tls_servername dns.google
+        }
         loop
         reload
         loadbalance
+        errors
     }
