@@ -25,3 +25,14 @@ To deploy the manifests:
 kubectl apply -k environments/$CLUSTER_ENV
 ```
 
+## Running Cilium Connectivity Test
+
+To avoid Talos PodSecurity issues when running the connectivity test run:
+
+```bash
+cilium connectivity test \
+    --namespace-labels pod-security.kubernetes.io/enforce=privileged \
+    --namespace-labels pod-security.kubernetes.io/warn=privileged \
+    --namespace-labels pod-security.kubernetes.io/audit=privileged
+```
+
