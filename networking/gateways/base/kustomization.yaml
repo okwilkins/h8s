@@ -13,3 +13,4 @@ resources:
   - ./http-routes/grafana.yaml
   - ./http-routes/argocd.yaml
   - ./http-routes/harbor.yaml
+  - ./http-routes/longhorn.yaml
