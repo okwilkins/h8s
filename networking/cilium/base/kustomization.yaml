@@ -5,3 +5,4 @@ resources:
   - ./ip-pools/gateway-pool.yaml
   - ./ip-pools/gateway-lan-pool.yaml
   - ./l2-announcements/default-l2-announcement-policy.yaml
+  - ./l2-announcements/gateway-l2-announcement-policy.yaml
