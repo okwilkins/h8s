@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-helm
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: 1.17.2
+      helm:
+        releaseName: cert-manager
+        valueFiles:
+          - $h8s/networking/cert-manager/environments/prod/values.yaml
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      ref: h8s
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      path: networking/cert-manager/environments/prod/namespace.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - PruneLast=true
+      - ServerSideApply=true
