@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-okwilkins-dev
+  namespace: argocd
+spec:
+  dnsNames:
+    - argocd.okwilkins.dev
+  secretName: argocd-okwilkins-dev-tls
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
