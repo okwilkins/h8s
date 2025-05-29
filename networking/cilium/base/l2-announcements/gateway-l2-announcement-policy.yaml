@@ -1,0 +1,12 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: gateway-policy
+spec:
+  serviceSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: default-gateway
+  interfaces:
+    - ^enp3s0$
+  externalIPs: true
+  loadBalancerIPs: true
