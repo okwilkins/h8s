@@ -1,5 +1,7 @@
 # https://artifacthub.io/packages/helm/cert-manager/cert-manager/1.17.2?modal=values
 
+config:
+  enableGatewayAPI: true
 crds:
   enabled: true
 prometheus:
