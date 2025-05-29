@@ -1,0 +1,8 @@
+# https://artifacthub.io/packages/helm/cert-manager/cert-manager/1.17.2?modal=values
+
+crds:
+  enabled: true
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
