@@ -8,5 +8,5 @@ spec:
     - argocd.okwilkins.dev
   secretName: argocd-okwilkins-dev-tls
   issuerRef:
-    name: letsencrypt
+    name: vault-issuer
     kind: ClusterIssuer
