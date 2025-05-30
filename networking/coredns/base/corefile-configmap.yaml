@@ -10,6 +10,9 @@ data:
         log . {
             class error
         }
+        header {
+            response set ra
+        }
         template IN A {
             match (^|\.)okwilkins\.dev\.$
             answer "{{ .Name }} 60 IN A 192.168.1.121"
