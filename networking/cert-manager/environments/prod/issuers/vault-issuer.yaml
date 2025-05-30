@@ -5,7 +5,7 @@ metadata:
   namespace: cert-manager
 spec:
   vault:
-    server: http://vault.vault.svc.cluster.local
+    server: http://vault.vault.svc.cluster.local:8200
     path: pki/sign/okwilkins-dot-dev
     auth:
       kubernetes:
