@@ -5,3 +5,4 @@ resources:
   - ./issuers/vault-issuer-service-account.yaml
   - ./issuers/vault-issuer-service-account-secret.yaml
   - ./certificates/argocd-okwilkins-dev.yaml
+  - ./certificates/grafana-okwilkins-dev.yaml
