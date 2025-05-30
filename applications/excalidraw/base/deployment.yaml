@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: excalidraw
+  name: excalidraw-deployment
+  namespace: excalidraw
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: excalidraw
+  template:
+    metadata:
+      labels:
+        pod: excalidraw
+    spec:
+      containers:
+        - name: excalidraw
+          # TODO: Switch to self-hosted image once that is setup
+          # at Excalidraw they only seem to have a latest tag...?
+          image: excalidraw/excalidraw:latest
+          # Change this from always after this too ^
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
