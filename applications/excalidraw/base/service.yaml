@@ -4,12 +4,12 @@ metadata:
   name: excalidraw
   namespace: excalidraw
   labels:
-    k8s-app: excalidraw
+    app: excalidraw
     kubernetes.io/name: excalidraw
 spec:
   type: ClusterIP
   selector:
-    k8s-app: excalidraw
+    app: excalidraw
   ports:
     - name: http
       port: 5000

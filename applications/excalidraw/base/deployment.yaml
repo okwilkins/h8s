@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      pod: excalidraw
+      app: excalidraw
   template:
     metadata:
       labels:
-        pod: excalidraw
+        app: excalidraw
     spec:
       containers:
         - name: excalidraw
