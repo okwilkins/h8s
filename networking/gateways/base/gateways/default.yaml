@@ -28,3 +28,4 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: argocd-okwilkins-dev-tls
+            namespace: argocd
