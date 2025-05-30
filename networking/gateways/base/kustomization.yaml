@@ -16,3 +16,4 @@ resources:
   - ./http-routes/longhorn.yaml
   # Reference grants
   - ./reference-grants/default-gateway-argocd-tls.yaml
+  - ./reference-grants/default-gateway-grafana-tls.yaml

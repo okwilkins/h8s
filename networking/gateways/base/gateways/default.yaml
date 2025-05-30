@@ -29,3 +29,15 @@ spec:
         certificateRefs:
           - name: argocd-okwilkins-dev-tls
             namespace: argocd
+    - protocol: HTTPS
+      name: home-lan-grafana
+      hostname: grafana.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: grafana-okwilkins-dev-tls
+            namespace: monitoring
