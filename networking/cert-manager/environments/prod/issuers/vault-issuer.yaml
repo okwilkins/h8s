@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: vault-issuer
+  namespace: cert-manager
+spec:
+  vault:
+    server: http://vault.vault.svc.cluster.local
+    path: pki/sign/okwilkins-dot-dev
+    auth:
+      kubernetes:
+        mountPath: /v1/auth/kubernetes
+        role: issuer
+        secretRef:
+          name: vault-cert-manager-issuer-token
+          key: token
