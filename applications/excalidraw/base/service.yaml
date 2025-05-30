@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: excalidraw
+  namespace: excalidraw
+  labels:
+    k8s-app: excalidraw
+    kubernetes.io/name: excalidraw
+spec:
+  type: ClusterIP
+  selector:
+    k8s-app: excalidraw
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 80
