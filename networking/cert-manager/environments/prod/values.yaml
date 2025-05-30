@@ -4,6 +4,8 @@ config:
   enableGatewayAPI: true
 crds:
   enabled: true
+extraArgs:
+  - --acme-http01-solver-nameservers="coredns-lan.coredns-lan.svc.cluster.local:53"
 prometheus:
   enabled: true
   servicemonitor:
