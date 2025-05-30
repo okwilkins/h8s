@@ -7,7 +7,7 @@ ExternalDNS synchronises exposed Kubernetes Services and Ingresses with DNS prov
 To allow External DNS to configure [CoreDNS](../coredns/README.md), it needs to connect to ETCD. To do this, 4 things are needed:
 
 ```bash
-export NODE_IP=$(talosctl etcd status | awk -F '\\s\\s' '{print $1}' | awk 'NR==2')
+export NODE_IP=$(talosctl etcd status | awk 'NR==2 {print $1}')
 
 # ETCD URL
 echo "https://$NODE_IP:2379"
