@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus-okwilkins-dev
+  namespace: monitoring
+spec:
+  secretName: prometheus-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: prometheus.okwilkins.dev
+  dnsNames:
+    - prometheus.okwilkins.dev
