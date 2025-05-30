@@ -4,9 +4,10 @@ metadata:
   name: argocd-okwilkins-dev
   namespace: argocd
 spec:
-  dnsNames:
-    - argocd.okwilkins.dev
   secretName: argocd-okwilkins-dev-tls
   issuerRef:
     name: vault-issuer
     kind: ClusterIssuer
+  commonName: argocd.okwilkins.dev
+  dnsNames:
+    - argocd.okwilkins.dev
