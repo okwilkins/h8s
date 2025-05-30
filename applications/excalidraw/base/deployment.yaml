@@ -28,3 +28,13 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /var/cache/nginx
+              name: nginx-cache
+            - mountPath: /var/run
+              name: nginx-run
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
