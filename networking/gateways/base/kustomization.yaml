@@ -13,6 +13,8 @@ resources:
   - ./http-routes/grafana.yaml
   - ./http-routes/argocd.yaml
   - ./http-routes/harbor.yaml
+  - ./http-routes/prometheus.yaml
   # Reference grants
   - ./reference-grants/default-gateway-argocd-tls.yaml
   - ./reference-grants/default-gateway-grafana-tls.yaml
+  - ./reference-grants/default-gateway-prometheus-tls.yaml

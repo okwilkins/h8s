@@ -41,3 +41,15 @@ spec:
         certificateRefs:
           - name: grafana-okwilkins-dev-tls
             namespace: monitoring
+    - protocol: HTTPS
+      name: home-lan-prometheus
+      hostname: prometheus.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: prometheus-okwilkins-dev-tls
+            namespace: monitoring

@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+      sectionName: home-lan-prometheus
+  hostnames:
+    - prometheus.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: prometheus-stack-kube-prom-prometheus
+          port: 9090
