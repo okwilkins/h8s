@@ -89,3 +89,26 @@ spec:
           port: 80
 ```
 
+## Obtaining Vault CA Certificate
+
+Once everything is setup and you start trying to connect to HTTPS endpoints you will find that your browser will not trust the website. This is because Vault's CA must be added to your system's trusted CA store. To get your CA certificate run:
+
+```bash
+kubectl get secrets -A -o json | \
+    jq -r 'first(.items[] | select(.metadata.annotations."cert-manager.io/issuer-name" == "vault-issuer")) | .data."ca.crt"' | \
+    base64 -d > vault-ca.crt
+```
+
+To then add this to your trusted CA store run the following for Linux:
+
+```bash
+sudo cp vault-ca.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
+
+And for macOS:
+
+```bash
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain vault-ca.crt
+```
+
