@@ -64,3 +64,28 @@ spec:
       name: <SUBDOMAIN>-okwilkins-dev-tls
 ```
 
+4. Create the HTTPRoute like so:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: <SUBDOMAIN>
+  namespace: <SUBDOMAIN>
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+      sectionName: home-lan-<SUBDOMAIN>
+  hostnames:
+    - <SUBDOMAIN>.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: <SUBDOMAIN>-server
+          port: 80
+```
+
