@@ -15,3 +15,16 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    # https://cert-manager.io/docs/usage/gateway/#use-cases
+    # For details on how to make these listeners for cert-manager
+    - protocol: HTTPS
+      name: home-lan-argocd
+      hostname: argocd.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: argocd-okwilkins-dev-tls
