@@ -14,3 +14,5 @@ resources:
   - ./http-routes/argocd.yaml
   - ./http-routes/harbor.yaml
   - ./http-routes/longhorn.yaml
+  # Reference grants
+  - ./reference-grants/default-gateway-argocd-tls.yaml
