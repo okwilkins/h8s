@@ -8,6 +8,8 @@ spec:
     - name: default-gateway
       namespace: default
       sectionName: home-lan-argocd
+    - name: cloudflare-gateway
+      namespace: cloudflare
   hostnames:
     - argocd.okwilkins.dev
   rules:
