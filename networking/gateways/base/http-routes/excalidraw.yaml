@@ -16,5 +16,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: draw
+        - name: excalidraw
           port: 5000
