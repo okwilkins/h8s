@@ -7,14 +7,8 @@ spec:
   gatewayClassName: cilium
   infrastructure:
     annotations:
-      io.cilium/lb-ipam-ips: 20.0.0.0, 192.168.1.121
+      io.cilium/lb-ipam-ips: 192.168.1.121
   listeners:
-    - protocol: HTTP
-      port: 80
-      name: web
-      allowedRoutes:
-        namespaces:
-          from: All
     # https://cert-manager.io/docs/usage/gateway/#use-cases
     # For details on how to make these listeners for cert-manager
     - protocol: HTTPS
