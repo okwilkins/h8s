@@ -7,6 +7,8 @@ spec:
   parentRefs:
     - name: default-gateway
       namespace: default
+    - name: cloudflare-gateway
+      namespace: cloudflare
   hostnames:
     - grafana.okwilkins.dev
   rules:

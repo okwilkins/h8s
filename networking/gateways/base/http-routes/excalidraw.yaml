@@ -8,6 +8,8 @@ spec:
     - name: default-gateway
       namespace: default
       sectionName: home-lan-draw
+    - name: cloudflare-gateway
+      namespace: cloudflare
   hostnames:
     - draw.okwilkins.dev
   rules:
