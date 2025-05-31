@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: excalidraw
+  namespace: excalidraw
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+      sectionName: home-lan-draw
+  hostnames:
+    - draw.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: draw
+          port: 5000
