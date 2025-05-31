@@ -12,5 +12,6 @@ spec:
     app: excalidraw
   ports:
     - name: http
+      protocol: TCP
       port: 5000
       targetPort: 80
