@@ -96,19 +96,19 @@ Once everything is setup and you start trying to connect to HTTPS endpoints you 
 ```bash
 kubectl get secrets -A -o json | \
     jq -r 'first(.items[] | select(.metadata.annotations."cert-manager.io/issuer-name" == "vault-issuer")) | .data."ca.crt"' | \
-    base64 -d > vault-ca.crt
+    base64 -d > /tmp/vault-ca.crt
 ```
 
 To then add this to your trusted CA store run the following for Linux:
 
 ```bash
-sudo cp vault-ca.crt /usr/local/share/ca-certificates/
+sudo cp /tmp/vault-ca.crt /usr/local/share/ca-certificates/
 sudo update-ca-certificates
 ```
 
 And for macOS:
 
 ```bash
-sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain vault-ca.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/vault-ca.crt
 ```
 
