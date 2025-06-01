@@ -122,6 +122,6 @@ It is probably a good idea to save `TALOSCONFIG` to your shell's config also.
 There will be times where the entire cluster will need to be installed from scratch. There are two steps to get everything in the cluster:
 
 1. Install Cilium as per the [README](../networking/cilium/README.md).
-2. Wait for Cilium to be installed then [install ArgoCD](../argocd/README.md). This will install the rest of the cluster for you.
+2. Wait for Cilium to be installed then [install ArgoCD](../ci-cd/argocd/README.md). This will install the rest of the cluster for you.
 3. Review which secrets need to be added to [Vault](../security/vault/README.md). Search the repo for `ExternalSecret` manifests for guidance.
 
