@@ -59,3 +59,15 @@ spec:
         certificateRefs:
           - name: draw-okwilkins-dev-tls
             namespace: excalidraw
+    - protocol: HTTPS
+      name: home-lan-workflows
+      hostname: workflows.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: workflows-okwilkins-dev-tls
+            namespace: argo-workflows

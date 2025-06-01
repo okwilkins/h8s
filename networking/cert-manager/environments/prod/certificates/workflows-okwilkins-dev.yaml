@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: workflows-okwilkins-dev
+  namespace: argo-workflows
+spec:
+  secretName: workflows-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: workflows.okwilkins.dev
+  dnsNames:
+    - workflows.okwilkins.dev
