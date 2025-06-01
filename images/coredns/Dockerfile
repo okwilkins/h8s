@@ -15,6 +15,8 @@ RUN git clone --depth 1 --branch v${COREDNS_VERSION} https://github.com/coredns/
 FROM common AS builder
 
 ARG BLOCKLIST_VERSION=1.12.1
+ARG GOOS=linux
+ARG GOARCH=amd64
 
 WORKDIR /coredns
 # RUN go get github.com/relekang/coredns-blocklist@v${BLOCKLIST_VERSION}
@@ -27,7 +29,7 @@ RUN go generate
 RUN go mod tidy
 
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+RUN CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build \
     -trimpath \
     -ldflags='-w -s -extldflags "-static"' \
     -a \
