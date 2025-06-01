@@ -1,8 +1,8 @@
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: argocd-tls-access
-  namespace: argocd
+  name: argo-workflows-tls-access
+  namespace: argo-workflows
 spec:
   from:
     - group: gateway.networking.k8s.io
