@@ -42,7 +42,9 @@ func (m *Coredns) Build(ctx context.Context, src *dagger.Directory) (string, err
 	}
 
 	imageDigest, err := dag.Container().
-		Publish(ctx, "ttl.sh/myapp:latest", dagger.ContainerPublishOpts{PlatformVariants: platformVariants})
+		Publish(ctx, "ttl.sh/coredns:1h", dagger.ContainerPublishOpts{
+			PlatformVariants: platformVariants,
+		})
 
 	if err != nil {
 		return "", err
