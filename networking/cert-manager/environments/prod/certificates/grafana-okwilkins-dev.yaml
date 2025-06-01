@@ -8,7 +8,6 @@ spec:
   issuerRef:
     name: vault-issuer
     kind: ClusterIssuer
-    sectionName: home-lan-argocd
   commonName: grafana.okwilkins.dev
   dnsNames:
     - grafana.okwilkins.dev
