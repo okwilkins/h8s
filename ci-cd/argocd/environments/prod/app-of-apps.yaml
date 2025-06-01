@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/okwilkins/h8s
     targetRevision: HEAD
-    path: argocd/environments/prod/apps/
+    path: ci-cd/argocd/environments/prod/apps/
   syncPolicy:
     automated:
       prune: true
