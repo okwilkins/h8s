@@ -4,5 +4,7 @@ workflow:
   serviceAccount:
     create: true
 controller:
+  metricsConfig:
+    enabled: true
   serviceMonitor:
     enabled: true
