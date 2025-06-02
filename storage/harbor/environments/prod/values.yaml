@@ -1,10 +1,10 @@
 # https://github.com/goharbor/harbor-helm/blob/v1.17.1/values.yaml
 
-# externalURL: https://harbor.okwilkins.dev
-# expose:
-#   type: clusterIP
-#   tls:
-#     enabled: false
+externalURL: https://harbor.okwilkins.dev
+expose:
+  type: clusterIP
+  tls:
+    enabled: false
 existingSecretAdminPassword: harbor-admin-credentials
 existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 database:
