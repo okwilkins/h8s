@@ -8,7 +8,6 @@ resources:
   - ./harbor/
   - ./external-secrets-operator/
   - ./vault/
-  - ./external-dns/
   - ./loki/
   - ./cert-manager/
 patches:
