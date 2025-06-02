@@ -9,3 +9,4 @@ resources:
   - ./certificates/prometheus-okwilkins-dev.yaml
   - ./certificates/draw-okwilkins-dev.yaml
   - ./certificates/workflows-okwilkins-dev.yaml
+  - ./certificates/harbor-okwilkins-dev.yaml

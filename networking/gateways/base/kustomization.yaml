@@ -13,13 +13,14 @@ resources:
   - ./gateways/cloudflare.yaml
   - ./http-routes/grafana.yaml
   - ./http-routes/argocd.yaml
-  - ./http-routes/harbor.yaml
   - ./http-routes/prometheus.yaml
   - ./http-routes/excalidraw.yaml
   - ./http-routes/argo-workflows.yaml
+  - ./http-routes/harbor-portal.yaml
   # Reference grants
   - ./reference-grants/default-gateway-argocd-tls.yaml
   - ./reference-grants/default-gateway-grafana-tls.yaml
   - ./reference-grants/default-gateway-prometheus-tls.yaml
   - ./reference-grants/default-gateway-draw-tls.yaml
   - ./reference-grants/default-gateway-workflows-tls.yaml
+  - ./reference-grants/default-gateway-harbor-tls.yaml
