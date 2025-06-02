@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/bitnami/harbor/25.0.0?modal=values
+# https://github.com/goharbor/harbor-helm/blob/v1.17.1/values.yaml
 
 # externalURL: https://harbor.okwilkins.dev
 # expose:
