@@ -71,3 +71,15 @@ spec:
         certificateRefs:
           - name: workflows-okwilkins-dev-tls
             namespace: argo-workflows
+    - protocol: HTTPS
+      name: home-lan-harbor
+      hostname: harbor.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: harbor-okwilkins-dev-tls
+            namespace: harbor
