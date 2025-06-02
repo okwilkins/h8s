@@ -1,0 +1,7 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: argo-workflows-dashboard
+spec:
+  url: https://raw.githubusercontent.com/argoproj/argo-workflows/refs/tags/v3.6.8/examples/grafana-dashboard.json
+  folderRef: argo-workflows

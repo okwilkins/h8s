@@ -10,6 +10,7 @@ resources:
   - ./vault/
   - ./loki/
   - ./cert-manager/
+  - ./argo-workflows/
 patches:
   - target:
       group: grafana.integreatly.org
