@@ -6,6 +6,7 @@
 #   tls:
 #     enabled: false
 existingSecretAdminPassword: harbor-admin-credentials
+existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 database:
   type: external
   external:
