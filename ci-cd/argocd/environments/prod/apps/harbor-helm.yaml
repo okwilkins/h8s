@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://helm.goharbor.io
       chart: harbor
-      targetRevision: 1.17.0
+      targetRevision: 1.16.4
       helm:
         releaseName: harbor
         valueFiles:
