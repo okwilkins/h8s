@@ -1,7 +1,6 @@
 machine:
   install:
     image: factory.talos.dev/installer/__SCHEMATIC_ID__:__TALOS_VER__
-    disk: /dev/nvme0n1
   network:
     hostname: controlplane-worker-__NODE_NUMBER__
     nameservers:
