@@ -12,3 +12,4 @@ resources:
   - ./keycloak-namespace.yaml
   - ./longhorn-system-namespace.yaml
   - ./monitoring-namespace.yaml
+  - ./vault-namespace.yaml
