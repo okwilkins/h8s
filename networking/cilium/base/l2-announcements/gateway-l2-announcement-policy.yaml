@@ -7,6 +7,6 @@ spec:
     matchLabels:
       gateway.networking.k8s.io/gateway-name: default-gateway
   interfaces:
-    - ^enp3s0$
+    - ^eth[0-9]+$
   externalIPs: true
   loadBalancerIPs: true
