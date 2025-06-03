@@ -3,13 +3,23 @@
 
 set -e
 
-for var in XDG_CONFIG_HOME NODE_1_IP NODE_2_IP; do
-    eval "value=\$$var"
+FOUND_ANY=0
+
+for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
+    FOUND_ANY=1
+    value="${!var}"
     if [ -z "$value" ]; then
-        echo "Please set your $var environment variable before running this!"
+        echo "Warning: $var is set but empty! Exiting..."
         exit 1
+    else
+        echo "$var is set to $value"
     fi
 done
+
+if [ $FOUND_ANY -eq 0 ]; then
+    echo "No NODE_X_IP environment variables are set! Exiting..."
+    exit 0
+fi
 
 TALOS_SECRET_FILE=$XDG_CONFIG_HOME/talos/secret.yaml
 
@@ -29,34 +39,35 @@ talosctl gen config \
     talos-homelab \
     https://$NODE_1_IP:6443
 
-echo "Generating config for controlplane-worker-1..."
-talosctl gen config \
-    --with-secrets $TALOS_SECRET_FILE \
-    --output-types controlplane \
-    -o $XDG_CONFIG_HOME/talos/controlplane_worker_1.yaml \
-    --force \
-    --config-patch @machine_patches/controlplane_worker_1.yaml \
-    --config-patch @machine_patches/machine_patch.yaml \
-    --config-patch @cluster_patch.yaml \
-    talos-homelab \
-    https://$NODE_1_IP:6443
+TALOS_VER="v1.10.3"
+schematic_id=$(curl -s -X POST \
+    --data-binary @iso_factory_patch.yaml \
+    https://factory.talos.dev/schematics | jq -r '.id')
 
-echo "Generating config for controlplane-worker-2..."
-talosctl gen config \
-    --with-secrets $TALOS_SECRET_FILE \
-    --output-types controlplane \
-    -o $XDG_CONFIG_HOME/talos/controlplane_worker_2.yaml \
-    --force \
-    --config-patch @machine_patches/controlplane_worker_2.yaml \
-    --config-patch @machine_patches/machine_patch.yaml \
-    --config-patch @cluster_patch.yaml \
-    talos-homelab \
-    https://$NODE_2_IP:6443
+for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
+    node_num=${var//[^0-9]/}
+    echo "Generating config for controlplane-worker-${node_num}..."
+    
+    talosctl gen config \
+        --with-secrets "$TALOS_SECRET_FILE" \
+        --output-types controlplane \
+        -o "$XDG_CONFIG_HOME/talos/controlplane_worker_${node_num}.yaml" \
+        --force \
+        --config-patch @<(sed "s/__NODE_NUMBER__/${node_num}/g; s/__SCHEMATIC_ID__/${schematic_id}/g; s/__TALOS_VER__/${TALOS_VER}/g" machine_patches/controlplane_worker_template.yaml) \
+        --config-patch @machine_patches/machine_patch.yaml \
+        --config-patch @cluster_patch.yaml \
+        talos-homelab \
+        "https://${!var}:6443"
+done
 
-talosctl config endpoint \
-    $NODE_1_IP $NODE_2_IP \
-    --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
+controlplane_ips=()
+for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
+    controlplane_ips+=("${!var}")  # Resolve variable value
+done
 
-talosctl config nodes \
-    $NODE_1_IP $NODE_2_IP \
-    --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
+talosctl config endpoint "${controlplane_ips[@]}" \
+    --talosconfig "$XDG_CONFIG_HOME/talos/talosconfig"
+
+talosctl config nodes "${controlplane_ips[@]}" \
+    --talosconfig "$XDG_CONFIG_HOME/talos/talosconfig"
+

@@ -10,23 +10,19 @@ Talos Linux is a specialised operating system built specifically for running Kub
 To generate the appropriate ISO for the system the [Talos Linux Image Factory can be used](https://factory.talos.dev/). This gives a nice UI to retrieve system-appropriate ISOs. Instead of using the UI, a schematic file is used:
 
 ```bash
-curl -X POST \
+curl -s -X POST \
     --data-binary @iso_factory_patch.yaml \
-    https://factory.talos.dev/schematics
+    https://factory.talos.dev/schematics | jq -r '.id'
 ```
 
-This will return:
-
-```bash
-{"id":"7d62abe0c1b6f96176f3f3ccc17c3f01982fddb8f505f91e4c040ff900fd7fdc"}
-```
+This will return: `53513e54bb39202f35694412577a6bc53d484744d35a126e5d42ef34785c0d83`
 
 This ID can then be used in each of the [machine config patches](./machine_patches):
 
 ```yaml
 machine:
   install:
-    image: factory.talos.dev/installer/7d62abe0c1b6f96176f3f3ccc17c3f01982fddb8f505f91e4c040ff900fd7fdc:v1.10.0
+    image: factory.talos.dev/installer/7d62abe0c1b6f96176f3f3ccc17c3f01982fddb8f505f91e4c040ff900fd7fdc:v1.10.3
 ```
 
 
