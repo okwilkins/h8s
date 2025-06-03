@@ -10,3 +10,4 @@ resources:
   - ./external-secrets-namespace.yaml
   - ./harbor-namespace.yaml
   - ./keycloak-namespace.yaml
+  - ./longhorn-system-namespace.yaml
