@@ -7,3 +7,4 @@ resources:
   - ./cpng-system-namespace.yaml
   - ./coredns-lan-namespace.yaml
   - ./excalidraw-namespace.yaml
+  - ./external-secrets-namespace.yaml
