@@ -11,3 +11,4 @@ resources:
   - ./harbor-namespace.yaml
   - ./keycloak-namespace.yaml
   - ./longhorn-system-namespace.yaml
+  - ./monitoring-namespace.yaml
