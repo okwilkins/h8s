@@ -9,3 +9,4 @@ resources:
   - ./excalidraw-namespace.yaml
   - ./external-secrets-namespace.yaml
   - ./harbor-namespace.yaml
+  - ./keycloak-namespace.yaml
