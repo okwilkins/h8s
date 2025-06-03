@@ -1,0 +1,25 @@
+# Python
+*.py     text eol=lf diff linguist-language=Python linguist-detectable=true
+
+# Go
+*.go     text eol=lf diff linguist-language=Go linguist-detectable=true
+
+# Shell/Bash
+*.sh     text eol=lf diff linguist-language=Shell linguist-detectable=true
+*.bash   text eol=lf diff linguist-language=Shell linguist-detectable=true
+
+# YAML
+*.yaml   text eol=lf diff linguist-language=YAML linguist-detectable=true
+*.yml    text eol=lf diff linguist-language=YAML linguist-detectable=true
+
+# Docker
+Dockerfile* text eol=lf diff linguist-language=Dockerfile linguist-detectable=true
+
+# Markdown
+*.md     text eol=lf diff linguist-language=Markdown linguist-detectable=false
+
+# Images (no text conversion or diff)
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
