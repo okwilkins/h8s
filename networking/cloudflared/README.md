@@ -8,7 +8,7 @@ I use this to facilitate connections to my K8s cluster over the web.
 
 To get the values for the first 3 variables:
 - `CLOUDFLARE_ACCOUNT_ID`: Read [this guide here](https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/).
-- `CLOUDFLARE_API_KEY`: Go to your [accounts api-tokens page](https://dash.cloudflare.com/profile/api-tokens). Create an API key with permissions for `Cloudflate One Connector: cloudflared` with `Read`.
+- `CLOUDFLARE_API_KEY`: Go to your [accounts api-tokens page](https://dash.cloudflare.com/profile/api-tokens). Create an API key with permissions for `Cloudflare Tunnel` with `Edit`.
 - `TUNNEL_NAME`: The name of the tunnel to use for the cluster. [Read more here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/).
 
 Place the `TUNNEL_TOKEN` into a secret in your cloud platform. Put the key name as `token` and the value the contents of the script below:
