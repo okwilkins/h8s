@@ -18,9 +18,6 @@ spec:
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
       ref: h8s
-    - repoURL: https://github.com/okwilkins/h8s
-      targetRevision: HEAD
-      path: observability/prometheus/environments/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
