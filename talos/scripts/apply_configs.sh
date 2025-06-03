@@ -1,23 +1,33 @@
 #!/bin/bash
 # Applies pre-generated configs for Talos, controlplanes and workers
 
-for var in XDG_CONFIG_HOME NODE_1_IP NODE_2_IP; do
-    eval "value=\$$var"
+set -e
+
+FOUND_ANY=0
+
+for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
+    FOUND_ANY=1
+    value="${!var}"
     if [ -z "$value" ]; then
-        echo "Please set your $var environment variable before running this!"
+        echo "Warning: $var is set but empty! Exiting..."
         exit 1
+    else
+        echo "$var is set to $value"
     fi
 done
 
-echo "Applying config for controlplane-worker-1..."
-talosctl apply-config \
-    --nodes $NODE_1_IP \
-    --endpoints $NODE_1_IP \
-    --file $XDG_CONFIG_HOME/talos/controlplane_worker_1.yaml
+if [ $FOUND_ANY -eq 0 ]; then
+    echo "No NODE_X_IP environment variables are set! Exiting..."
+    exit 0
+fi
 
-echo "Applying config for controlplane-worker-2..."
-talosctl apply-config \
-    --nodes $NODE_2_IP \
-    --endpoints $NODE_2_IP \
-    --file $XDG_CONFIG_HOME/talos/controlplane_worker_2.yaml
+for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
+    node_num=${var//[^0-9]/}
+
+    echo "Applying config for controlplane-worker-1..."
+    talosctl apply-config \
+        --nodes ${!var} \
+        --endpoints ${!var} \
+        --file $XDG_CONFIG_HOME/talos/controlplane_worker_${node_num}.yaml
+done
 

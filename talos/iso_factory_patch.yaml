@@ -1,9 +1,9 @@
-# Patch for N100 CPU-based nodes
+# Patch for Proxmox and Longhorn
 customization:
   systemExtensions:
     officialExtensions:
-      # Supports N100 CPUs
-      - siderolabs/i915-ucode
+      # For QEMU support with Proxmox
+      - siderolabs/qemu-guest-agent
       # Longhorn support
       - siderolabs/iscsi-tools
       - siderolabs/util-linux-tools
