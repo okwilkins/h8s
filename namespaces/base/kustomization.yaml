@@ -5,3 +5,4 @@ resources:
   - ./cert-manager-namespace.yaml
   - ./cloudflare-namespace.yaml
   - ./cpng-system-namespace.yaml
+  - ./coredns-lan-namespace.yaml
