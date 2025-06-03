@@ -8,3 +8,4 @@ resources:
   - ./coredns-lan-namespace.yaml
   - ./excalidraw-namespace.yaml
   - ./external-secrets-namespace.yaml
+  - ./harbor-namespace.yaml
