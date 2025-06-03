@@ -6,3 +6,4 @@ resources:
   - ./cloudflare-namespace.yaml
   - ./cpng-system-namespace.yaml
   - ./coredns-lan-namespace.yaml
+  - ./excalidraw-namespace.yaml
