@@ -21,4 +21,3 @@ spec:
       allowEmpty: false
     syncOptions:
       - PruneLast=true
-      - CreateNamespace=true
