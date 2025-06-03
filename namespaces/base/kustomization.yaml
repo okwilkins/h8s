@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - ./argo-workflows-namespace.yaml
   - ./cert-manager-namespace.yaml
+  - ./cloudflare-namespace.yaml
