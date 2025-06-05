@@ -4,6 +4,7 @@ resources:
   - ./issuers/vault-issuer.yaml
   - ./issuers/vault-issuer-service-account.yaml
   - ./issuers/vault-issuer-service-account-secret.yaml
+  - ./certificates/root-ca.yaml
   - ./certificates/argocd-okwilkins-dev.yaml
   - ./certificates/grafana-okwilkins-dev.yaml
   - ./certificates/prometheus-okwilkins-dev.yaml
