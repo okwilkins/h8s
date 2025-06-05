@@ -13,3 +13,4 @@ resources:
   - ./longhorn-system-namespace.yaml
   - ./monitoring-namespace.yaml
   - ./vault-namespace.yaml
+  - ./terraform-namespace.yaml

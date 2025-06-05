@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-terraform-backend-prod
+  namespace: terraform
+spec:
+  description: Postgres cluster for the Terraform backend of this cluster
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.4
+  instances: 1
+  storage:
+    size: 10Gi
+  resources:
+    requests:
+      memory: 512Mi
+  managed:
+    roles:
+      - name: terraform
+        ensure: present
+        login: true
+        superuser: false
+        passwordSecret:
+          name: cnpg-terraform-prod-app-user-credentials
+          key: password
+  enableSuperuserAccess: false
+  monitoring:
+    enablePodMonitor: true
