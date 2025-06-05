@@ -2,11 +2,10 @@
 
 persistence:
   reclaimPolicy: Retain
+  defaultClassReplicaCount: 2
 preUpgradeChecker:
   # https://github.com/longhorn/longhorn/issues/8707
   jobEnabled: false
-persistence:
-  defaultClassReplicaCount: 2
 metrics:
   enabled: true
   serviceMonitor:
