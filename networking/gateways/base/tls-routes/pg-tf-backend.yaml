@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TLSRoute
+metadata:
+  name: cnpg-terraform-backend-prod
+  namespace: terraform
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+      sectionName: home-lan-pg-tf-backend
+  hostnames:
+    - pg-tf-backend.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: cnpg-terraform-backend-prod-rw
+          port: 5432
