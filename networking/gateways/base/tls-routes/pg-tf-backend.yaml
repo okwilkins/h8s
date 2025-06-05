@@ -12,9 +12,9 @@ spec:
     - pg-tf-backend.okwilkins.dev
   rules:
     - matches:
-        - path:
-            type: PathPrefix
-            value: /
       backendRefs:
         - name: cnpg-terraform-backend-prod-rw
+          kind: Service
+          group: ""
+          weight: 1
           port: 5432
