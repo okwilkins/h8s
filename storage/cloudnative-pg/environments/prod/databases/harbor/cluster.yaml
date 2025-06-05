@@ -2,6 +2,7 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: cnpg-harbor-prod
+  namespace: harbor
 spec:
   description: Postgres cluster for the Harbor
   imageName: ghcr.io/cloudnative-pg/postgresql:17.4
