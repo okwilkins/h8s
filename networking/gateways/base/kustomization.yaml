@@ -17,6 +17,7 @@ resources:
   - ./http-routes/excalidraw.yaml
   - ./http-routes/argo-workflows.yaml
   - ./http-routes/harbor.yaml
+  - ./tls-routes/pg-tf-backend.yaml
   # Reference grants
   - ./reference-grants/default-gateway-argocd-tls.yaml
   - ./reference-grants/default-gateway-grafana-tls.yaml
@@ -24,3 +25,4 @@ resources:
   - ./reference-grants/default-gateway-draw-tls.yaml
   - ./reference-grants/default-gateway-workflows-tls.yaml
   - ./reference-grants/default-gateway-harbor-tls.yaml
+  - ./reference-grants/default-gateway-pg-tf-backend-tls.yaml

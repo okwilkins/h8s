@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pg-tf-backend-okwilkins-dev
+  namespace: terraform
+spec:
+  secretName: pg-tf-backend-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: pg-tf-backend.okwilkins.dev
+  dnsNames:
+    - pg-tf-backend.okwilkins.dev
