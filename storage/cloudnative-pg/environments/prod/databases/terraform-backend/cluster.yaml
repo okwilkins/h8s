@@ -12,6 +12,12 @@ spec:
   resources:
     requests:
       memory: 512Mi
+  certificates:
+    serverTLSSecret: pg-tf-backend-okwilkins-dev-tls
+    serverCASecret: vault-ca
+  postgresql:
+    pg_hba:
+      - hostssl all all all scram-sha-256
   managed:
     roles:
       - name: terraform

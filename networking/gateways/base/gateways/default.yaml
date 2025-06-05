@@ -90,8 +90,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: pg-tf-backend-okwilkins-dev-tls
-            namespace: terraform
+      # tls:
+      #   mode: Terminate
+      #   certificateRefs:
+      #     - name: pg-tf-backend-okwilkins-dev-tls
+      #       namespace: terraform
