@@ -1,0 +1,10 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: terraform-backend
+  namespace: terraform
+spec:
+  name: terraform_backend
+  owner: terraform
+  cluster:
+    name: cnpg-terraform-backend-prod
