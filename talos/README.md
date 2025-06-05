@@ -1,30 +1,10 @@
 # Talos
 
-Talos Linux is a specialised operating system built specifically for running Kubernetes clusters. It's designed to be minimal, secure, and immutable, meaning the system files remain read-only and cannot be modified during runtime.
+[Talos Linux](https://www.talos.dev/) is a specialised operating system built specifically for running Kubernetes clusters. It's designed to be minimal, secure, and immutable, meaning the system files remain read-only and cannot be modified during runtime.
 
+[Proxmox VE](https://www.proxmox.com/en/) is used as the [hypervisor](https://en.wikipedia.org/wiki/Hypervisor) that runs Talos.
 
 ## Getting Started
-
-### TalosOS ISOs
-
-To generate the appropriate ISO for the system the [Talos Linux Image Factory can be used](https://factory.talos.dev/). This gives a nice UI to retrieve system-appropriate ISOs. Instead of using the UI, a schematic file is used:
-
-```bash
-curl -s -X POST \
-    --data-binary @iso_factory_patch.yaml \
-    https://factory.talos.dev/schematics | jq -r '.id'
-```
-
-This will return: `53513e54bb39202f35694412577a6bc53d484744d35a126e5d42ef34785c0d83`
-
-This ID can then be used in each of the [machine config patches](./machine_patches):
-
-```yaml
-machine:
-  install:
-    image: factory.talos.dev/installer/7d62abe0c1b6f96176f3f3ccc17c3f01982fddb8f505f91e4c040ff900fd7fdc:v1.10.3
-```
-
 
 ### Initalising the Cluster
 
@@ -64,10 +44,10 @@ talosctl bootstrap \
 ***NOTE:*** It doesn't matter which controlplane-worker we do this for. As both nodes are control planes, it doesn't matter which one is chosen to bootstrap.
 
 
-You can generate your kubeconfig like so, it will be placed in your current working directory:
+You can generate your kubeconfig like so, it will be placed in your `$HOME/.kube` directory. **WARNING**: This will replace your current config!
 
 ```bash
-talosctl kubeconfig ./config \
+talosctl kubeconfig $HOME/.kube/config \
     --nodes $NODE_1_IP \
     --endpoints $NODE_1_IP \
     --talosconfig $XDG_CONFIG_HOME/talos/talosconfig
