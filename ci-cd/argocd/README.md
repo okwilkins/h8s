@@ -18,6 +18,12 @@ helm upgrade argocd argo/argo-cd \
     -f environments/${CLUSTER_ENV}/values.yaml
 ```
 
+### After Bootstrapping
+
+After bootstrapping, the above command will need to be run again in order to run again to have the Prometheus service monitors be installed. They will only be available after [Prometheus is installed](../../observability/prometheus).
+
+**TODO**: Install Prometheus CRDs before cluster bootstrap to avoid this side effect.
+
 ### App of Apps
 
 Installing the app of apps will install everything the cluster needs to get going. It is based from [ArgoCD's docs found here](https://github.com/argoproj/argo-cd/blob/a06cdb3880fe89f2e0512b07a4b2df2cfe83634e/docs/operator-manual/cluster-bootstrapping.md).
