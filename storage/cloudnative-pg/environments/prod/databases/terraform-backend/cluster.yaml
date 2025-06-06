@@ -14,7 +14,7 @@ spec:
       memory: 512Mi
   certificates:
     serverTLSSecret: pg-tf-backend-okwilkins-dev-tls
-    serverCASecret: vault-root-ca
+    serverCASecret: terraform-vault-root-ca
   postgresql:
     pg_hba:
       - hostssl all all all scram-sha-256
