@@ -8,6 +8,8 @@ resources:
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.2.0/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.2.0/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.2.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.2.0/config/crd/experimental/gateway.networking.k8s.io_tcproutes.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.2.0/config/crd/experimental/gateway.networking.k8s.io_udproutes.yaml
   # Gateways and routes
   - ./gateways/default.yaml
   - ./gateways/cloudflare.yaml
