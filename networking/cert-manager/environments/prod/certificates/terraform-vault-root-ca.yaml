@@ -1,10 +1,10 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: vault-root-ca
-  namespace: cert-manager
+  name: terraform-vault-root-ca
+  namespace: terraform
 spec:
-  secretName: vault-root-ca
+  secretName: terraform-vault-root-ca
   isCA: true
   commonName: okwilkins.dev
   issuerRef:
