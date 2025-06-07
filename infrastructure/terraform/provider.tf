@@ -8,8 +8,8 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path    = "$HOME/.kube/config"
-  config_context = "talos-homelab"
+  config_path    = "~/.kube/config"
+  config_context = "admin@talos-homelab"
 }
 
 provider "harbor" {}
