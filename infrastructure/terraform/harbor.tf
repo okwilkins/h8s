@@ -23,3 +23,24 @@ locals {
   harbor_pass     = data.kubernetes_secret.harbor_admin_secret.data.HARBOR_ADMIN_PASSWORD
 }
 
+##############
+# Registries #
+##############
+resource "harbor_registry" "docker" {
+  provider_name = "docker-hub"
+  name          = "docker"
+  endpoint_url  = "https://registry-1.docker.io"
+}
+
+resource "harbor_registry" "quay" {
+  provider_name = "quay"
+  name          = "quay"
+  endpoint_url  = "https://quay.io"
+}
+
+resource "harbor_registry" "ghcr" {
+  provider_name = "github"
+  name          = "ghcr"
+  endpoint_url  = "https://ghcr.io"
+}
+
