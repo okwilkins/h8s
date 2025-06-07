@@ -1,5 +1,9 @@
 terraform {
   required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.37.1"
+    }
     harbor = {
       source  = "goharbor/harbor"
       version = "3.10.21"
