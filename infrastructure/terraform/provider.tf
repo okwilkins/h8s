@@ -16,4 +16,9 @@ provider "kubernetes" {
   config_context = "admin@talos-homelab"
 }
 
-provider "harbor" {}
+provider "harbor" {
+  url      = local.harbor_url
+  password = local.harbor_pass
+  username = local.harbor_user
+}
+
