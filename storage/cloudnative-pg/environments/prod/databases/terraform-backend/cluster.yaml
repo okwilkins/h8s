@@ -25,7 +25,7 @@ spec:
         login: true
         superuser: false
         passwordSecret:
-          name: cnpg-terraform-prod-app-user-credentials
+          name: cnpg-terraform-backend-prod-app-user-credentials
           key: password
   enableSuperuserAccess: false
   monitoring:
