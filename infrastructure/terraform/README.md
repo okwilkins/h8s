@@ -31,5 +31,5 @@ terraform init
 
 ### Connecting to Kubernetes
 
-By default Terraform will connect to Kubernetes via a `config` found in `$HOME/.kube/config`. The config context should be named `talos-homelab`. Make sure that this exists for Terraform to be able to function correctly.
+By default Terraform will connect to Kubernetes via a `config` found in `~/.kube/config`. The config context should be named `admin@talos-homelab`. Make sure that this exists for Terraform to be able to function correctly.
 
