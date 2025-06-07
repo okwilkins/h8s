@@ -4,3 +4,13 @@ resources:
   # - ./keycloak/
   - ./harbor/
   - ./terraform-backend/
+patches:
+  # Ensure the secret exists before servers
+  - patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          argocd.argoproj.io/sync-wave: "-1000"
+    target:
+      group: external-secrets.io
+      kind: ExternalSecret
