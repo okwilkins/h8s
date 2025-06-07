@@ -2,7 +2,6 @@
 
 Vault is a tool for securely accessing secrets. A secret is anything that you want to tightly control access to, such as API keys, passwords, certificates, and more. Vault provides a unified interface to any secret, while providing tight access control and recording a detailed audit log.
 
-
 ## Installation
 
 [ArgoCD](../../ci-cd/argocd/README.md) handles the installation of Vault. There are some steps to take after ArgoCD has installed everything however.
@@ -82,12 +81,13 @@ vault write pki/config/urls \
 # Configure a role that maps a name in Vault to a procedure for generating a certificate
 vault write pki/roles/$ROLE_NAME \
     allowed_domains=$DOMAIN \
+    allow_bare_domains=true \
     allow_subdomains=true \
     max_ttl=72h
 
 # Create a policy to enable read access to the PKI secrets engine paths
 vault policy write pki - <<EOF
-path "pki*"                        { capabilities = ["read", "list"] }
+path "pki*"                   { capabilities = ["read", "list"] }
 path "pki/sign/$ROLE_NAME"    { capabilities = ["create", "update"] }
 path "pki/issue/$ROLE_NAME"   { capabilities = ["create"] }
 EOF
