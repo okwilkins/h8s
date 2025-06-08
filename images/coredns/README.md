@@ -1,4 +1,4 @@
-# CoreDNS
+# Image: CoreDNS
 
 This Dockerfile builds CoreDNS with the [coredns-blocklist plugin](https://github.com/relekang/coredns-blocklist) integrated.
 
