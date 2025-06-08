@@ -1,3 +1,6 @@
+######################
+# Kubernetes Secrets #
+######################
 data "kubernetes_secret" "harbor_admin_secret" {
   metadata {
     name      = "harbor-admin-credentials"
@@ -5,6 +8,14 @@ data "kubernetes_secret" "harbor_admin_secret" {
   }
 }
 
+data "kubernetes_secret" "harbor_dagger_robot_secret" {
+  metadata {
+    name      = "harbor-dagger-robot-secret"
+    namespace = "harbor"
+  }
+}
+
+# Gateway route
 data "kubernetes_resource" "harbor_route" {
   api_version = "gateway.networking.k8s.io/v1"
   kind        = "HTTPRoute"
@@ -58,3 +69,25 @@ resource "harbor_registry" "ghcr" {
   endpoint_url  = "https://ghcr.io"
 }
 
+
+##################
+# Robot Accounts #
+##################
+resource "harbor_robot_account" "terraform" {
+  name        = "dagger"
+  description = "robot for dagger to perform ci-cd operations"
+  level       = "project"
+  secret      = data.kubernetes_secret.harbor_dagger_robot_secret.data.SECRET
+  permissions {
+    access {
+      action   = "push"
+      resource = "repository"
+    }
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    kind      = "project"
+    namespace = harbor_project.main.name
+  }
+}
