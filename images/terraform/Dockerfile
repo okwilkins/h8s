@@ -10,5 +10,3 @@ RUN addgroup -S terraform && adduser  --system \
      terraform
 USER terraform
 
-COPY --chown=terraform:terraform ../. /terraform
-
