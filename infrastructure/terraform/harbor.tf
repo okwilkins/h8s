@@ -44,7 +44,6 @@ resource "harbor_project" "main" {
   enable_content_trust        = true
   enable_content_trust_cosign = true
   public                      = true
-  registry_id                 = resource.harbor_registry.docker.registry_id
 }
 
 
