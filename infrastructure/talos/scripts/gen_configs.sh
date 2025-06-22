@@ -8,7 +8,7 @@ FOUND_ANY=0
 for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
     FOUND_ANY=1
     value="${!var}"
-    if [ -z "$value" ]; then
+    if [ -z ${value+x} ]; then
         echo "Warning: $var is set but empty! Exiting..."
         exit 1
     else
@@ -19,6 +19,13 @@ done
 if [ $FOUND_ANY -eq 0 ]; then
     echo "No NODE_X_IP environment variables are set! Exiting..."
     exit 0
+fi
+
+if [ -z ${VIP_IP+x} ]; then
+    echo "Virtual IP (VIP_IP) is not set Exiting..."
+    exit 1
+else
+    echo "Virtual IP (VIP_IP) is set to ${VIP_IP}"
 fi
 
 TALOS_SECRET_FILE=$XDG_CONFIG_HOME/talos/secret.yaml
@@ -53,7 +60,7 @@ for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
         --output-types controlplane \
         -o "$XDG_CONFIG_HOME/talos/controlplane_worker_${node_num}.yaml" \
         --force \
-        --config-patch @<(sed "s/__NODE_NUMBER__/${node_num}/g; s/__SCHEMATIC_ID__/${schematic_id}/g; s/__TALOS_VER__/${TALOS_VER}/g" machine_patches/controlplane_worker_template.yaml) \
+        --config-patch @<(sed "s/__NODE_NUMBER__/${node_num}/g; s/__SCHEMATIC_ID__/${schematic_id}/g; s/__TALOS_VER__/${TALOS_VER}/g; s/__VIP_IP__/${VIP_IP}/g;" machine_patches/controlplane_worker_template.yaml) \
         --config-patch @machine_patches/machine_patch.yaml \
         --config-patch @cluster_patch.yaml \
         talos-homelab \

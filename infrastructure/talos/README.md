@@ -15,7 +15,12 @@ Set your variables:
 ```bash
 export NODE_1_IP=192.168.xxx.xxx
 export NODE_2_IP=192.168.xxx.xxx
+export NODE_X_IP=192.168.xxx.xxx
+export VIP_IP=192.168.xxx.xxx
 ```
+
+- Node `X` will be the IP of each of your nodes on your LAN.
+- `VIP_IP` is the Virtual IP of all the controlplane nodes in the cluster. This means only one IP address is needed to access the cluster's controlplane. [Read more here](https://www.talos.dev/v1.10/talos-guides/network/vip).
 
 Generate the Talos configs:
 ```bash
