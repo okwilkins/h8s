@@ -24,7 +24,7 @@ fi
 for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
     node_num=${var//[^0-9]/}
 
-    echo "Applying config for controlplane-worker-1..."
+    echo "Applying config for controlplane-worker-${node_num}..."
     talosctl apply-config \
         --nodes ${!var} \
         --endpoints ${!var} \
