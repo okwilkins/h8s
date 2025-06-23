@@ -40,7 +40,7 @@ locals {
 ############
 resource "harbor_project" "main" {
   name                        = "main"
-  deployment_security         = "high"
+  deployment_security         = "critical"
   enable_content_trust        = true
   enable_content_trust_cosign = true
   public                      = true
