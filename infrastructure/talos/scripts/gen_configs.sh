@@ -62,7 +62,7 @@ for var in $(compgen -v | grep -E '^NODE_[1-9]+_IP$'); do
         --force \
         --config-patch @<(sed "s/__NODE_NUMBER__/${node_num}/g; s/__SCHEMATIC_ID__/${schematic_id}/g; s/__TALOS_VER__/${TALOS_VER}/g; s/__VIP_IP__/${VIP_IP}/g;" machine_patches/controlplane_worker_template.yaml) \
         --config-patch @machine_patches/machine_patch.yaml \
-        --config-patch @cluster_patch.yaml \
+        --config-patch @<(sed "s/__VIP_IP__/${VIP_IP}/g;" cluster_patch.yaml) \
         talos-homelab \
         "https://${!var}:6443"
 done
