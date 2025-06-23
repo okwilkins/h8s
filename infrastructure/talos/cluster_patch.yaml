@@ -9,3 +9,5 @@ cluster:
     disabled: true
   coreDNS:
     disabled: false
+  controlPlane:
+    endpoint: https://__VIP_IP__:6443
