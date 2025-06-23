@@ -9,8 +9,61 @@ import (
 
 type TerraformImage struct{}
 
-// Build and push image from existing Dockerfile
-func (m *TerraformImage) Build(ctx context.Context, src *dagger.Directory) (string, error) {
+func CosignSignImage(
+	ctx context.Context,
+	harborAddress string,
+	robotUsername string,
+	robotToken *dagger.Secret,
+	imageDigest string,
+	cosignKey *dagger.Secret,
+	cosignPass *dagger.Secret,
+) (string, error) {
+	token, err := robotToken.Plaintext(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return dag.Container().
+		From("ghcr.io/sigstore/cosign/cosign:latest").
+		WithMountedSecret(
+			"/cosign.key",
+			cosignKey,
+			dagger.ContainerWithMountedSecretOpts{Owner: "root", Mode: 0444},
+		).
+		WithSecretVariable("COSIGN_PASSWORD", cosignPass).
+		// Login via stdin because there are 0 binaries in this container
+		// Cannot use "sh -c cosign sign ... --registry-password $ROBOT_TOKEN" for example
+		WithExec(
+			[]string{
+				"cosign", "login",
+				harborAddress,
+				"--username", robotUsername,
+				"--password-stdin",
+			},
+			dagger.ContainerWithExecOpts{
+				Stdin: token,
+			},
+		).
+		WithExec([]string{
+			"cosign", "sign",
+			"--key", "/cosign.key",
+			"--recursive",
+			"--yes",
+			imageDigest,
+		}).
+		Stdout(ctx)
+}
+
+func (m *TerraformImage) Build(
+	ctx context.Context,
+	src *dagger.Directory,
+	harborRobotToken *dagger.Secret,
+	cosignKey *dagger.Secret,
+	cosignPass *dagger.Secret,
+) (string, error) {
+	imgRef := "harbor.okwilkins.dev/main/terraform"
+	tag := "test"
+
 	var platforms = []dagger.Platform{
 		"linux/amd64",
 		"linux/arm64",
@@ -40,14 +93,31 @@ func (m *TerraformImage) Build(ctx context.Context, src *dagger.Directory) (stri
 		platformVariants = append(platformVariants, ctr)
 	}
 
-	imageDigest, err := dag.Container().
-		Publish(ctx, "ttl.sh/coredns:1h", dagger.ContainerPublishOpts{
-			PlatformVariants: platformVariants,
-		})
+	digest, err := dag.Container().
+		WithRegistryAuth("harbor.okwilkins.dev", "robot$main+dagger", harborRobotToken).
+		Publish(
+			ctx,
+			fmt.Sprintf("%s:%s", imgRef, tag),
+			dagger.ContainerPublishOpts{PlatformVariants: platformVariants},
+		)
 
 	if err != nil {
 		return "", err
 	}
 
-	return imageDigest, nil
+	_, err = CosignSignImage(
+		ctx,
+		"harbor.okwilkins.dev",
+		`robot$main+dagger`,
+		harborRobotToken,
+		digest,
+		cosignKey,
+		cosignPass,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return digest, nil
 }
