@@ -26,3 +26,15 @@ Within [Vault](../vault/README.md) save the key under: `vault/secrets/kubernetes
 
 The cluster will then use this as a secret via [ESO](../external-secrets-operator/README.md).
 
+
+## Verifying Images
+
+To verify an image first get the Cosign public key and then use that to verify a given image:
+
+```bash
+export IMAGE="harbor.okwilkins.dev/main/terraform:1.12"
+kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d > cosign.pub
+cosign verify --key cosign.pub $IMAGE | jq
+rm cosign.pub
+```
+
