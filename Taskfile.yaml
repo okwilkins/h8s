@@ -1,0 +1,26 @@
+version: "3"
+vars:
+  HARBOR_TLS_CRT:
+    sh: kubectl -n harbor get secret harbor-okwilkins-dev-tls -o json | jq -r '.data["tls.crt"]' | base64 -d
+  HARBOR_ROBOT_TOKEN:
+    sh: kubectl get secret harbor-dagger-robot-secret -n harbor -o json | jq -r '.data.SECRET' | base64 -d
+env:
+  DAGGER_ENGINE_IMAGE: h8s-dagger
+  _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://${DAGGER_ENGINE_IMAGE}
+tasks:
+  # Dagger
+  dagger_start:
+    desc: Starts the Dagger engine
+    cmds:
+      - echo $HARBOR_TLS_CRT > /tmp/harbor.crt
+      - |
+        docker run -d --rm -v /var/lib/dagger \
+          -v /tmp/harbor.crt:/usr/local/share/ca-certificates/harbor.crt \
+          --name ${DAGGER_ENGINE_IMAGE} \
+          --privileged registry.dagger.io/engine
+  dagger_stop:
+    desc: Stops the Dagger engine
+    cmd: docker stop $DAGGER_ENGINE_IMAGE
+    preconditions:
+      - sh: docker ps --format json | jq -r '.Names' | grep -Eq '{{.DAGGER_ENGINE_IMAGE}}'
+        msg: Dagger engine isn't running!
