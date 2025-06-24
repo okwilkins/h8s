@@ -1,4 +1,5 @@
 version: "3"
+run: once
 vars:
   HARBOR_TLS_CRT:
     sh: kubectl -n harbor get secret harbor-okwilkins-dev-tls -o json | jq -r '.data["tls.crt"]' | base64 -d
