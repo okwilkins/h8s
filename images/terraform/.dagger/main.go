@@ -63,7 +63,6 @@ func (m *TerraformImage) Build(
 	terraformVer string,
 ) (string, error) {
 	imgRef := "harbor.okwilkins.dev/main/terraform"
-	tag := "test"
 
 	var platforms = []dagger.Platform{
 		"linux/amd64",
@@ -102,7 +101,7 @@ func (m *TerraformImage) Build(
 		WithRegistryAuth("harbor.okwilkins.dev", "robot$main+dagger", harborRobotToken).
 		Publish(
 			ctx,
-			fmt.Sprintf("%s:%s", imgRef, tag),
+			fmt.Sprintf("%s:%s", imgRef, terraformVer),
 			dagger.ContainerPublishOpts{PlatformVariants: platformVariants},
 		)
 
