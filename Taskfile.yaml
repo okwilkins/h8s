@@ -7,9 +7,9 @@ vars:
     sh: kubectl get secret harbor-dagger-robot-secret -n harbor -o json | jq -r '.data.SECRET' | base64 -d
   COSIGN_PASSWORD:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data.COSIGN_PASSWORD' | base64 -d
-  COSGIN_KEY:
+  COSIGN_KEY:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.key"' | base64 -d
-  COSGIN_PUB:
+  COSIGN_PUB:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d
 env:
   DAGGER_ENGINE_IMAGE: h8s-dagger
