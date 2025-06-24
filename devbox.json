@@ -19,6 +19,9 @@
     "go-task": {
       "version": "3.43.3"
     },
+    "jq": {
+      "version": "1.7.1"
+    },
     "github:dagger/nix#packages.x86_64-linux.dagger": {
       "platforms": [
         "x86_64-linux"
