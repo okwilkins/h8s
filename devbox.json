@@ -22,6 +22,9 @@
     "jq": {
       "version": "1.7.1"
     },
+    "terraform": {
+      "version": "1.12.0"
+    },
     "github:dagger/nix#packages.x86_64-linux.dagger": {
       "platforms": [
         "x86_64-linux"
