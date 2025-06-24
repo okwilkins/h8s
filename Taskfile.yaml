@@ -4,6 +4,12 @@ vars:
     sh: kubectl -n harbor get secret harbor-okwilkins-dev-tls -o json | jq -r '.data["tls.crt"]' | base64 -d
   HARBOR_ROBOT_TOKEN:
     sh: kubectl get secret harbor-dagger-robot-secret -n harbor -o json | jq -r '.data.SECRET' | base64 -d
+  COSIGN_PASSWORD:
+    sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data.COSIGN_PASSWORD' | base64 -d
+  COSGIN_KEY:
+    sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.key"' | base64 -d
+  COSGIN_PUB:
+    sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d
 env:
   DAGGER_ENGINE_IMAGE: h8s-dagger
   _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://${DAGGER_ENGINE_IMAGE}
