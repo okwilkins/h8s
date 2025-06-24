@@ -22,12 +22,12 @@ tasks:
       HARBOR_TLS_CRT: '{{.HARBOR_TLS_CRT}}'
     cmds:
       - echo "$HARBOR_TLS_CRT" > ./harbor.crt
+      - defer: rm ./harbor.crt
       - |
         docker run -d --rm -v /var/lib/dagger \
           -v ./harbor.crt:/usr/local/share/ca-certificates/harbor.crt:ro \
           --name {{.DAGGER_ENGINE_IMAGE}} \
           --privileged registry.dagger.io/engine
-      - rm ./harbor.crt
   dagger_stop:
     desc: Stops the Dagger engine
     cmd: docker stop '{{.DAGGER_ENGINE_IMAGE}}'
