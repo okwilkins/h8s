@@ -1,0 +1,289 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "argocd@2.14.11": {
+      "last_modified": "2025-06-20T02:24:11Z",
+      "resolved": "github:NixOS/nixpkgs/076e8c6678d8c54204abcb4b1b14c366835a58bb#argocd",
+      "source": "devbox-search",
+      "version": "2.14.11",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/nl4jplcxsxa0jvrvkdcxd0av9wlys8zn-argocd-2.14.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/nl4jplcxsxa0jvrvkdcxd0av9wlys8zn-argocd-2.14.11"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qbb623v44kgwf02gfyc1ak7q2rv6k61f-argocd-2.14.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/qbb623v44kgwf02gfyc1ak7q2rv6k61f-argocd-2.14.11"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/bfjvvqzb8zzf07k3hx9ca72phz6ggkyq-argocd-2.14.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/bfjvvqzb8zzf07k3hx9ca72phz6ggkyq-argocd-2.14.11"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/pviwfiv89vilnciacw2ck1jd0xj7b89l-argocd-2.14.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/pviwfiv89vilnciacw2ck1jd0xj7b89l-argocd-2.14.11"
+        }
+      }
+    },
+    "cilium-cli@0.18.3": {
+      "last_modified": "2025-05-16T20:19:48Z",
+      "resolved": "github:NixOS/nixpkgs/12a55407652e04dcf2309436eb06fef0d3713ef3#cilium-cli",
+      "source": "devbox-search",
+      "version": "0.18.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/00hgw5dw1xfrsiyan5qzwzivzkgbypim-cilium-cli-0.18.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/00hgw5dw1xfrsiyan5qzwzivzkgbypim-cilium-cli-0.18.3"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/bqf74l2zv1m7cl3br7d0f183gpjk56l9-cilium-cli-0.18.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/bqf74l2zv1m7cl3br7d0f183gpjk56l9-cilium-cli-0.18.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/5rki7m736fjznvplzn8kvbh00fnar6f3-cilium-cli-0.18.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/5rki7m736fjznvplzn8kvbh00fnar6f3-cilium-cli-0.18.3"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/k72m9afh7xm04zxr5n7p966hwqzh1rdb-cilium-cli-0.18.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/k72m9afh7xm04zxr5n7p966hwqzh1rdb-cilium-cli-0.18.3"
+        }
+      }
+    },
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "last_modified": "2025-06-06T12:35:49Z",
+      "resolved": "github:NixOS/nixpkgs/a4ff0e3c64846abea89662bfbacf037ef4b34207?lastModified=1749213349&narHash=sha256-UAaWOyQhdp7nXzsbmLVC67fo%2BQetzoTm9hsPf9X3yr4%3D"
+    },
+    "github:dagger/nix#packages.x86_64-linux.dagger": {
+      "last_modified": "2025-06-10T14:42:36Z",
+      "resolved": "github:dagger/nix/0352c1026a01a61fe09bc801825697d7f86c3dc2?lastModified=1749566556&narHash=sha256-21jLzhfw%2BsjWVnT75gLGYfg5ur9rIDEcurQ1OiCF5ow%3D#packages.x86_64-linux.dagger"
+    },
+    "kubectl@1.33.0": {
+      "last_modified": "2025-05-16T20:19:48Z",
+      "resolved": "github:NixOS/nixpkgs/12a55407652e04dcf2309436eb06fef0d3713ef3#kubectl",
+      "source": "devbox-search",
+      "version": "1.33.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/402qdc96z88sil3j4wgr780nqlfl7fvz-kubectl-1.33.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/a9xsp33pfmng1411zzank853is0dlk5q-kubectl-1.33.0-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/xapln59nb67wbsvvcj8rqxh63nzvljwy-kubectl-1.33.0-convert"
+            }
+          ],
+          "store_path": "/nix/store/402qdc96z88sil3j4wgr780nqlfl7fvz-kubectl-1.33.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qms0pllz09sckfcrxyy03790jdryn802-kubectl-1.33.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/9jh6dknzzkjabs64zl4qrzfm8pnhx03l-kubectl-1.33.0-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/mxnjb3lh156b0g0agfczhkrs6cyqx4is-kubectl-1.33.0-convert"
+            }
+          ],
+          "store_path": "/nix/store/qms0pllz09sckfcrxyy03790jdryn802-kubectl-1.33.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ry8arpjf8x8gzcsb2gmdx360613lpxgz-kubectl-1.33.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/pnabai47mcqnnh0q3zzcbfsnhbl3dbnm-kubectl-1.33.0-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/h3jb5f5lb7s6gz3522sk0gf458c3wmaq-kubectl-1.33.0-convert"
+            }
+          ],
+          "store_path": "/nix/store/ry8arpjf8x8gzcsb2gmdx360613lpxgz-kubectl-1.33.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/f93la7iy82zzmhr9wc5rxh18yqajr95v-kubectl-1.33.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/ifif1zqv5k8z5ggpvh5x3iynhyc9ma5v-kubectl-1.33.0-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/m5ng07c66w7aqxj26i9s8968k0b9k10x-kubectl-1.33.0-convert"
+            }
+          ],
+          "store_path": "/nix/store/f93la7iy82zzmhr9wc5rxh18yqajr95v-kubectl-1.33.0"
+        }
+      }
+    },
+    "kubernetes-helm@3.17.3": {
+      "last_modified": "2025-05-16T20:19:48Z",
+      "resolved": "github:NixOS/nixpkgs/12a55407652e04dcf2309436eb06fef0d3713ef3#kubernetes-helm",
+      "source": "devbox-search",
+      "version": "3.17.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mg9rya9swd6lymmarlgjmx2m037ydngc-kubernetes-helm-3.17.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mg9rya9swd6lymmarlgjmx2m037ydngc-kubernetes-helm-3.17.3"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kd9x5i47ydamzw514a6lc6r1i0ybiygn-kubernetes-helm-3.17.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/kd9x5i47ydamzw514a6lc6r1i0ybiygn-kubernetes-helm-3.17.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kiy0fscxlhdyy1v7rj290g0vbwa62m3i-kubernetes-helm-3.17.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/kiy0fscxlhdyy1v7rj290g0vbwa62m3i-kubernetes-helm-3.17.3"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/z8fh9w8y3hlckw7zqi29hgfz0x5gyi0s-kubernetes-helm-3.17.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/z8fh9w8y3hlckw7zqi29hgfz0x5gyi0s-kubernetes-helm-3.17.3"
+        }
+      }
+    },
+    "talosctl@1.10.1": {
+      "last_modified": "2025-05-16T20:19:48Z",
+      "resolved": "github:NixOS/nixpkgs/12a55407652e04dcf2309436eb06fef0d3713ef3#talosctl",
+      "source": "devbox-search",
+      "version": "1.10.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/baqy319z6cd7d09h4h56gi6d9l0ag9dx-talosctl-1.10.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/baqy319z6cd7d09h4h56gi6d9l0ag9dx-talosctl-1.10.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/10xqqm29j5gs549yrw3qrnrkhdx42srh-talosctl-1.10.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/10xqqm29j5gs549yrw3qrnrkhdx42srh-talosctl-1.10.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/0wplpvy308ks2awf44xm6363wxwk1jqw-talosctl-1.10.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/0wplpvy308ks2awf44xm6363wxwk1jqw-talosctl-1.10.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/l405b1kp4ssqmna5qrxq99xycy3cvpkz-talosctl-1.10.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/l405b1kp4ssqmna5qrxq99xycy3cvpkz-talosctl-1.10.1"
+        }
+      }
+    }
+  }
+}
