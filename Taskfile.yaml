@@ -11,23 +11,26 @@ vars:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.key"' | base64 -d
   COSIGN_PUB:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d
-env:
   DAGGER_ENGINE_IMAGE: h8s-dagger
-  _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://${DAGGER_ENGINE_IMAGE}
+env:
+  _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://{{.DAGGER_ENGINE_IMAGE}}
 tasks:
   # Dagger
   dagger_start:
     desc: Starts the Dagger engine
+    env:
+      HARBOR_TLS_CRT: '{{.HARBOR_TLS_CRT}}'
     cmds:
-      - echo $HARBOR_TLS_CRT > /tmp/harbor.crt
+      - echo "$HARBOR_TLS_CRT" > ./harbor.crt
       - |
         docker run -d --rm -v /var/lib/dagger \
-          -v /tmp/harbor.crt:/usr/local/share/ca-certificates/harbor.crt \
-          --name ${DAGGER_ENGINE_IMAGE} \
+          -v ./harbor.crt:/usr/local/share/ca-certificates/harbor.crt:ro \
+          --name {{.DAGGER_ENGINE_IMAGE}} \
           --privileged registry.dagger.io/engine
+      - rm ./harbor.crt
   dagger_stop:
     desc: Stops the Dagger engine
-    cmd: docker stop $DAGGER_ENGINE_IMAGE
+    cmd: docker stop '{{.DAGGER_ENGINE_IMAGE}}'
     preconditions:
       - sh: docker ps --format json | jq -r '.Names' | grep -Eq '{{.DAGGER_ENGINE_IMAGE}}'
         msg: Dagger engine isn't running!
