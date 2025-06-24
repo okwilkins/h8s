@@ -1,0 +1,30 @@
+version: "3"
+run: once
+includes:
+  main:
+    taskfile: ../../Taskfile.yaml
+    flatten: true
+tasks:
+  dagger_run:
+    desc: Runs the Dagger pipeline that builds and pushes the Terraform image and signature to Harbor
+    preconditions:
+      - sh: '[ -n "{{.HARBOR_ROBOT_TOKEN}}" ]'
+        msg: HARBOR_ROBOT_TOKEN is empty!
+      - sh: '[ -n "{{.COSIGN_PASSWORD}}" ]'
+        msg: COSIGN_PASSWORD is empty!
+      - sh: '[ -n "{{.COSIGN_KEY}}" ]'
+        msg: COSIGN_KEY is empty!
+    env:
+      HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
+      COSIGN_KEY: '{{.COSIGN_KEY}}'
+      COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
+    cmds:
+      - task: dagger_start
+      - cmd: |
+          dagger call build \
+            --src="." \
+            --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
+            --cosign-key=env:COSIGN_KEY \
+            --cosign-pass=env:COSIGN_PASSWORD
+        ignore_error: true
+      - task: dagger_stop
