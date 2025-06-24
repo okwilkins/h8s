@@ -105,6 +105,54 @@
       "last_modified": "2025-06-10T14:42:36Z",
       "resolved": "github:dagger/nix/0352c1026a01a61fe09bc801825697d7f86c3dc2?lastModified=1749566556&narHash=sha256-21jLzhfw%2BsjWVnT75gLGYfg5ur9rIDEcurQ1OiCF5ow%3D#packages.x86_64-linux.dagger"
     },
+    "go-task@3.43.3": {
+      "last_modified": "2025-06-20T02:24:11Z",
+      "resolved": "github:NixOS/nixpkgs/076e8c6678d8c54204abcb4b1b14c366835a58bb#go-task",
+      "source": "devbox-search",
+      "version": "3.43.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ss65wy1s6wi6ixm9pypssbj5jm649i2c-go-task-3.43.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/ss65wy1s6wi6ixm9pypssbj5jm649i2c-go-task-3.43.3"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/dfs4z98h0kp5zdjc2gz5dzqbsz8qwjnb-go-task-3.43.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/dfs4z98h0kp5zdjc2gz5dzqbsz8qwjnb-go-task-3.43.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/s8fc6jpdkvsvqynhwifvaacfq3pvrqmb-go-task-3.43.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/s8fc6jpdkvsvqynhwifvaacfq3pvrqmb-go-task-3.43.3"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/64rqvndzck53pq5162qshp47b5rsglrh-go-task-3.43.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/64rqvndzck53pq5162qshp47b5rsglrh-go-task-3.43.3"
+        }
+      }
+    },
     "kubectl@1.33.0": {
       "last_modified": "2025-05-16T20:19:48Z",
       "resolved": "github:NixOS/nixpkgs/12a55407652e04dcf2309436eb06fef0d3713ef3#kubectl",
