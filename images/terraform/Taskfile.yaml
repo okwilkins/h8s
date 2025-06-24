@@ -14,6 +14,8 @@ tasks:
         msg: COSIGN_PASSWORD is empty!
       - sh: '[ -n "{{.COSIGN_KEY}}" ]'
         msg: COSIGN_KEY is empty!
+      - sh: '[ -n "$TERRAFORM_VER" ]'
+        msg: TERRAFORM_VER is empty!
     env:
       HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
       COSIGN_KEY: '{{.COSIGN_KEY}}'
@@ -25,6 +27,7 @@ tasks:
             --src="." \
             --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
             --cosign-key=env:COSIGN_KEY \
-            --cosign-pass=env:COSIGN_PASSWORD
+            --cosign-pass=env:COSIGN_PASSWORD \
+            --terraform-ver=$TERRAFORM_VER
         ignore_error: true
       - task: dagger_stop

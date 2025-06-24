@@ -60,6 +60,7 @@ func (m *TerraformImage) Build(
 	harborRobotToken *dagger.Secret,
 	cosignKey *dagger.Secret,
 	cosignPass *dagger.Secret,
+	terraformVer string,
 ) (string, error) {
 	imgRef := "harbor.okwilkins.dev/main/terraform"
 	tag := "test"
@@ -86,6 +87,10 @@ func (m *TerraformImage) Build(
 			{
 				Name:  "GOOS",
 				Value: platformOs,
+			},
+			{
+				Name:  "TERRAFORM_VER",
+				Value: terraformVer,
 			},
 		}
 		buildOpts := dagger.DirectoryDockerBuildOpts{Platform: platform, BuildArgs: buildArgs}
