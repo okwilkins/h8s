@@ -20,8 +20,9 @@ tasks:
       HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
       COSIGN_KEY: '{{.COSIGN_KEY}}'
       COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
+    deps:
+      - dagger_start
     cmds:
-      - task: dagger_start
       - cmd: |
           dagger call build \
             --src="." \
