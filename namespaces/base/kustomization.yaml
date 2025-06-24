@@ -6,6 +6,7 @@ resources:
   - ./cloudflare-namespace.yaml
   - ./cpng-system-namespace.yaml
   - ./coredns-lan-namespace.yaml
+  - ./cosign-namespace.yaml
   - ./excalidraw-namespace.yaml
   - ./external-secrets-namespace.yaml
   - ./harbor-namespace.yaml
