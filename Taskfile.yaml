@@ -28,6 +28,9 @@ tasks:
           -v ./harbor.crt:/usr/local/share/ca-certificates/harbor.crt:ro \
           --name {{.DAGGER_ENGINE_IMAGE}} \
           --privileged registry.dagger.io/engine
+    preconditions:
+      - sh: '! docker ps --format json | jq -r ''.Names'' | grep -Eq ''{{.DAGGER_ENGINE_IMAGE}}'''
+        msg: Dagger engine is already running! Run task dagger_stop and run this again.
   dagger_stop:
     desc: Stops the Dagger engine
     cmd: docker stop '{{.DAGGER_ENGINE_IMAGE}}'
