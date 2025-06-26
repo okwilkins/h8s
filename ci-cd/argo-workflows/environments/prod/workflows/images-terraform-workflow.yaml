@@ -1,6 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
+  name: images-terraform-workflow
   generateName: images-terraform-
 spec:
   entrypoint: dagger-workflow
@@ -13,7 +14,6 @@ spec:
     - name: dagger-workflow
       sidecars:
         - name: dagger-engine
-          # replace with the latest available version of Dagger for your platform
           image: registry.dagger.io/engine:v0.18.11
           securityContext:
             privileged: true
