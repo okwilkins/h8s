@@ -1,19 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argo-workflows-helm
+  name: argo-workflows-resources
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - repoURL: https://argoproj.github.io/argo-helm
-      chart: argo-workflows
-      targetRevision: 0.45.15
-      helm:
-        valueFiles:
-          - $h8s/ci-cd/argo-workflows/environments/prod/values.yaml
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      path: ci-cd/argo-workflows/environments/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: argo-workflows
@@ -24,4 +21,3 @@ spec:
       allowEmpty: false
     syncOptions:
       - PruneLast=true
-      - ServerSideApply=true
