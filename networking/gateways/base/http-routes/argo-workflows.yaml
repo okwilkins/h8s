@@ -18,5 +18,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: argo-workflows-server
+        - name: argo-workflows-helm-server
           port: 2746
