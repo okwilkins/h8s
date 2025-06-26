@@ -14,6 +14,9 @@ spec:
       helm:
         valueFiles:
           - $h8s/ci-cd/argo-workflows/environments/prod/values.yaml
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      ref: h8s
   destination:
     server: https://kubernetes.default.svc
     namespace: argo-workflows
