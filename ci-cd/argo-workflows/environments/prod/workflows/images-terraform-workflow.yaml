@@ -5,59 +5,12 @@ metadata:
   generateName: images-terraform-
   namespace: dagger-workflows
 spec:
-  entrypoint: dagger-workflow
-  volumes:
-    - name: dagger-socket
-      emptyDir: {}
-    - name: dagger-storage
-      emptyDir: {}
-  templates:
-    - name: dagger-workflow
-      sidecars:
-        - name: dagger-engine
-          image: registry.dagger.io/engine:v0.18.11
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - ALL
-          readinessProbe:
-            exec:
-              command:
-                - dagger
-                - core
-                - version
-          volumeMounts:
-            - mountPath: /run/dagger
-              name: dagger-socket
-            - mountPath: /var/lib/dagger
-              name: dagger-storage
-      inputs:
-        artifacts:
-          - name: project-source
-            path: /work
-            git:
-              # replace with your repository URL
-              repo: https://github.com/kpenfound/greetings-api.git
-              revision: main
-          - name: dagger-cli
-            path: /usr/local/bin
-            mode: 0755
-            http:
-              # replace with the latest available version of Dagger for your platform
-              url: https://github.com/dagger/dagger/releases/download/v0.18.11/dagger_v0.18.11_linux_amd64.tar.gz
-      container:
-        image: alpine:latest
-        command:
-          - sh
-          - -c
-        # modify to use different function(s) as needed
-        args:
-          - dagger -m github.com/kpenfound/dagger-modules/golang@v0.2.0 call test --source=.
-        workingDir: /work
-        env:
-          - name: _EXPERIMENTAL_DAGGER_RUNNER_HOST
-            value: unix:///run/dagger/engine.sock
-        volumeMounts:
-          - mountPath: /run/dagger
-            name: dagger-socket
+  workflowTemplateRef:
+    name: dagger-workflow
+    namespace: dagger-workflows
+  arguments:
+    parameters:
+      - name: dagger-version
+        value: 0.8.12
+      - name: dagger-module
+        value: https://github.com/kpenfound/greetings-api.git
