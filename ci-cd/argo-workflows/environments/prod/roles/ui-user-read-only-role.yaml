@@ -3,7 +3,7 @@ kind: Role
 metadata:
   name: argo-workflows-ui-user-read-only
 rules:
-  # k8s standard APIs
+  # K8s standard APIs
   - apiGroups:
       - ""
     resources:
@@ -14,7 +14,7 @@ rules:
       - get
       - list
       - watch
-  # Argo APIs. See also https://github.com/argoproj/argo-workflows/blob/v3.6.7/manifests/cluster-install/workflow-controller-rbac/workflow-aggregate-roles.yaml#L4
+  # Argo APIs see: https://github.com/argoproj/argo-workflows/blob/v3.6.7/manifests/cluster-install/workflow-controller-rbac/workflow-aggregate-roles.yaml
   - apiGroups:
       - argoproj.io
     resources:
