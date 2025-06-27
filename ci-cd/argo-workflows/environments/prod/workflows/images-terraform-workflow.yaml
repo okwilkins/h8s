@@ -3,6 +3,7 @@ kind: Workflow
 metadata:
   name: images-terraform-workflow
   generateName: images-terraform-
+  namespace: dagger-workflows
 spec:
   entrypoint: dagger-workflow
   volumes:
