@@ -1,5 +1,11 @@
 # https://artifacthub.io/packages/helm/argo/argo-workflows/0.45.19?modal=values
 
+workflow:
+  serviceAccount:
+    create: true
+    name: argo-workflow
+  rbac:
+    create: true
 singleNamespace: false
 controller:
   workflowNamespaces:
