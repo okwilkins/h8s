@@ -11,7 +11,7 @@ spec:
   arguments:
     parameters:
       - name: dagger-version
-        value: 0.8.12
+        value: 0.18.12
       - name: dagger-module
         value: https://github.com/kpenfound/greetings-api.git
       - name: git-revision
