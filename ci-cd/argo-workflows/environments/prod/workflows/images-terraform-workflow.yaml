@@ -58,13 +58,6 @@ spec:
         env:
           - name: _EXPERIMENTAL_DAGGER_RUNNER_HOST
             value: unix:///run/dagger/engine.sock
-            # assumes the Dagger Cloud token is
-            # in a Kubernetes secret named dagger-cloud
-          - name: DAGGER_CLOUD_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: dagger-cloud
-                key: token
         volumeMounts:
           - mountPath: /run/dagger
             name: dagger-socket
