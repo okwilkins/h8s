@@ -9,6 +9,7 @@ spec:
     parameters:
       - name: dagger-version
       - name: dagger-module
+      - name: git-revision
   volumes:
     - name: dagger-socket
       emptyDir: {}
@@ -36,14 +37,12 @@ spec:
             - mountPath: /var/lib/dagger
               name: dagger-storage
       inputs:
-        parameters:
-          - name: git-revision
         artifacts:
           - name: project-source
             path: /work
             git:
               repo: https://github.com/okwilkins/h8s.git
-              revision: '{{inputs.parameters.git-revision}}'
+              revision: '{{workflow.parameters.git-revision}}'
           - name: dagger-cli
             path: /usr/local/bin
             mode: 0755

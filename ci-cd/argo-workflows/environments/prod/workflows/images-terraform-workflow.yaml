@@ -14,3 +14,5 @@ spec:
         value: 0.8.12
       - name: dagger-module
         value: https://github.com/kpenfound/greetings-api.git
+      - name: git-revision
+        value: main
