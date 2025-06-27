@@ -1,8 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: argo-workflows-ui-user-read-only
-  namespace: argo-workflows
 rules:
   # K8s standard APIs
   - apiGroups:
