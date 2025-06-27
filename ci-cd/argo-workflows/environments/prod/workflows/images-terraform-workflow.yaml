@@ -5,6 +5,7 @@ metadata:
   generateName: images-terraform-
   namespace: dagger-workflows
 spec:
+  serviceAccountName: argo-workflow
   entrypoint: dagger-workflow
   volumes:
     - name: dagger-socket
