@@ -31,6 +31,8 @@ rules:
       - clusterworkflowtemplates/finalizers
       - workflowtaskresults
       - workflowtaskresults/finalizers
+      - sensors
+      - eventsources
     verbs:
       - get
       - list
