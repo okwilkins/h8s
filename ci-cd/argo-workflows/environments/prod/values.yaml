@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/argo/argo-workflows/0.45.15?modal=values
+# https://artifacthub.io/packages/helm/argo/argo-workflows/0.45.19?modal=values
 
 singleNamespace: false
 controller:
