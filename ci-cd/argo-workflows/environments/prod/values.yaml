@@ -4,6 +4,11 @@ workflow:
   serviceAccount:
     create: true
 controller:
+  workflowNamespaces:
+    - default
+    - dagger-workflows
+    - argo-workflows
+controller:
   metricsConfig:
     enabled: true
   serviceMonitor:
