@@ -18,14 +18,18 @@ rules:
   - apiGroups:
       - argoproj.io
     resources:
-      - eventsources
-      - sensors
       - workflows
+      - workflows/finalizers
       - workfloweventbindings
+      - workfloweventbindings/finalizers
       - workflowtemplates
-      - clusterworkflowtemplates
+      - workflowtemplates/finalizers
       - cronworkflows
+      - cronworkflows/finalizers
+      - clusterworkflowtemplates
+      - clusterworkflowtemplates/finalizers
       - workflowtaskresults
+      - workflowtaskresults/finalizers
     verbs:
       - get
       - list
