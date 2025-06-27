@@ -1,14 +1,11 @@
 # https://artifacthub.io/packages/helm/argo/argo-workflows/0.45.15?modal=values
 
-workflow:
-  serviceAccount:
-    create: true
+singleNamespace: false
 controller:
   workflowNamespaces:
     - default
     - dagger-workflows
     - argo-workflows
-controller:
   metricsConfig:
     enabled: true
   serviceMonitor:
