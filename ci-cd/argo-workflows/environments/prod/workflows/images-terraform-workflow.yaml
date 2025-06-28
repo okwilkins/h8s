@@ -16,3 +16,15 @@ spec:
         value: https://github.com/kpenfound/greetings-api.git
       - name: git-revision
         value: main
+      - name: git-repo
+        value: https://github.com/okwilkins/h8s.git
+      - name: sub-directory
+        value: images/terraform
+      - name: dagger-call-command
+        value: |
+          build \
+            --src="." \
+            --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
+            --cosign-key=env:COSIGN_KEY \
+            --cosign-pass=env:COSIGN_PASSWORD \
+            --terraform-ver=$TERRAFORM_VER

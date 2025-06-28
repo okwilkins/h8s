@@ -8,8 +8,10 @@ spec:
   arguments:
     parameters:
       - name: dagger-version
-      - name: dagger-module
+      - name: git-repo
       - name: git-revision
+      - name: sub-directory
+      - name: dagger-call-command
   volumes:
     - name: dagger-socket
       emptyDir: {}
@@ -41,7 +43,7 @@ spec:
           - name: project-source
             path: /work
             git:
-              repo: https://github.com/okwilkins/h8s.git
+              repo: '{{workflow.parameters.git-repo}}'
               revision: '{{workflow.parameters.git-revision}}'
           - name: dagger-cli
             path: /usr/local/bin
@@ -53,8 +55,9 @@ spec:
         command:
           - sh
           - -c
-          - dagger -m  {{workflow.parameters.dagger-module}} call test --source=.
-        workingDir: /work
+          - dagger call
+          - '{{workflow.parameters.dagger-call-command}}'
+        workingDir: /work/{{workflow.parameters.sub-directory}}
         env:
           - name: _EXPERIMENTAL_DAGGER_RUNNER_HOST
             value: unix:///run/dagger/engine.sock
