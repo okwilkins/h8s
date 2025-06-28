@@ -55,8 +55,7 @@ spec:
         command:
           - sh
           - -c
-          - dagger call
-          - '{{workflow.parameters.dagger-call-command}}'
+          - dagger call '{{workflow.parameters.dagger-call-command}}'
         workingDir: /work/{{workflow.parameters.sub-directory}}
         env:
           - name: _EXPERIMENTAL_DAGGER_RUNNER_HOST
