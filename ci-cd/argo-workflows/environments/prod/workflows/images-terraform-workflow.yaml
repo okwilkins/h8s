@@ -21,10 +21,4 @@ spec:
       - name: sub-directory
         value: images/terraform
       - name: dagger-call-command
-        value: |
-          build \
-            --src="." \
-            --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
-            --cosign-key=env:COSIGN_KEY \
-            --cosign-pass=env:COSIGN_PASSWORD \
-            --terraform-ver=$TERRAFORM_VER
+        value: build --src="." --harbor-robot-token=env:HARBOR_ROBOT_TOKEN --cosign-key=env:COSIGN_KEY --cosign-pass=env:COSIGN_PASSWORD --terraform-ver=$TERRAFORM_VER
