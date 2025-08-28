@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubegrade-scanner
+  namespace: kubegrade
+  labels:
+    app: kubegrade-scanner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubegrade-scanner
+  template:
+    metadata:
+      labels:
+        app: kubegrade-scanner
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: kubegrade-scanner
+          image: public.ecr.aws/kubegrade/scanner:v0.6.6
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: kubegrade-scanner
+            - secretRef:
+                name: kubegrade-scanner-secret
+          volumeMounts:
+            - name: kubegrade-storage
+              mountPath: /kubegrade
+      volumes:
+        - name: kubegrade-storage
+          persistentVolumeClaim:
+            claimName: kubegrade-scanner-pvc

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubegrade-scanner
+  namespace: kubegrade
+data:
+  MATRIX_HOST: api.dev.kubegrade.com
+  MATRIX_PORT: "443"
+  MATRIX_REQUIRE_SSL: "true"
+  KUBEGRADE_CONFIG_PATH: /kubegrade/config.yaml
+  SQLITE_PATH: /kubegrade

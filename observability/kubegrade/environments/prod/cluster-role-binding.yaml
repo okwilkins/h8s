@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubegrade-scanner
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: kubegrade
+roleRef:
+  kind: ClusterRole
+  # TODO: HUGE security risk REMOVE ASAP!
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
