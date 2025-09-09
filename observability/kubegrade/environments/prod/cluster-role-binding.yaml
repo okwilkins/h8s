@@ -8,6 +8,5 @@ subjects:
     namespace: kubegrade
 roleRef:
   kind: ClusterRole
-  # TODO: HUGE security risk REMOVE ASAP!
-  name: cluster-admin
+  name: cluster-wide-read
   apiGroup: rbac.authorization.k8s.io
