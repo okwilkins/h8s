@@ -4,3 +4,4 @@ resources:
   - ./templates/
   - ./roles/
   - ./workflows/
+  - ./secrets/
