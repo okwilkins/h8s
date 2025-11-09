@@ -44,7 +44,7 @@ spec:
       - name: dagger-call-command
         value: |-
           build --src="." \
-            --harbor-robot-token="$HARBOR_ROBOT_TOKEN" \
-            --cosign-key="$COSIGN_KEY" \
-            --cosign-pass="$COSIGN_PASSWORD" \
+            --harbor-robot-token=env://HARBOR_ROBOT_TOKEN \
+            --cosign-key=env://COSIGN_KEY \
+            --cosign-pass=env://COSIGN_PASSWORD \
             --terraform-ver='{{workflow.parameters.terraform-ver}}'
