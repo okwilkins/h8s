@@ -10,6 +10,8 @@ tasks:
     preconditions:
       - sh: '[ -n "{{.HARBOR_ROBOT_TOKEN}}" ]'
         msg: HARBOR_ROBOT_TOKEN is empty!
+      - sh: '[ -n "$HARBOR_ADDR" ]'
+        msg: HARBOR_ADDR is empty!
       - sh: '[ -n "{{.COSIGN_PASSWORD}}" ]'
         msg: COSIGN_PASSWORD is empty!
       - sh: '[ -n "{{.COSIGN_KEY}}" ]'
@@ -27,6 +29,7 @@ tasks:
           dagger call build \
             --src="." \
             --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
+            --harbor-addr=env:HARBOR_ADDR \
             --cosign-key=env:COSIGN_KEY \
             --cosign-pass=env:COSIGN_PASSWORD \
             --terraform-ver=$TERRAFORM_VER

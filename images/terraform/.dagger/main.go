@@ -11,7 +11,7 @@ type TerraformImage struct{}
 
 func CosignSignImage(
 	ctx context.Context,
-	harborAddress string,
+	harborAddr string,
 	robotUsername string,
 	robotToken *dagger.Secret,
 	imageDigest string,
@@ -36,7 +36,7 @@ func CosignSignImage(
 		WithExec(
 			[]string{
 				"cosign", "login",
-				harborAddress,
+				harborAddr,
 				"--username", robotUsername,
 				"--password-stdin",
 			},
@@ -58,6 +58,7 @@ func (m *TerraformImage) Build(
 	ctx context.Context,
 	src *dagger.Directory,
 	harborRobotToken *dagger.Secret,
+	harborAddr string,
 	cosignKey *dagger.Secret,
 	cosignPass *dagger.Secret,
 	terraformVer string,
@@ -98,7 +99,7 @@ func (m *TerraformImage) Build(
 	}
 
 	digest, err := dag.Container().
-		WithRegistryAuth("harbor.okwilkins.dev", "robot$main+dagger", harborRobotToken).
+		WithRegistryAuth(harborAddr, "robot$main+dagger", harborRobotToken).
 		Publish(
 			ctx,
 			fmt.Sprintf("%s:%s", imgRef, terraformVer),
