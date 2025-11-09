@@ -4,34 +4,75 @@ includes:
   main:
     taskfile: ../../Taskfile.yaml
     flatten: true
+vars:
+  IMG_NAME: harbor.okwilkins.dev/main/terraform
+  HARBOR_ROBOT_USER: robot$main+dagger
 tasks:
-  dagger_run:
-    desc: Runs the Dagger pipeline that builds and pushes the Terraform image and signature to Harbor
-    preconditions:
-      - sh: '[ -n "{{.HARBOR_ROBOT_TOKEN}}" ]'
-        msg: HARBOR_ROBOT_TOKEN is empty!
-      - sh: '[ -n "$HARBOR_ADDR" ]'
-        msg: HARBOR_ADDR is empty!
-      - sh: '[ -n "{{.COSIGN_PASSWORD}}" ]'
-        msg: COSIGN_PASSWORD is empty!
-      - sh: '[ -n "{{.COSIGN_KEY}}" ]'
-        msg: COSIGN_KEY is empty!
-      - sh: '[ -n "$TERRAFORM_VER" ]'
-        msg: TERRAFORM_VER is empty!
+  setup_builder:
+    desc: Ensure a Buildx builder exists and is active
+    cmd: |
+      if ! docker buildx inspect builder >/dev/null 2>&1; then
+        docker buildx create --name builder --use
+      else
+        docker buildx use builder
+      fi
+
+  docker_login:
+    desc: Login to Harbor for Docker
     env:
       HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
-      COSIGN_KEY: '{{.COSIGN_KEY}}'
-      COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
-    deps:
-      - dagger_start
+    cmd: echo $HARBOR_ROBOT_TOKEN | docker login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
+
+  cosign_login:
+    desc: Login to Harbor for Cosign
+    cmd: echo $HARBOR_ROBOT_TOKEN | cosign login "{{.HARBOR_ADDR}}" -u "{{.HARBOR_ROBOT_USER}}" --password-stdin
+
+  push:
+    desc: Build and push an image
+    vars:
+      IMG:
+        sh: echo "{{.IMG_NAME}}:${TERRAFORM_VER}"
+    preconditions:
+      - sh: '[ -n "$TERRAFORM_VER" ]'
+        msg: TERRAFORM_VER is empty!
+    cmd: |
+      docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        --build-arg TERRAFORM_VER="${TERRAFORM_VER}" \
+        -t "{{.IMG}}" \
+        --push \
+        .
+
+  resolve_digest:
+    desc: Print manifest list digest for an image reference
+    vars:
+      IMG: '{{.IMG}}'
     cmds:
-      - cmd: |
-          dagger call build \
-            --src="." \
-            --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
-            --harbor-addr=env:HARBOR_ADDR \
-            --cosign-key=env:COSIGN_KEY \
-            --cosign-pass=env:COSIGN_PASSWORD \
-            --terraform-ver=$TERRAFORM_VER
-        ignore_error: true
-      - task: dagger_stop
+      - DIGEST="$(docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}.Digest{{"}}"}}' 2>/dev/null || docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}json .Manifest.Digest{{"}}"}}' | tr -d '"')"
+      - echo "${DIGEST}"
+
+  cosign_sign:
+    desc: Sign by digest (recursive) to cover all platform manifests
+    vars:
+      IMG: '{{.IMG}}'
+    env:
+      COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
+      COSIGN_KEY: '{{.COSIGN_KEY}}'
+    deps:
+      - cosign_login
+    cmds:
+      - DIGEST="$(docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}.Digest{{"}}"}}' 2>/dev/null || docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}json .Manifest.Digest{{"}}"}}' | tr -d '"')"
+      - echo "Signing {{.IMG}} @ ${DIGEST}"
+      - cosign sign --key "${COSIGN_KEY}" --recursive --yes "{{.IMG}}@${DIGEST}"
+
+  publish:
+    desc: Orchestrate build and signature publishing
+    deps:
+      - setup_builder
+      - docker_login
+      - cosign_login
+    cmds:
+      - task: push
+      - task: cosign_sign
+        vars:
+          IMG: '{{.IMG_NAME}}:{{.TERRAFORM_VER}}'
