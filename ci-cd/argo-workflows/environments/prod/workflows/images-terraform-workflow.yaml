@@ -20,5 +20,12 @@ spec:
         value: https://github.com/okwilkins/h8s.git
       - name: sub-directory
         value: images/terraform
+      - name: terraform-ver
+        value: "1.13.5"
       - name: dagger-call-command
-        value: build --src="." --harbor-robot-token=env:HARBOR_ROBOT_TOKEN --cosign-key=env:COSIGN_KEY --cosign-pass=env:COSIGN_PASSWORD --terraform-ver=$TERRAFORM_VER
+        value: |-
+          build --src="." \
+            --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
+            --cosign-key=env:COSIGN_KEY \
+            --cosign-pass=env:COSIGN_PASSWORD \
+            --terraform-ver='{{workflow.parameters.terraform-ver}}'
