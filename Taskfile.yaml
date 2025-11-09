@@ -1,6 +1,7 @@
 version: "3"
 run: once
 vars:
+  HARBOR_ADDR: "harbor.okwilkins.dev"
   HARBOR_TLS_CRT:
     sh: kubectl -n harbor get secret harbor-okwilkins-dev-tls -o json | jq -r '.data["tls.crt"]' | base64 -d
   HARBOR_ROBOT_TOKEN:
@@ -11,30 +12,3 @@ vars:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.key"' | base64 -d
   COSIGN_PUB:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d
-  DAGGER_ENGINE_IMAGE: h8s-dagger
-env:
-  _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://{{.DAGGER_ENGINE_IMAGE}}
-tasks:
-  # Dagger
-  dagger_start:
-    desc: Starts the Dagger engine
-    env:
-      HARBOR_TLS_CRT: '{{.HARBOR_TLS_CRT}}'
-    cmds:
-      - echo "$HARBOR_TLS_CRT" > ./harbor.crt
-      - defer: rm ./harbor.crt
-      - |
-        if docker ps --format json | jq -r '.Names' | grep -Eq '{{.DAGGER_ENGINE_IMAGE}}'; then
-          exit 0
-        else
-          docker run -d --rm -v /var/lib/dagger \
-            -v ./harbor.crt:/usr/local/share/ca-certificates/harbor.crt:ro \
-            --name {{.DAGGER_ENGINE_IMAGE}} \
-            --privileged registry.dagger.io/engine
-        fi
-  dagger_stop:
-    desc: Stops the Dagger engine
-    cmd: docker stop '{{.DAGGER_ENGINE_IMAGE}}'
-    preconditions:
-      - sh: docker ps --format json | jq -r '.Names' | grep -Eq '{{.DAGGER_ENGINE_IMAGE}}'
-        msg: Dagger engine isn't running!
