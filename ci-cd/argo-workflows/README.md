@@ -7,7 +7,7 @@ Argo Workflows is an open source container-native workflow engine for orchestrat
 To login to the Argo Workflows frontend, simply obtain the `argo-workflow` service account's token secret:
 
 ```bash
-ARGO_TOKEN=$(kubectl get secret -n argo-workflows argo-workflows-ui-user-read-only-sa-token -o json | jq -r '.data.token' | base64 -d)
+ARGO_TOKEN=$(kubectl get secret -n argo-workflows argo-workflows-ui-user-admin-sa-token -o json | jq -r '.data.token' | base64 -d)
 echo "Bearer $ARGO_TOKEN"
 ```
 
