@@ -45,6 +45,7 @@ spec:
         value: |-
           build --src="." \
             --harbor-robot-token=env://HARBOR_ROBOT_TOKEN \
+            --harbor-addr="http://harbor.harbor.svc.cluster.local" \
             --cosign-key=env://COSIGN_KEY \
             --cosign-pass=env://COSIGN_PASSWORD \
             --terraform-ver='{{workflow.parameters.terraform-ver}}'
