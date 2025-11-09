@@ -8,6 +8,25 @@ spec:
   workflowTemplateRef:
     name: dagger-workflow
     namespace: dagger-workflows
+  podSpecPatch: |
+    containers:
+      - name: main
+        env:
+          - name: HARBOR_ROBOT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: harbor-dagger-robot-secret
+                key: SECRET
+          - name: COSIGN_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cosign-key-pair
+                key: cosign.key
+          - name: COSIGN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cosign-key-pair
+                key: COSIGN_PASSWORD
   arguments:
     parameters:
       - name: dagger-version
@@ -25,7 +44,7 @@ spec:
       - name: dagger-call-command
         value: |-
           build --src="." \
-            --harbor-robot-token=env:HARBOR_ROBOT_TOKEN \
-            --cosign-key=env:COSIGN_KEY \
-            --cosign-pass=env:COSIGN_PASSWORD \
+            --harbor-robot-token="$HARBOR_ROBOT_TOKEN" \
+            --cosign-key="$COSIGN_KEY" \
+            --cosign-pass="$COSIGN_PASSWORD" \
             --terraform-ver='{{workflow.parameters.terraform-ver}}'
