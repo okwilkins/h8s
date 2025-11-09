@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./ui-user-read-only-role.yaml
-  - ./ui-user-read-only-role-binding.yaml
-  - ./ui-user-read-only-sa-token-secret.yaml
-  - ./ui-user-read-only-service-account.yaml
+  - ./ui-user-read-only/ui-user-read-only-role.yaml
+  - ./ui-user-read-only/ui-user-read-only-role-binding.yaml
+  - ./ui-user-read-only/ui-user-read-only-sa-token-secret.yaml
+  - ./ui-user-read-only/ui-user-read-only-service-account.yaml
