@@ -2,29 +2,27 @@ version: "3"
 run: once
 vars:
   HARBOR_ADDR: "harbor.okwilkins.dev"
-  HARBOR_TLS_CRT:
-    sh: kubectl -n harbor get secret harbor-okwilkins-dev-tls -o json | jq -r '.data["tls.crt"]' | base64 -d
   HARBOR_ROBOT_TOKEN:
     sh: kubectl get secret harbor-dagger-robot-secret -n harbor -o json | jq -r '.data.SECRET' | base64 -d
+  HARBOR_ROBOT_USER: "robot$main+dagger"
+
+  REPO_NAME: "{{.HARBOR_ADDR}}/main"
+  PLATFORMS: "linux/amd64,linux/arm64"
+
   COSIGN_PASSWORD:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data.COSIGN_PASSWORD' | base64 -d
   COSIGN_KEY:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.key"' | base64 -d
   COSIGN_PUB:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d
-  REPO_NAME: "{{.HARBOR_ADDR}}/main"
-  HARBOR_ROBOT_USER: robot$main+dagger
-  BUILDER_NAME: builder
-tasks:
-  clean:
-    desc: Clean resources
-    cmds:
-      - task: clean_builder
 
+  BUILDER_NAME: builder
+
+tasks:
   setup_builder:
-    desc: Ensure a Buildx builder exists and is active
+    desc: Ensure a Buildx builder exists and is active.
     cmd: |
-      if ! docker buildx inspect builder >/dev/null 2>&1; then
+      if ! docker buildx inspect {{.BUILDER_NAME}} >/dev/null 2>&1; then
         docker buildx create --name {{.BUILDER_NAME}} --use
       else
         docker buildx use {{.BUILDER_NAME}}
@@ -32,14 +30,70 @@ tasks:
     silent: true
 
   clean_builder:
-    desc: Remove the Buildx builder if it exists
+    desc: Remove the Buildx builder if it exists.
     cmds:
       - cmd: docker buildx rm {{.BUILDER_NAME}} &>/dev/null
         ignore_error: true
     silent: true
 
   docker_login:
-    desc: Login to Harbor for Docker
+    desc: Login to Harbor for Docker.
     env:
       HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
     cmd: echo $HARBOR_ROBOT_TOKEN | docker login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
+
+  build_push:
+    desc: "Buildx multi-arch build and push (generic). Required: COMPONENT, TAG; Optional: CONTEXT, BUILD_ARGS (raw string: --build-arg FOO=bar ...)."
+    preconditions:
+      - sh: '[ -n "{{.COMPONENT}}" ]'
+        msg: COMPONENT is empty!
+      - sh: '[ -n "{{.TAG}}" ]'
+        msg: TAG is empty!
+    vars:
+      IMG_NAME: "{{.REPO_NAME}}/{{.COMPONENT}}"
+      IMG: "{{.IMG_NAME}}:{{.TAG}}"
+      CONTEXT: "{{.CONTEXT | default (printf \"%s/images/%s\" .ROOT_DIR .COMPONENT) }}"
+      BUILD_ARGS: "{{.BUILD_ARGS}}"
+    cmds:
+      - echo "{{.IMG}}"
+      - |
+        docker buildx build \
+          --platform {{.PLATFORMS}} \
+          {{.BUILD_ARGS}} \
+          -t "{{.IMG}}" \
+          --metadata-file /tmp/buildx-metadata.json \
+          --push \
+          "{{.CONTEXT}}"
+      - "echo \"Build completed. Digest: $(jq -r '.\"containerimage.digest\"' /tmp/buildx-metadata.json)\""
+
+  cosign_sign:
+    desc: Cosign sign by digest (recursive) for all manifests.
+    env:
+      COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
+      COSIGN_KEY: '{{.COSIGN_KEY}}'
+      COSIGN_PUB: '{{.COSIGN_PUB}}'
+      DIGEST:
+        sh: jq -r '."containerimage.digest"' /tmp/buildx-metadata.json
+    vars:
+      IMG: "{{.REPO_NAME}}/{{.COMPONENT}}:{{.TAG}}"
+    cmds:
+      - echo "Signing {{.IMG}} @ ${DIGEST}"
+      - |
+        cosign sign \
+          --new-bundle-format=false \
+          --use-signing-config=false \
+          --yes \
+          --key env://COSIGN_KEY \
+          --recursive \
+          {{.IMG}}@${DIGEST}
+
+  publish:
+    desc: "Orchestrate build and sign for a specific component. Requires: COMPONENT, TAG; pass BUILD_ARGS if needed."
+    cmds:
+      - task: setup_builder
+      - task: docker_login
+      - task: build_push
+        vars: {COMPONENT: "{{.COMPONENT}}", TAG: "{{.TAG}}", CONTEXT: "{{.CONTEXT}}", BUILD_ARGS: "{{.BUILD_ARGS}}"}
+      - task: cosign_sign
+        vars: {COMPONENT: "{{.COMPONENT}}", TAG: "{{.TAG}}"}
+
