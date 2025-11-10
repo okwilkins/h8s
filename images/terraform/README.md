@@ -7,8 +7,8 @@ This Dockerfile builds a non-root version of Terraform.
 To build locally and to push to [Harbor](../../storage/harbor/README.md) run:
 
 ```bash
-export TERRAFORM_VER="1.12"
-task dagger_run
+export TERRAFORM_VER="1.13"
+task publish COMPONENT=terraform TAG=$TERRAFORM_VER BUILD_ARGS="--build-arg TERRAFORM_VER=$TERRAFORM_VER"
 ```
 
 ## Available Build Arguments
