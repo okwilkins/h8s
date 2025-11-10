@@ -6,47 +6,19 @@ includes:
     flatten: true
 vars:
   IMG_NAME: harbor.okwilkins.dev/main/terraform
-  HARBOR_ROBOT_USER: robot$main+dagger
-  BUILDER_NAME: builder
 tasks:
-  clean:
-    desc: Clean resources
-    cmds:
-      - task: clean_builder
-
-  setup_builder:
-    desc: Ensure a Buildx builder exists and is active
-    cmd: |
-      if ! docker buildx inspect builder >/dev/null 2>&1; then
-        docker buildx create --name {{.BUILDER_NAME}} --use
-      else
-        docker buildx use {{.BUILDER_NAME}}
-      fi
-    silent: true
-
-  clean_builder:
-    desc: Remove the Buildx builder if it exists
-    cmds:
-      - cmd: docker buildx rm {{.BUILDER_NAME}} &>/dev/null
-        ignore_error: true
-    silent: true
-
-  docker_login:
-    desc: Login to Harbor for Docker
-    env:
-      HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
-    cmd: echo $HARBOR_ROBOT_TOKEN | docker login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
-
   push:
     desc: Build and push an image
-    vars:
-      IMG:
-        sh: echo "{{.IMG_NAME}}:${TERRAFORM_VER}"
     preconditions:
       - sh: '[ -n "$TERRAFORM_VER" ]'
         msg: TERRAFORM_VER is empty!
     # This will fail when the builder container doesn't have the CA for harbor.okwilkins.dev!
+    vars:
+      IMG:
+        sh: echo "{{.IMG_NAME}}:${TERRAFORM_VER}"
     cmds:
+      - echo "{{.REPO_NAME}}"
+      - echo "{{.IMG}}"
       - |
         docker buildx build \
           --platform linux/amd64,linux/arm64 \
@@ -59,14 +31,15 @@ tasks:
 
   cosign_sign:
     desc: Sign by digest (recursive) to cover all platform manifests
-    vars:
-      IMG: '{{.IMG}}'
     env:
       COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
       COSIGN_KEY: '{{.COSIGN_KEY}}'
       COSIGN_PUB: '{{.COSIGN_PUB}}'
       DIGEST:
         sh: jq -r '."containerimage.digest"' /tmp/buildx-metadata.json
+    vars:
+      IMG:
+        sh: echo "{{.IMG_NAME}}:${TERRAFORM_VER}"
     cmds:
       - echo "Signing {{.IMG}} @ ${DIGEST}"
       # Bundle and signing flags needed as incompatibility with Cosign v3 and Harbor v2.18
@@ -86,5 +59,3 @@ tasks:
       - task: docker_login
       - task: push
       - task: cosign_sign
-        vars:
-          IMG: '{{.IMG_NAME}}:{{.TERRAFORM_VER}}'

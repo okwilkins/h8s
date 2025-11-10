@@ -12,3 +12,34 @@ vars:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.key"' | base64 -d
   COSIGN_PUB:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d
+  REPO_NAME: "{{.HARBOR_ADDR}}/main"
+  HARBOR_ROBOT_USER: robot$main+dagger
+  BUILDER_NAME: builder
+tasks:
+  clean:
+    desc: Clean resources
+    cmds:
+      - task: clean_builder
+
+  setup_builder:
+    desc: Ensure a Buildx builder exists and is active
+    cmd: |
+      if ! docker buildx inspect builder >/dev/null 2>&1; then
+        docker buildx create --name {{.BUILDER_NAME}} --use
+      else
+        docker buildx use {{.BUILDER_NAME}}
+      fi
+    silent: true
+
+  clean_builder:
+    desc: Remove the Buildx builder if it exists
+    cmds:
+      - cmd: docker buildx rm {{.BUILDER_NAME}} &>/dev/null
+        ignore_error: true
+    silent: true
+
+  docker_login:
+    desc: Login to Harbor for Docker
+    env:
+      HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
+    cmd: echo $HARBOR_ROBOT_TOKEN | docker login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
