@@ -7,15 +7,29 @@ includes:
 vars:
   IMG_NAME: harbor.okwilkins.dev/main/terraform
   HARBOR_ROBOT_USER: robot$main+dagger
+  BUILDER_NAME: builder
 tasks:
+  clean:
+    desc: Clean resources
+    cmds:
+      - task: clean_builder
+
   setup_builder:
     desc: Ensure a Buildx builder exists and is active
     cmd: |
       if ! docker buildx inspect builder >/dev/null 2>&1; then
-        docker buildx create --name builder --use
+        docker buildx create --name {{.BUILDER_NAME}} --use
       else
-        docker buildx use builder
+        docker buildx use {{.BUILDER_NAME}}
       fi
+    silent: true
+
+  clean_builder:
+    desc: Remove the Buildx builder if it exists
+    cmds:
+      - cmd: docker buildx rm {{.BUILDER_NAME}} &>/dev/null
+        ignore_error: true
+    silent: true
 
   docker_login:
     desc: Login to Harbor for Docker
@@ -35,6 +49,7 @@ tasks:
     preconditions:
       - sh: '[ -n "$TERRAFORM_VER" ]'
         msg: TERRAFORM_VER is empty!
+    # This will fail when the builder container doesn't have the CA for harbor.okwilkins.dev!
     cmd: |
       docker buildx build \
         --platform linux/amd64,linux/arm64 \
@@ -42,14 +57,6 @@ tasks:
         -t "{{.IMG}}" \
         --push \
         .
-
-  resolve_digest:
-    desc: Print manifest list digest for an image reference
-    vars:
-      IMG: '{{.IMG}}'
-    cmds:
-      - DIGEST="$(docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}.Digest{{"}}"}}' 2>/dev/null || docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}json .Manifest.Digest{{"}}"}}' | tr -d '"')"
-      - echo "${DIGEST}"
 
   cosign_sign:
     desc: Sign by digest (recursive) to cover all platform manifests
