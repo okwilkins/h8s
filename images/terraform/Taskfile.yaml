@@ -37,10 +37,6 @@ tasks:
       HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
     cmd: echo $HARBOR_ROBOT_TOKEN | docker login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
 
-  cosign_login:
-    desc: Login to Harbor for Cosign
-    cmd: echo $HARBOR_ROBOT_TOKEN | cosign login "{{.HARBOR_ADDR}}" -u "{{.HARBOR_ROBOT_USER}}" --password-stdin
-
   push:
     desc: Build and push an image
     vars:
@@ -68,21 +64,18 @@ tasks:
     env:
       COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
       COSIGN_KEY: '{{.COSIGN_KEY}}'
+      COSIGN_PUB: '{{.COSIGN_PUB}}'
       DIGEST:
         sh: jq -r '."containerimage.digest"' /tmp/buildx-metadata.json
-    deps:
-      - cosign_login
     cmds:
       - echo "Signing {{.IMG}} @ ${DIGEST}"
-      - cosign sign --key env://COSIGN_KEY --recursive --yes "{{.IMG}}@${DIGEST}"
+      - cosign sign --key env://COSIGN_KEY {{.IMG}}@${DIGEST}
 
   publish:
     desc: Orchestrate build and signature publishing
-    deps:
-      - setup_builder
-      - docker_login
-      - cosign_login
     cmds:
+      - task: setup_builder
+      - task: docker_login
       - task: push
       - task: cosign_sign
         vars:
