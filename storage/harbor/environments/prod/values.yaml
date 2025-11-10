@@ -1,4 +1,4 @@
-# https://github.com/goharbor/harbor-helm/blob/v1.17.1/values.yaml
+# https://github.com/goharbor/harbor-helm/blob/v1.18.0/values.yaml
 
 externalURL: https://harbor.okwilkins.dev
 expose:
