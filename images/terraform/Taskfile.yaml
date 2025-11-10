@@ -69,7 +69,15 @@ tasks:
         sh: jq -r '."containerimage.digest"' /tmp/buildx-metadata.json
     cmds:
       - echo "Signing {{.IMG}} @ ${DIGEST}"
-      - cosign sign --key env://COSIGN_KEY {{.IMG}}@${DIGEST}
+      # Bundle and signing flags needed as incompatibility with Cosign v3 and Harbor v2.18
+      - |
+        cosign sign \
+          --new-bundle-format=false \
+          --use-signing-config=false \
+          --yes \
+          --key env://COSIGN_KEY \
+          --recursive \
+          {{.IMG}}@${DIGEST}
 
   publish:
     desc: Orchestrate build and signature publishing
