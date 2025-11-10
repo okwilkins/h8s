@@ -1,7 +1,0 @@
-{
-  "name": "coredns",
-  "engineVersion": "v0.18.9",
-  "sdk": {
-    "source": "go"
-  }
-}
