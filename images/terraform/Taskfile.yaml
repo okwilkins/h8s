@@ -50,13 +50,16 @@ tasks:
       - sh: '[ -n "$TERRAFORM_VER" ]'
         msg: TERRAFORM_VER is empty!
     # This will fail when the builder container doesn't have the CA for harbor.okwilkins.dev!
-    cmd: |
-      docker buildx build \
-        --platform linux/amd64,linux/arm64 \
-        --build-arg TERRAFORM_VER="${TERRAFORM_VER}" \
-        -t "{{.IMG}}" \
-        --push \
-        .
+    cmds:
+      - |
+        docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --build-arg TERRAFORM_VER="${TERRAFORM_VER}" \
+          -t "{{.IMG}}" \
+          --metadata-file /tmp/buildx-metadata.json \
+          --push \
+          .
+      - "echo \"Build completed. Digest: $(jq -r '.\"containerimage.digest\"' /tmp/buildx-metadata.json)\""
 
   cosign_sign:
     desc: Sign by digest (recursive) to cover all platform manifests
@@ -65,12 +68,13 @@ tasks:
     env:
       COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
       COSIGN_KEY: '{{.COSIGN_KEY}}'
+      DIGEST:
+        sh: jq -r '."containerimage.digest"' /tmp/buildx-metadata.json
     deps:
       - cosign_login
     cmds:
-      - DIGEST="$(docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}.Digest{{"}}"}}' 2>/dev/null || docker buildx imagetools inspect "{{.IMG}}" --format '{{"{{"}}json .Manifest.Digest{{"}}"}}' | tr -d '"')"
       - echo "Signing {{.IMG}} @ ${DIGEST}"
-      - cosign sign --key "${COSIGN_KEY}" --recursive --yes "{{.IMG}}@${DIGEST}"
+      - cosign sign --key env://COSIGN_KEY --recursive --yes "{{.IMG}}@${DIGEST}"
 
   publish:
     desc: Orchestrate build and signature publishing
