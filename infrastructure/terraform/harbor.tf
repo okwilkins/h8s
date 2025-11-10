@@ -39,9 +39,10 @@ locals {
 # Projects #
 ############
 resource "harbor_project" "main" {
-  name                = "main"
-  deployment_security = "critical"
-  public              = true
+  name                        = "main"
+  deployment_security         = "critical"
+  public                      = true
+  enable_content_trust_cosign = true
 }
 
 
@@ -83,6 +84,18 @@ resource "harbor_robot_account" "terraform" {
     access {
       action   = "pull"
       resource = "repository"
+    }
+    access {
+      action   = "create"
+      resource = "artifact"
+    }
+    access {
+      action   = "read"
+      resource = "artifact"
+    }
+    access {
+      action   = "delete"
+      resource = "artifact"
     }
     kind      = "project"
     namespace = harbor_project.main.name
