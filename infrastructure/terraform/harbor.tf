@@ -15,6 +15,13 @@ data "kubernetes_secret" "harbor_dagger_robot_secret" {
   }
 }
 
+data "kubernetes_secret" "main_user_secret" {
+  metadata {
+    name      = "harbor-main-user-secret"
+    namespace = "harbor"
+  }
+}
+
 # Gateway route
 data "kubernetes_resource" "harbor_route" {
   api_version = "gateway.networking.k8s.io/v1"
@@ -84,6 +91,33 @@ resource "harbor_registry" "ghcr" {
   endpoint_url  = "https://ghcr.io"
 }
 
+#########
+# Users #
+#########
+resource "harbor_user" "main" {
+  username  = "oli"
+  password  = data.kubernetes_secret.main_user_secret.data.PASSWORD
+  full_name = "Oliver Kenyon Wilkins"
+  email     = "okwilkins@googlemail.com"
+}
+
+resource "harbor_project_member_user" "oli_docker_cache_member" {
+  project_id = harbor_project.docker_cache.id
+  user_name  = harbor_user.main.username
+  role       = "developer"
+}
+
+resource "harbor_project_member_user" "oli_quay_cache_member" {
+  project_id = harbor_project.quay_cache.id
+  user_name  = harbor_user.main.username
+  role       = "developer"
+}
+
+resource "harbor_project_member_user" "oli_ghcr_cache_member" {
+  project_id = harbor_project.ghcr_cache.id
+  user_name  = harbor_user.main.username
+  role       = "developer"
+}
 
 ##################
 # Robot Accounts #
