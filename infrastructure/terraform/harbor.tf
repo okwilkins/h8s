@@ -104,19 +104,19 @@ resource "harbor_user" "main" {
 resource "harbor_project_member_user" "oli_docker_cache_member" {
   project_id = harbor_project.docker_cache.id
   user_name  = harbor_user.main.username
-  role       = "developer"
+  role       = "guest"
 }
 
 resource "harbor_project_member_user" "oli_quay_cache_member" {
   project_id = harbor_project.quay_cache.id
   user_name  = harbor_user.main.username
-  role       = "developer"
+  role       = "guest"
 }
 
 resource "harbor_project_member_user" "oli_ghcr_cache_member" {
   project_id = harbor_project.ghcr_cache.id
   user_name  = harbor_user.main.username
-  role       = "developer"
+  role       = "guest"
 }
 
 ##################
