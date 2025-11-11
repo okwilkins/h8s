@@ -58,11 +58,11 @@ resource "harbor_project" "docker_cache" {
   registry_id = harbor_registry.docker.registry_id
 }
 
-resource "harbor_project" "quay_cache" {
-  name        = "quay-cache"
-  public      = "false"
-  registry_id = harbor_registry.quay.registry_id
-}
+# resource "harbor_project" "quay_cache" {
+#   name        = "quay-cache"
+#   public      = "false"
+#   registry_id = harbor_registry.quay.registry_id
+# }
 
 resource "harbor_project" "ghcr_cache" {
   name        = "ghcr-cache"
@@ -107,11 +107,11 @@ resource "harbor_project_member_user" "oli_docker_cache_member" {
   role       = "guest"
 }
 
-resource "harbor_project_member_user" "oli_quay_cache_member" {
-  project_id = harbor_project.quay_cache.id
-  user_name  = harbor_user.main.username
-  role       = "guest"
-}
+# resource "harbor_project_member_user" "oli_quay_cache_member" {
+#   project_id = harbor_project.quay_cache.id
+#   user_name  = harbor_user.main.username
+#   role       = "guest"
+# }
 
 resource "harbor_project_member_user" "oli_ghcr_cache_member" {
   project_id = harbor_project.ghcr_cache.id
@@ -125,7 +125,7 @@ resource "harbor_project_member_user" "oli_ghcr_cache_member" {
 resource "harbor_robot_account" "terraform" {
   name        = "dagger"
   description = "robot for dagger to perform ci-cd operations"
-  level       = "project"
+  level       = "system"
   secret      = data.kubernetes_secret.harbor_dagger_robot_secret.data.SECRET
   permissions {
     access {
@@ -150,5 +150,29 @@ resource "harbor_robot_account" "terraform" {
     }
     kind      = "project"
     namespace = harbor_project.main.name
+  }
+  permissions {
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    kind      = "project"
+    namespace = harbor_project.docker_cache.name
+  }
+  # permissions {
+  #   access {
+  #     action   = "pull"
+  #     resource = "repository"
+  #   }
+  #   kind      = "project"
+  #   namespace = harbor_project.quay_cache.name
+  # }
+  permissions {
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    kind      = "project"
+    namespace = harbor_project.ghcr_cache.name
   }
 }
