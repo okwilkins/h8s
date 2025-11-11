@@ -16,16 +16,22 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        devTools = [
+          pkgs.go
+          pkgs.cosign
+          pkgs.jq
+          pkgs.go-task
+          pkgs.buildkit
+        ];
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = [
-            pkgs.go
-            pkgs.cosign
-            pkgs.jq
-            pkgs.go-task
-            pkgs.buildkit
-          ];
+          buildInputs = devTools;
+        };
+
+        packages.dev-tools = pkgs.buildEnv {
+          name = "dev-tools";
+          paths = devTools;
         };
       }
     );
