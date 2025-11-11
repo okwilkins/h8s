@@ -21,6 +21,30 @@ export PG_CONN_STR=postgres://$PG_USER:$PG_PASS@localhost/terraform_backend
 
 More details on the [Postgres backend can be read here](https://developer.hashicorp.com/terraform/language/backend/pg).
 
+### Connecting to the Main User
+
+There are several pull-through caches setup in Harbor. As these are not public, they need to be accessed through the main user.
+
+Firstly, login:
+
+```bash
+docker login harbor.okwilkins.dev -u oli
+```
+
+Next try pulling from one of the projects:
+
+```bash
+docker pull harbor.okwilkins.dev/docker-hub-cache/hello-world:latest
+```
+
+The pattern to use the pull-through caches will be:
+
+```bash
+docker pull harbor.okwilkins.dev/<project>/<image>:<tag>
+
+This is not neccessary for Docker Hub images, if mirror registries have been setup.
+```
+
 ### Initialising Backend
 
 Run:
