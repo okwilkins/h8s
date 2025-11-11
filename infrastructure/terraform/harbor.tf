@@ -45,6 +45,23 @@ resource "harbor_project" "main" {
   enable_content_trust_cosign = true
 }
 
+resource "harbor_project" "docker_cache" {
+  name        = "docker-hub-cache"
+  public      = "false"
+  registry_id = harbor_registry.docker.registry_id
+}
+
+resource "harbor_project" "quay_cache" {
+  name        = "quay-cache"
+  public      = "false"
+  registry_id = harbor_registry.quay.registry_id
+}
+
+resource "harbor_project" "ghcr_cache" {
+  name        = "ghcr-cache"
+  public      = "false"
+  registry_id = harbor_registry.ghcr.registry_id
+}
 
 ##############
 # Registries #
