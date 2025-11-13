@@ -22,6 +22,8 @@
           pkgs.jq
           pkgs.go-task
           pkgs.buildkit
+          pkgs.rootlesskit
+          pkgs.runc
         ];
       in
       {
