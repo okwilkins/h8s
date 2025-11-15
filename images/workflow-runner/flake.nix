@@ -11,30 +11,31 @@
       self,
       nixpkgs,
       flake-utils,
+      ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        devTools = [
-          pkgs.go
+        tools = [
+          pkgs.bash
           pkgs.cosign
           pkgs.jq
           pkgs.go-task
-          pkgs.buildkit
-          pkgs.rootlesskit
-          pkgs.runc
+          pkgs.buildah
         ];
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = devTools;
+          buildInputs = tools;
         };
 
-        packages.dev-tools = pkgs.buildEnv {
-          name = "dev-tools";
-          paths = devTools;
+        packages.tools = pkgs.buildEnv {
+          name = "tools";
+          paths = tools;
         };
+
+        defaultPackage = self.packages.${system}.tools;
       }
     );
 }
