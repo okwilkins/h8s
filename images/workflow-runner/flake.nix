@@ -23,6 +23,7 @@
           pkgs.jq
           pkgs.go-task
           pkgs.buildah
+          pkgs.shadow
         ];
       in
       {
