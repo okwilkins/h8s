@@ -1,4 +1,4 @@
-ARG BUILD_USER=test
+ARG BUILD_USER=buildah
 ARG BUILD_UID=1000
 ARG BUILD_GID=1000
 
@@ -33,11 +33,15 @@ RUN mkdir -p /tmp/home/${BUILD_USER}/.config/containers
 RUN echo '[storage]' > /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
     echo 'driver = "vfs"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
     echo 'runroot = "/home/${BUILD_USER}/.local/share/containers/storage-run"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
-    echo 'graphroot = "/home/${BUILD_USER}/.local/share/containers/storage"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf
+    echo 'graphroot = "/home/${BUILD_USER}/.local/share/containers/storage"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
+    echo '[storage.options.vfs]' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
+    echo 'ignore_chown_errors = "true"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf
 
 # Create the directories buildah will use for storage
 RUN mkdir -p /tmp/home/${BUILD_USER}/.local/share/containers/storage-run && \
     mkdir -p /tmp/home/${BUILD_USER}/.local/share/containers/storage
+
+RUN mkdir -p /tmp/etc/containers && echo '{ "default": [ { "type": "insecureAcceptAnything" } ] }' > /tmp/etc/containers/policy.json
 
 
 FROM scratch
@@ -50,6 +54,9 @@ WORKDIR /workspace
 ENV PATH="/workspace/bin"
 ENV _BUILDAH_STARTED_IN_USERNS=""
 ENV BUILDAH_ISOLATION=chroot
+ENV TMPDIR=/home/${BUILD_USER}/.local/share/containers/storage
+ENV HOME=/home/${BUILD_USER}
+ENV XDG_CONFIG_HOME=/home/${BUILD_USER}/.config
 ENV XDG_RUNTIME_DIR=/home/${BUILD_USER}/.local/share/containers/storage-run
 
 COPY --from=builder /tmp/etc/passwd /etc/passwd
@@ -60,6 +67,8 @@ COPY --from=builder /etc/subgid /etc/subgid
 
 COPY --from=builder /tmp/nix-store-closure /nix/store
 COPY --from=builder /tmp/build/result /workspace
+COPY --from=builder /tmp/etc/containers /etc/containers
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 USER ${BUILD_UID}:${BUILD_GID}
 
