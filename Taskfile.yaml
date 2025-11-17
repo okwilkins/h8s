@@ -2,12 +2,10 @@ version: "3"
 run: once
 vars:
   HARBOR_ADDR: "harbor.okwilkins.dev"
-  HARBOR_ROBOT_TOKEN:
+  HARBOR_TOKEN:
     sh: kubectl get secret harbor-dagger-robot-secret -n harbor -o json | jq -r '.data.SECRET' | base64 -d
-  HARBOR_ROBOT_USER: "robot$main+dagger"
-
+  HARBOR_ROBOT_USER: "robot$dagger"
   REPO_NAME: "{{.HARBOR_ADDR}}/main"
-  PLATFORMS: "linux/amd64,linux/arm64"
 
   COSIGN_PASSWORD:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data.COSIGN_PASSWORD' | base64 -d
@@ -19,51 +17,26 @@ vars:
   BUILDER_NAME: builder
 
 tasks:
-  setup_builder:
-    desc: Ensure a Buildx builder exists and is active.
-    cmd: |
-      if ! docker buildx inspect {{.BUILDER_NAME}} >/dev/null 2>&1; then
-        docker buildx create --name {{.BUILDER_NAME}} --use
-      else
-        docker buildx use {{.BUILDER_NAME}}
-      fi
-    silent: true
-
-  clean_builder:
-    desc: Remove the Buildx builder if it exists.
-    cmds:
-      - cmd: docker buildx rm {{.BUILDER_NAME}} &>/dev/null
-        ignore_error: true
-    silent: true
-
-  docker_login:
+  registry_login:
     desc: Login to Harbor for Docker.
     env:
-      HARBOR_ROBOT_TOKEN: '{{.HARBOR_ROBOT_TOKEN}}'
-    cmd: echo $HARBOR_ROBOT_TOKEN | docker login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
+      HARBOR_TOKEN: '{{.HARBOR_TOKEN}}'
+    cmd: echo $HARBOR_TOKEN | buildah login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
 
   build_push:
-    desc: "Buildx multi-arch build and push (generic). Required: COMPONENT, TAG; Optional: CONTEXT, BUILD_ARGS (raw string: --build-arg FOO=bar ...)."
+    desc: "Buildah builds the image and pushes to a remote repository. Requires that there is a container file in the current directory!"
+    dir: "{{.USER_WORKING_DIR}}"
     preconditions:
-      - sh: '[ -n "{{.COMPONENT}}" ]'
-        msg: COMPONENT is empty!
+      - sh: '[ -n "{{.IMG_NAME}}" ]'
+        msg: IMG_NAME is empty!
       - sh: '[ -n "{{.TAG}}" ]'
         msg: TAG is empty!
     vars:
-      IMG_NAME: "{{.REPO_NAME}}/{{.COMPONENT}}"
-      IMG: "{{.IMG_NAME}}:{{.TAG}}"
-      CONTEXT: "{{.CONTEXT | default (printf \"%s/images/%s\" .ROOT_DIR .COMPONENT) }}"
-      BUILD_ARGS: "{{.BUILD_ARGS}}"
+      IMG: "{{.REPO_NAME}}/{{.IMG_NAME}}"
+      FULL_IMG_NAME: "{{.IMG}}:{{.TAG}}"
     cmds:
       - echo "{{.IMG}}"
-      - |
-        docker buildx build \
-          --platform {{.PLATFORMS}} \
-          {{.BUILD_ARGS}} \
-          -t "{{.IMG}}" \
-          --metadata-file /tmp/buildx-metadata.json \
-          --push \
-          "{{.CONTEXT}}"
+      - buildah build --tag {{.FULL_IMG_NAME}}
       - "echo \"Build completed. Digest: $(jq -r '.\"containerimage.digest\"' /tmp/buildx-metadata.json)\""
 
   cosign_sign:
@@ -88,9 +61,8 @@ tasks:
           {{.IMG}}@${DIGEST}
 
   publish:
-    desc: "Orchestrate build and sign for a specific component. Requires: COMPONENT, TAG; pass BUILD_ARGS if needed."
+    desc: "Orchestrate build, push and sign a container"
     cmds:
-      - task: setup_builder
       - task: docker_login
       - task: build_push
         vars: {COMPONENT: "{{.COMPONENT}}", TAG: "{{.TAG}}", CONTEXT: "{{.CONTEXT}}", BUILD_ARGS: "{{.BUILD_ARGS}}"}
