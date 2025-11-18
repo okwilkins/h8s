@@ -3,7 +3,7 @@
 H8s is a home infrastructure project that combines the power of Kubernetes with the security-first approach of Talos OS.
 This project provides a my setup, designed specifically for home labs and personal cloud environments.
 
-This cluster uses 2 H100 CPU-based mini PCs, both retrofitted with 32GB of RAM and 1TB of NVME SSDs. They are happily tucked away under my TV `:)`.
+This cluster uses 2 N100 CPU-based mini PCs, both retrofitted with 32GB of RAM and 1TB of NVME SSDs. They are happily tucked away under my TV `:)`.
 
 ## Motivations
 
