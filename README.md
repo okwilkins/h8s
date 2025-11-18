@@ -7,11 +7,12 @@ This project provides a my setup, designed specifically for home labs and person
 
 ### CLI Tools
 
-This repo uses [Devbox](https://www.jetify.com/devbox) to install all dependencies to run all commands and scripts.
+This repo uses [Nix Flakes](https://nixos.wiki/wiki/flakes) to install all dependencies to run all commands and scripts. To get started:
 
-To activate a shell with all CLIs installed run:
+1. Exnable experimental-features. Read the Nix Flakes wiki for more information.
+2. Run the following to drop into a shell with all dependencies:
 
 ```bash
-devbox shell
+nix shell
 ```
 
