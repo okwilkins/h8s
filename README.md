@@ -41,7 +41,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 ├── images
 │   ├── coredns
 │   ├── terraform
-│   └── workflow-runner
+│   └── image-buildah
 ├── infrastructure
 │   ├── talos                       | Scripts and definintions for Talos running on Proxmox.
 │   └── terraform                   | Terraform for internal infrastructure.
