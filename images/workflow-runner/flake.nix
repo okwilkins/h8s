@@ -18,7 +18,6 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         tools = [
-          pkgs.bash
           pkgs.cosign
           pkgs.jq
           pkgs.go-task
@@ -34,6 +33,7 @@
         packages.tools = pkgs.buildEnv {
           name = "tools";
           paths = tools;
+          pathsToLink = [ "/bin" ];
         };
 
         defaultPackage = self.packages.${system}.tools;
