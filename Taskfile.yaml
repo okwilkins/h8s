@@ -30,6 +30,13 @@ tasks:
         msg: IMG_NAME is empty!
     cmd: buildah manifest create {{.IMG_NAME}}
 
+  clean_manifest:
+    desc: Removes a manifest for a multi-arch image.
+    preconditions:
+      - sh: '[ -n "{{.IMG_NAME}}" ]'
+        msg: IMG_NAME is empty!
+    cmd: buildah manifest rm {{.IMG_NAME}}
+
   build:
     desc: "Buildah builds the image and pushes to a remote repository. Requires that there is a container file in the current directory!"
     dir: "{{.USER_WORKING_DIR}}"
@@ -93,6 +100,9 @@ tasks:
       - sh: '[ -n "{{.TAG}}" ]'
         msg: TAG is empty!
     cmds:
+      - defer:
+          task: clean_manifest
+          vars: {IMG_NAME: "{{.IMG_NAME}}"}
       - task: registry_login
       - task: build
         vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
