@@ -64,24 +64,29 @@ tasks:
       IMG: "{{.REPO_NAME}}/{{.IMG_NAME}}"
       FULL_IMG_NAME: "{{.IMG}}:{{.TAG}}"
     cmds:
-      - "buildah manifest push --all {{.IMG_NAME}} docker://{{.FULL_IMG_NAME}}"
+      - "buildah manifest push --all {{.IMG_NAME}} --digestfile digest docker://{{.FULL_IMG_NAME}}"
+
+  clean_digestfile:
+    desc: Cleans the digestfile generated in the push task.
+    dir: "{{.USER_WORKING_DIR}}"
+    cmd: rm -f digest
 
   cosign_sign:
     desc: Cosign sign by digest (recursive) for all manifests.
+    dir: "{{.USER_WORKING_DIR}}"
     vars:
       IMG: "{{.REPO_NAME}}/{{.IMG_NAME}}"
-      FULL_IMG_NAME: "{{.IMG}}:{{.TAG}}"
     env:
       COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
       COSIGN_KEY: '{{.COSIGN_KEY}}'
       COSIGN_PUB: '{{.COSIGN_PUB}}'
       DIGEST:
-        sh: "buildah inspect --type image {{.FULL_IMG_NAME}} | jq -r .FromImageDigest"
+        sh: "cat {{.USER_WORKING_DIR}}/digest"
     preconditions:
       - sh: '[ -n "{{.IMG_NAME}}" ]'
         msg: IMG_NAME is empty!
-      - sh: '[ -n "{{.TAG}}" ]'
-        msg: TAG is empty!
+      - sh: '[ -f digest ]'
+        msg: "digest file is missing! Did the push task run successfully?"
     cmds:
       - |
         cosign sign \
@@ -90,7 +95,7 @@ tasks:
           --yes \
           --key env://COSIGN_KEY \
           --recursive \
-          {{.FULL_IMG_NAME}}
+          {{.IMG}}@$DIGEST
 
   publish:
     desc: "Orchestrate build, push and sign a container"
@@ -103,6 +108,8 @@ tasks:
       - defer:
           task: clean_manifest
           vars: {IMG_NAME: "{{.IMG_NAME}}"}
+      - defer:
+          task: clean_digestfile
       - task: registry_login
       - task: build
         vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
