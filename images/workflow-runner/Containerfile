@@ -8,14 +8,15 @@ ARG BUILD_USER
 ARG BUILD_UID
 ARG BUILD_GID
 
-ENV NIX_CONFIG="experimental-features = nix-command flakes"
+RUN mkdir -p /etc/nix && \
+    echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf && \
+    echo "sandbox = false" >> /etc/nix/nix.conf && \
+    echo "build-users-group =" >> /etc/nix/nix.conf
 
 WORKDIR /tmp/build
 COPY flake.nix flake.lock ./
 
-RUN nix \
-    --option filter-syscalls false \
-    build .
+RUN nix build .
 
 RUN mkdir /tmp/nix-store-closure
 RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
@@ -61,7 +62,7 @@ ENV XDG_RUNTIME_DIR=/home/${BUILD_USER}/.local/share/containers/storage-run
 
 COPY --from=builder /tmp/etc/passwd /etc/passwd
 COPY --from=builder /tmp/etc/group /etc/group
-COPY --from=builder --chown=${BUILD_UID}:${BUILD_GID} /tmp/home/${BUILD_USER} /home/${BUILD_USER}
+COPY --from=builder /tmp/home/${BUILD_USER} /home/${BUILD_USER}
 COPY --from=builder /etc/subuid /etc/subuid
 COPY --from=builder /etc/subgid /etc/subgid
 
@@ -71,6 +72,4 @@ COPY --from=builder /tmp/etc/containers /etc/containers
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 USER ${BUILD_UID}:${BUILD_GID}
-
-CMD ["/workspace/bin/bash"]
 
