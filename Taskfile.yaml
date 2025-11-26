@@ -90,8 +90,6 @@ tasks:
     cmds:
       - |
         cosign sign \
-          --new-bundle-format=false \
-          --use-signing-config=false \
           --yes \
           --key env://COSIGN_KEY \
           --recursive \
