@@ -18,12 +18,19 @@ vars:
 
 tasks:
   registry_login:
-    desc: Login to Harbor for Docker.
+    desc: Login to Harbor for Buildah and Cosign.
     env:
       HARBOR_TOKEN: '{{.HARBOR_TOKEN}}'
     cmd: echo $HARBOR_TOKEN | buildah login "{{.HARBOR_ADDR}}" -u '{{.HARBOR_ROBOT_USER}}' --password-stdin
 
-  build_push:
+  create_manifest:
+    desc: Creates a manifest for a multi-arch image.
+    preconditions:
+      - sh: '[ -n "{{.IMG_NAME}}" ]'
+        msg: IMG_NAME is empty!
+    cmd: buildah manifest create {{.IMG_NAME}}
+
+  build:
     desc: "Buildah builds the image and pushes to a remote repository. Requires that there is a container file in the current directory!"
     dir: "{{.USER_WORKING_DIR}}"
     preconditions:
@@ -36,21 +43,39 @@ tasks:
       FULL_IMG_NAME: "{{.IMG}}:{{.TAG}}"
     cmds:
       - echo "{{.IMG}}"
-      - buildah build --tag {{.FULL_IMG_NAME}}
-      - "echo \"Build completed. Digest: $(jq -r '.\"containerimage.digest\"' /tmp/buildx-metadata.json)\""
+      - "buildah build --tag {{.FULL_IMG_NAME}} --platform linux/amd64,linux/arm64 --manifest {{.IMG_NAME}}"
+
+  push:
+    desc: "Buildah pushes the built image to a remote repository."
+    dir: "{{.USER_WORKING_DIR}}"
+    preconditions:
+      - sh: '[ -n "{{.IMG_NAME}}" ]'
+        msg: IMG_NAME is empty!
+      - sh: '[ -n "{{.TAG}}" ]'
+        msg: TAG is empty!
+    vars:
+      IMG: "{{.REPO_NAME}}/{{.IMG_NAME}}"
+      FULL_IMG_NAME: "{{.IMG}}:{{.TAG}}"
+    cmds:
+      - "buildah manifest push --all {{.IMG_NAME}} docker://{{.FULL_IMG_NAME}}"
 
   cosign_sign:
     desc: Cosign sign by digest (recursive) for all manifests.
+    vars:
+      IMG: "{{.REPO_NAME}}/{{.IMG_NAME}}"
+      FULL_IMG_NAME: "{{.IMG}}:{{.TAG}}"
     env:
       COSIGN_PASSWORD: '{{.COSIGN_PASSWORD}}'
       COSIGN_KEY: '{{.COSIGN_KEY}}'
       COSIGN_PUB: '{{.COSIGN_PUB}}'
       DIGEST:
-        sh: jq -r '."containerimage.digest"' /tmp/buildx-metadata.json
-    vars:
-      IMG: "{{.REPO_NAME}}/{{.COMPONENT}}:{{.TAG}}"
+        sh: "buildah inspect --type image {{.FULL_IMG_NAME}} | jq -r .FromImageDigest"
+    preconditions:
+      - sh: '[ -n "{{.IMG_NAME}}" ]'
+        msg: IMG_NAME is empty!
+      - sh: '[ -n "{{.TAG}}" ]'
+        msg: TAG is empty!
     cmds:
-      - echo "Signing {{.IMG}} @ ${DIGEST}"
       - |
         cosign sign \
           --new-bundle-format=false \
@@ -58,14 +83,21 @@ tasks:
           --yes \
           --key env://COSIGN_KEY \
           --recursive \
-          {{.IMG}}@${DIGEST}
+          {{.FULL_IMG_NAME}}
 
   publish:
     desc: "Orchestrate build, push and sign a container"
+    preconditions:
+      - sh: '[ -n "{{.IMG_NAME}}" ]'
+        msg: IMG_NAME is empty!
+      - sh: '[ -n "{{.TAG}}" ]'
+        msg: TAG is empty!
     cmds:
-      - task: docker_login
-      - task: build_push
-        vars: {COMPONENT: "{{.COMPONENT}}", TAG: "{{.TAG}}", CONTEXT: "{{.CONTEXT}}", BUILD_ARGS: "{{.BUILD_ARGS}}"}
+      - task: registry_login
+      - task: build
+        vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
+      - task: push
+        vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
       - task: cosign_sign
-        vars: {COMPONENT: "{{.COMPONENT}}", TAG: "{{.TAG}}"}
+        vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
 
