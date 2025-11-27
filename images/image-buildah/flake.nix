@@ -18,6 +18,7 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         tools = [
+          pkgs.gitMinimal
           pkgs.cosign
           pkgs.jq
           pkgs.go-task
