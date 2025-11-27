@@ -26,7 +26,7 @@ nix shell
 To build, push and sign (via [Cosign](https://github.com/sigstore/cosign)) images run:
 
 ```bash
-task publish TAG=$(git rev-parse --short HEAD) IMG_NAME=image-buildah
+nix shell --command task publish TAG=$(git rev-parse --short HEAD) IMG_NAME=image-buildah PUSH_LATEST=true
 ```
 
 This will push and sign images to the self-hosted [Harbor](../../storage/harbor/README.md) instance within the cluster.
