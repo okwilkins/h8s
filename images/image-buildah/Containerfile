@@ -52,8 +52,7 @@ ARG BUILD_USER
 ARG BUILD_UID
 ARG BUILD_GID
 
-WORKDIR /workspace
-ENV PATH="/workspace/bin"
+ENV PATH="/home/${BUILD_USER}/bin"
 ENV _BUILDAH_STARTED_IN_USERNS=""
 ENV BUILDAH_ISOLATION=chroot
 ENV TMPDIR=/home/${BUILD_USER}/.local/share/containers/storage
@@ -68,7 +67,7 @@ COPY --from=builder /etc/subuid /etc/subuid
 COPY --from=builder /etc/subgid /etc/subgid
 
 COPY --from=builder /tmp/nix-store-closure /nix/store
-COPY --from=builder /tmp/build/result /workspace
+COPY --from=builder /tmp/build/result /home/${BUILD_USER}/bin
 COPY --from=builder /tmp/etc/containers /etc/containers
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
