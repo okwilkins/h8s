@@ -10,7 +10,6 @@ singleNamespace: false
 controller:
   workflowNamespaces:
     - default
-    - dagger-workflows
     - argo-workflows
   metricsConfig:
     enabled: true
