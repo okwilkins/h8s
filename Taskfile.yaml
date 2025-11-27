@@ -15,6 +15,7 @@ vars:
     sh: kubectl get secret cosign-key-pair -n cosign -o json | jq -r '.data."cosign.pub"' | base64 -d
 
   BUILDER_NAME: builder
+  PUSH_LATEST: "false"
 
 tasks:
   registry_login:
@@ -66,6 +67,21 @@ tasks:
     cmds:
       - "buildah manifest push --all {{.IMG_NAME}} --digestfile digest docker://{{.FULL_IMG_NAME}}"
 
+  push_latest:
+    desc: "Buildah pushes the built image to a remote repository with the latest tag. Intended to be used in the publish task."
+    internal: true
+    status:
+      - '[ "{{.PUSH_LATEST}}" = "false" ]'
+    dir: "{{.USER_WORKING_DIR}}"
+    preconditions:
+      - sh: '[ -n "{{.IMG_NAME}}" ]'
+        msg: IMG_NAME is empty!
+    vars:
+      IMG: "{{.REPO_NAME}}/{{.IMG_NAME}}"
+      FULL_IMG_NAME: "{{.IMG}}:latest"
+    cmds:
+      - "buildah manifest push --all {{.IMG_NAME}} --digestfile digest docker://{{.FULL_IMG_NAME}}"
+
   clean_digestfile:
     desc: Cleans the digestfile generated in the push task.
     dir: "{{.USER_WORKING_DIR}}"
@@ -113,6 +129,9 @@ tasks:
         vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
       - task: push
         vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
+      # Only runs if PUSH_LATEST is not false
+      - task: push_latest
+        vars: {IMG_NAME: "{{.IMG_NAME}}", PUSH_LATEST: "{{.PUSH_LATEST}}"}
       - task: cosign_sign
         vars: {IMG_NAME: "{{.IMG_NAME}}", TAG: "{{.TAG}}"}
 
