@@ -1,51 +1,55 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  name: images-terraform-workflow
-  generateName: images-terraform-
-  namespace: dagger-workflows
+  name: container-build-terraform-workflow
+  generateName: container-build-terraform-
 spec:
-  workflowTemplateRef:
-    name: dagger-workflow
-    namespace: dagger-workflows
-  podSpecPatch: |
-    containers:
-      - name: main
+  entrypoint: main
+  volumes:
+    - name: buildah-storage
+      emptyDir: {}
+  templates:
+    - name: main
+      inputs:
+        artifacts:
+          - name: source-code
+            path: /workspace
+            git:
+              repo: https://github.com/okwilkins/h8s.git
+              revision: main
+      container:
+        image: harbor.okwilkins.dev/main/image-buildah:latest
+        workingDir: /workspace
+        command: ["task"]
+        args:
+          - "publish"
+          - "HARBOR_TOKEN=$(HARBOR_TOKEN)"
+          - "COSIGN_PASSWORD=$(COSIGN_PASSWORD)"
+          - "COSIGN_KEY=$(COSIGN_KEY)"
+          - "COSIGN_PUB=$(COSIGN_PUB)"
         env:
-          - name: HARBOR_ROBOT_TOKEN
+          - name: STORAGE_DRIVER
+            value: "vfs"
+          - name: HARBOR_TOKEN
             valueFrom:
               secretKeyRef:
                 name: harbor-dagger-robot-secret
                 key: SECRET
-          - name: COSIGN_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cosign-key-pair
-                key: cosign.key
           - name: COSIGN_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: cosign-key-pair
                 key: COSIGN_PASSWORD
-  arguments:
-    parameters:
-      - name: dagger-version
-        value: 0.18.12
-      - name: dagger-module
-        value: https://github.com/kpenfound/greetings-api.git
-      - name: git-revision
-        value: main
-      - name: git-repo
-        value: https://github.com/okwilkins/h8s.git
-      - name: sub-directory
-        value: images/terraform
-      - name: terraform-ver
-        value: "1.13.5"
-      - name: dagger-call-command
-        value: |-
-          build --src="." \
-            --harbor-robot-token=env://HARBOR_ROBOT_TOKEN \
-            --harbor-addr="http://harbor.harbor.svc.cluster.local" \
-            --cosign-key=env://COSIGN_KEY \
-            --cosign-pass=env://COSIGN_PASSWORD \
-            --terraform-ver='{{workflow.parameters.terraform-ver}}'
+          - name: COSIGN_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cosign-key-pair
+                key: cosign.key
+          - name: COSIGN_PUB
+            valueFrom:
+              secretKeyRef:
+                name: cosign-key-pair
+                key: cosign.pub
+        volumeMounts:
+          - name: buildah-storage
+            mountPath: /var/lib/containers
