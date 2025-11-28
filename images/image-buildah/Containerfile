@@ -23,7 +23,7 @@ RUN mkdir /tmp/nix-store-closure
 RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
 
 RUN mkdir -p /tmp/etc
-RUN echo "${BUILD_USER}:x:${BUILD_UID}:${BUILD_GID}:${BUILD_USER} container user:/home/${BUILD_USER}:/bin/bash" > /tmp/etc/passwd
+RUN echo "${BUILD_USER}:x:${BUILD_UID}:${BUILD_GID}:${BUILD_USER} container user:/home/${BUILD_USER}:/home/${BUILD_USER}/bin/sh" > /tmp/etc/passwd
 RUN echo "${BUILD_USER}:x:${BUILD_GID}:" > /tmp/etc/group
 
 RUN echo "${BUILD_USER}:100000:65536" > /etc/subuid \
@@ -40,7 +40,7 @@ RUN echo '[storage]' > /tmp/home/${BUILD_USER}/.config/containers/storage.conf &
     echo 'ignore_chown_errors = "true"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf
 
 # Create the directories buildah will use for storage
-RUN mkdir -p /tmp/home/${BUILD_USER}/.local/share/containers/storage-run && \
+RUN mkdir -p /tmp/home/${BUILD_USER}/.local/share/containers/storage-run/libpod && \
     mkdir -p /tmp/home/${BUILD_USER}/.local/share/containers/storage
 
 RUN mkdir -p /tmp/etc/containers && echo '{ "default": [ { "type": "insecureAcceptAnything" } ] }' > /tmp/etc/containers/policy.json
@@ -68,6 +68,7 @@ COPY --from=builder /etc/subgid /etc/subgid
 
 COPY --from=builder /tmp/nix-store-closure /nix/store
 COPY --from=builder /tmp/build/result/bin /home/${BUILD_USER}/bin
+COPY --from=builder /tmp/build/result/bin/sh /bin/sh
 COPY --from=builder /tmp/etc/containers /etc/containers
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
