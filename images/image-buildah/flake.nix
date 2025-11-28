@@ -17,6 +17,20 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        minimalUtils = pkgs.runCommand "minimal-utils" { } ''
+          mkdir -p $out/bin
+          ln -s ${pkgs.pkgsStatic.busybox}/bin/sh $out/bin/sh
+          ln -s ${pkgs.pkgsStatic.busybox}/bin/rm $out/bin/rm
+          ln -s ${pkgs.pkgsStatic.busybox}/bin/cat $out/bin/cat
+          ln -s ${pkgs.pkgsStatic.busybox}/bin/echo $out/bin/echo
+          ln -s ${pkgs.pkgsStatic.busybox}/bin/grep $out/bin/grep
+        '';
+        minimalShadow = pkgs.runCommand "minimal-shadow" { } ''
+          mkdir -p $out/bin
+          ln -s ${pkgs.shadow}/bin/useradd $out/bin/useradd
+          ln -s ${pkgs.shadow}/bin/groupadd $out/bin/groupadd
+          ln -s ${pkgs.shadow}/bin/usermod $out/bin/usermod
+        '';
         fakeGit = pkgs.runCommand "fake-git" { } ''
           mkdir -p $out/bin
 
@@ -73,15 +87,13 @@
           chmod +x $out/bin/git
         '';
         tools = [
+          minimalUtils
+          minimalShadow
           fakeGit
-          # May as well include coreutils as Buildah uses them too
-          # so there is no size reduction in using Busybox
-          pkgs.coreutils
           pkgs.cosign
           pkgs.jq
           pkgs.go-task
           pkgs.buildah
-          pkgs.shadow
         ];
       in
       {
