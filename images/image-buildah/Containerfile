@@ -29,19 +29,13 @@ RUN echo "${BUILD_USER}:x:${BUILD_GID}:" > /tmp/etc/group
 RUN echo "${BUILD_USER}:100000:65536" > /etc/subuid \
  && echo "${BUILD_USER}:100000:65536" > /etc/subgid
 
-# Create buildah storage configuration
-# This tells buildah where to store container data when running rootless
 RUN mkdir -p /tmp/home/${BUILD_USER}/.config/containers
 RUN echo '[storage]' > /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
     echo 'driver = "vfs"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
-    echo 'runroot = "/home/${BUILD_USER}/.local/share/containers/storage-run"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
-    echo 'graphroot = "/home/${BUILD_USER}/.local/share/containers/storage"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
+    echo "runroot = \"/home/${BUILD_USER}/.local/share/containers/storage-run\"" >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
+    echo "graphroot = \"/home/${BUILD_USER}/.local/share/containers/storage\"" >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
     echo '[storage.options.vfs]' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf && \
     echo 'ignore_chown_errors = "true"' >> /tmp/home/${BUILD_USER}/.config/containers/storage.conf
-
-# Create the directories buildah will use for storage
-RUN mkdir -p /tmp/home/${BUILD_USER}/.local/share/containers/storage-run/libpod && \
-    mkdir -p /tmp/home/${BUILD_USER}/.local/share/containers/storage
 
 RUN mkdir -p /tmp/etc/containers && echo '{ "default": [ { "type": "insecureAcceptAnything" } ] }' > /tmp/etc/containers/policy.json
 
