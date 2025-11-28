@@ -20,13 +20,16 @@ spec:
       container:
         image: harbor.okwilkins.dev/main/image-buildah:latest
         workingDir: /workspace
-        command: ["task"]
+        command: ["sh", "-c"]
         args:
-          - "publish"
-          - "HARBOR_TOKEN=$(HARBOR_TOKEN)"
-          - "COSIGN_PASSWORD=$(COSIGN_PASSWORD)"
-          - "COSIGN_KEY=$(COSIGN_KEY)"
-          - "COSIGN_PUB=$(COSIGN_PUB)"
+          - |
+            task publish \
+            IMG_NAME=image-buildah \
+            TAG="$(git rev-parse --short HEAD)" \
+            HARBOR_TOKEN="$HARBOR_TOKEN" \
+            COSIGN_PASSWORD="$COSIGN_PASSWORD" \
+            COSIGN_KEY="$COSIGN_KEY" \
+            COSIGN_PUB="$COSIGN_PUB"
         env:
           - name: STORAGE_DRIVER
             value: "vfs"
