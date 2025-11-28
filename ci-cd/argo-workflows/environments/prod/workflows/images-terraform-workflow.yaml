@@ -50,3 +50,5 @@ spec:
               secretKeyRef:
                 name: cosign-key-pair
                 key: cosign.pub
+          - name: GIT_CONFIG_PARAMETERS
+            value: "'safe.directory=/workspace'"
