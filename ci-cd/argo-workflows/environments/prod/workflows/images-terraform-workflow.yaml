@@ -14,6 +14,21 @@ spec:
             git:
               repo: https://github.com/okwilkins/h8s.git
               revision: main
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      volumes:
+        - name: buildah-storage
+          emptyDir: {}
+      initContainers:
+        # Inits VFS compatible dirs for Buildah to use
+        - name: init-storage
+          image: alpine:latest
+          command: ["sh", "-c", "mkdir -p /data/storage /data/storage-run"]
+          volumeMounts:
+            - name: buildah-storage
+              mountPath: /data
       container:
         image: harbor.okwilkins.dev/main/image-buildah:latest
         workingDir: /workspace
@@ -52,3 +67,6 @@ spec:
                 key: cosign.pub
           - name: GIT_CONFIG_PARAMETERS
             value: "'safe.directory=/workspace'"
+        volumeMounts:
+          - name: buildah-storage
+            mountPath: /home/buildah/.local/share/containers
