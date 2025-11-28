@@ -5,9 +5,6 @@ metadata:
   generateName: container-build-terraform-
 spec:
   entrypoint: main
-  volumes:
-    - name: buildah-storage
-      emptyDir: {}
   templates:
     - name: main
       inputs:
@@ -53,6 +50,3 @@ spec:
               secretKeyRef:
                 name: cosign-key-pair
                 key: cosign.pub
-        volumeMounts:
-          - name: buildah-storage
-            mountPath: /var/lib/containers
