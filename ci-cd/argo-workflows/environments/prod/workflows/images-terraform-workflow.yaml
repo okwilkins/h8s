@@ -32,6 +32,9 @@ spec:
       container:
         image: harbor.okwilkins.dev/main/image-buildah:latest
         workingDir: /workspace
+        securityContext:
+          capabilities:
+            add: ["SYS_CHROOT"]
         command: ["sh", "-c"]
         args:
           - |
