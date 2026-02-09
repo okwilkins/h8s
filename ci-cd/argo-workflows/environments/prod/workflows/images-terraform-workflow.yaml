@@ -45,6 +45,8 @@ spec:
         env:
           - name: STORAGE_DRIVER
             value: "vfs"
+          - name: BUILDAH_ISOLATION
+            value: "chroot"
           - name: HARBOR_TOKEN
             valueFrom:
               secretKeyRef:
