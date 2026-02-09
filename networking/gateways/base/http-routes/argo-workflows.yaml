@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: default-gateway
       namespace: default
-      sectionName: home-lan-argocd
+      sectionName: home-lan-workflows
   hostnames:
     - workflows.okwilkins.dev
   rules:
