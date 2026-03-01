@@ -23,7 +23,7 @@ spec:
         fsGroup: 999
       containers:
         - name: redis
-          image: harbor.okwilkins.dev/docker-hub-cache/redis:7-alpine
+          image: harbor.okwilkins.dev/docker-hub-cache/redis:8.6.1-alpine3.23
           imagePullPolicy: IfNotPresent
           ports:
             - name: redis
