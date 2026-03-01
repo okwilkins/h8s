@@ -15,6 +15,13 @@ data "kubernetes_secret" "harbor_dagger_robot_secret" {
   }
 }
 
+data "kubernetes_secret" "harbor_image_pull_robot_secret" {
+  metadata {
+    name      = "harbor-image-pull-robot-secret"
+    namespace = "harbor"
+  }
+}
+
 data "kubernetes_secret" "main_user_secret" {
   metadata {
     name      = "harbor-main-user-secret"
@@ -167,6 +174,30 @@ resource "harbor_robot_account" "terraform" {
   #   kind      = "project"
   #   namespace = harbor_project.quay_cache.name
   # }
+  permissions {
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    kind      = "project"
+    namespace = harbor_project.ghcr_cache.name
+  }
+}
+
+resource "harbor_robot_account" "image_pull" {
+  name        = "image-pull"
+  description = "robot account for general K8s image pulls from cache projects"
+  level       = "system"
+  secret      = data.kubernetes_secret.harbor_image_pull_robot_secret.data.ROBOT_PASSWORD
+
+  permissions {
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    kind      = "project"
+    namespace = harbor_project.docker_cache.name
+  }
   permissions {
     access {
       action   = "pull"
