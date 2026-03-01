@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: searxng
+  name: searxng
+  namespace: searxng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: searxng
+          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /etc/searxng
+              name: searxng-config
+              readOnly: true
+            - mountPath: /var/cache/searxng
+              name: searxng-cache
+            - mountPath: /var/log/searxng
+              name: searxng-log
+          env:
+            - name: SEARXNG_BASE_URL
+              value: "https://search.okwilkins.dev"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: searxng-config
+          configMap:
+            name: searxng
+        - name: searxng-cache
+          emptyDir: {}
+        - name: searxng-log
+          emptyDir: {}
