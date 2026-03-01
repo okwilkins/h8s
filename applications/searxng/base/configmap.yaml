@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng
+  namespace: searxng
+data:
+  settings.yml: |-
+    general:
+      # instance_name: "H8s Search"
+      # contact_instance: "https://search.okwilkins.dev"
+      debug: false
+
+    server:
+      # bind_address: "0.0.0.0"
+      port: 8080
+      limiter: false
+      image_proxy: true
+      http_protocol_version: "1.1"
+      secret_key: "ultrasecretkey"  # TODO: Change this to a random value
+      # ui:
+      #   static_use_hash: true
+      #   default_theme: simple
+      #   default_view: compact
+
+    search:
+      safe_search: 0
+      autocomplete: ""
+      default_lang: "en"
+      # formats: ["html", "json"]
+
+    #engines:
+    #  # Disabled by default (privacy concerns)
+    #  - name: google
+    #    disabled: true
+    #  - name: bing
+    #    disabled: true
+    #  - name: yahoo
+    #    disabled: true
+    #  - name: duckduckgo
+    #    disabled: true
+    #  # Recommended to enable
+    #  - name: startpage
+    #  - name: qwant
+    #  - name: searx
+    #  - name: wikipedia
+    #  - name: archlinux
+    #  - name: github
+
+    outgoing:
+      request_timeout: 3.0
+      max_request_timeout: 10.0
+      pool_connections: 100
+      pool_maxsize: 20
+
+    ui:
+      static_use_hash: true
+      default_theme: simple
+
+    redis:
+      url: "redis://searxng-redis:6379/0"
