@@ -4,58 +4,56 @@ metadata:
   name: searxng-settings
   namespace: searxng
 data:
+  # Go here for full list of settings:
+  # https://github.com/searxng/searxng/blob/162c04a1c48333680a76d147f8ae770450d223b8/searx/settings.yml
   settings.yml: |-
     use_default_settings: true
 
     general:
-      # instance_name: "H8s Search"
-      # contact_instance: "https://search.okwilkins.dev"
       debug: false
+      instance_name: "Homelab Search"
+      privacypolicy_url: false
+      donation_url: false
+      contact_url: https://www.okwilkins.dev
+      enable_metrics: false
 
-    server:
-      # bind_address: "0.0.0.0"
-      port: 8080
-      limiter: false
-      image_proxy: true
-      http_protocol_version: "1.1"
-      # ui:
-      #   static_use_hash: true
-      #   default_theme: simple
-      #   default_view: compact
+    brand:
+      new_issue_url: ""
+      docs_url: ""
+      public_instances: ""
+      wiki_url: ""
+      issue_url: ""
 
     search:
       safe_search: 0
-      autocomplete: ""
-      default_lang: "en"
-      # formats: ["html", "json"]
+      autocomplete: "duckduckgo"
+      max_page: 0
 
-    #engines:
-    #  # Disabled by default (privacy concerns)
-    #  - name: google
-    #    disabled: true
-    #  - name: bing
-    #    disabled: true
-    #  - name: yahoo
-    #    disabled: true
-    #  - name: duckduckgo
-    #    disabled: true
-    #  # Recommended to enable
-    #  - name: startpage
-    #  - name: qwant
-    #  - name: searx
-    #  - name: wikipedia
-    #  - name: archlinux
-    #  - name: github
+    server:
+      port: 8080
+      limiter: true
+      public_instance: true
+      image_proxy: true
+      http_protocol_version: "1.1"
 
-    outgoing:
-      request_timeout: 3.0
-      max_request_timeout: 10.0
-      pool_connections: 100
-      pool_maxsize: 20
-
-    ui:
-      static_use_hash: true
-      default_theme: simple
-
-    redis:
+    valkey:
       url: "redis://searxng-redis:6379/0"
+
+    engines:
+      # Disabled by default (privacy concerns)
+      - name: google
+        disabled: false
+      - name: duckduckgo
+        disabled: false
+      - name: reddit
+        disabled: false
+      - name: github
+        disabled: false
+      # Recommended to enable
+      - name: startpage
+      - name: qwant
+      - name: searx
+      - name: wikipedia
+      - name: archlinux
+      - name: github
+
