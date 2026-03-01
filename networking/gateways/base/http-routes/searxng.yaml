@@ -8,6 +8,8 @@ spec:
     - name: default-gateway
       namespace: default
       sectionName: home-lan-search
+    - name: cloudflare-gateway
+      namespace: cloudflare
   hostnames:
     - search.okwilkins.dev
   rules:
