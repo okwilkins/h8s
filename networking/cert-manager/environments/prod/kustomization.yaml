@@ -11,4 +11,5 @@ resources:
   - ./certificates/draw-okwilkins-dev.yaml
   - ./certificates/workflows-okwilkins-dev.yaml
   - ./certificates/harbor-okwilkins-dev.yaml
+  - ./certificates/search-okwilkins-dev.yaml
   - ./certificates/pg-tf-backend-okwilkins-dev.yaml
