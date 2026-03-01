@@ -19,12 +19,23 @@ spec:
         - name: harbor-credentials
       securityContext:
         runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsGroup: 3000
+        fsGroup: 3000
+      initContainers:
+        - name: init-config
+          image: busybox:latest
+          command:
+            - "sh"
+            - "-c"
+            - "cp /tmp/config/settings.yml /etc/searxng/settings.yml"
+          volumeMounts:
+            - name: config-source
+              mountPath: /tmp/config
+            - name: config-writable
+              mountPath: /etc/searxng
       containers:
         - name: searxng
-          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:latest
-          imagePullPolicy: Always
+          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.3.1-162c04a1c
           ports:
             - name: http
               containerPort: 8080
@@ -35,16 +46,20 @@ spec:
               drop:
                 - ALL
           volumeMounts:
-            - mountPath: /etc/searxng
-              name: searxng-config
-              readOnly: true
-            - mountPath: /var/cache/searxng
-              name: searxng-cache
-            - mountPath: /var/log/searxng
-              name: searxng-log
+            - name: config-writable
+              mountPath: /etc/searxng
+            - name: cache
+              mountPath: /var/cache/searxng
+            - name: tmp
+              mountPath: /tmp
           env:
             - name: SEARXNG_BASE_URL
               value: "https://search.okwilkins.dev"
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-secret
+                  key: SECRET
           livenessProbe:
             httpGet:
               path: /
@@ -59,16 +74,18 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              cpu: 500m
+              cpu: 100m
               memory: 512Mi
             limits:
-              cpu: 1000m
               memory: 1Gi
       volumes:
-        - name: searxng-config
+        - name: config-source
           configMap:
-            name: searxng
-        - name: searxng-cache
+            name: searxng-settings
+        - name: config-writable
           emptyDir: {}
-        - name: searxng-log
+        - name: cache
+          persistentVolumeClaim:
+            claimName: searxng-cache-pvc
+        - name: tmp
           emptyDir: {}

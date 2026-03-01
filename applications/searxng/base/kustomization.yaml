@@ -7,3 +7,5 @@ resources:
   - ./redis-deployment.yaml
   - ./configmap.yaml
   - ./redis-configmap.yaml
+  - ./cache-pvc.yaml
+  - ./searxng-secret.yaml
