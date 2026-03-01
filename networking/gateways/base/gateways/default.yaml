@@ -83,6 +83,18 @@ spec:
         certificateRefs:
           - name: harbor-okwilkins-dev-tls
             namespace: harbor
+    - protocol: HTTPS
+      name: home-lan-search
+      hostname: search.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: search-okwilkins-dev-tls
+            namespace: searxng
     - protocol: TLS
       name: home-lan-pg-tf-backend
       hostname: pg-tf-backend.okwilkins.dev
