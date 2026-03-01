@@ -4,3 +4,4 @@ metadata:
   name: searxng
   labels:
     name: searxng
+    harbor-image-pulls: "true"
