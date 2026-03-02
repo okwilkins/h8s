@@ -5,8 +5,7 @@ image:
   pullPolicy: IfNotPresent
   useFull: false
 
-imagePullSecrets:
-  - name: harbor-credentials
+imagePullSecrets: harbor-credentials
 
 renovate:
   mendRnvAcceptTos: "y"
@@ -17,8 +16,6 @@ renovate:
 
   mendRnvGithubAppId: "2992155"
 
-  # Scan only this repository
-  mendRnvAutodiscoverFilter: "okwilkins/h8s"
   # App sync runs every 4 hours to discover new repos
   mendRnvCronAppSync: "0 */4 * * *"
   # Job scheduler runs hourly to process updates
@@ -28,8 +25,7 @@ renovate:
   mendRnvEnqueueJobsOnStartup: "discovered"
   mendRnvSyncOnStartup: "true"
 
-  # API and monitoring
-  mendRnvApiEnabled: "true"
+  # Enable Prometheus metrics
   mendRnvPrometheusMetricsEnabled: "true"
 
   extraEnvVars:
@@ -56,6 +52,8 @@ resources:
 
 podSecurityContext:
   runAsNonRoot: true
+  runAsUser: 12021
+  fsGroup: 12021
   seccompProfile:
     type: RuntimeDefault
 
@@ -67,4 +65,3 @@ containerSecurityContext:
   capabilities:
     drop:
       - ALL
-
