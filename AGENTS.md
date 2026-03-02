@@ -11,6 +11,10 @@ This is a **Kubernetes infrastructure-as-code repository** containing:
 - Nix flake for development environment
 - Taskfile for build automation
 
+## Internet Usage is Key
+
+It is **extremely** important that you use the internet. Kubernetes projects change frequently and you will likely implement the wrong thing if you do not utilise it.
+
 ## Build Commands
 
 ### Development Environment
