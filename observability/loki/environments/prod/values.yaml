@@ -5,14 +5,9 @@ loki:
   auth_enabled: false
   commonConfig:
     replication_factor: 1
+    path_prefix: /loki
   storage:
-    ring:
-      instance_addr: 127.0.0.1
-      kvstore:
-        store: inmemory
     type: filesystem
-    filesystem:
-      directory: /loki
   # https://grafana.com/docs/loki/latest/configuration/#schema_config
   schemaConfig:
     configs:
