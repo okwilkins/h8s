@@ -2,8 +2,8 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "dependencyDashboard": true,
     "automerge": false,
-    "prHourlyLimit": 2,
-    "prConcurrentLimit": 10,
+    "prHourlyLimit": 0,
+    "prConcurrentLimit": 0,
     "argocd": {
         "managerFilePatterns": [
             "/^ci-cd\\/argocd\\/environments\\/prod\\/apps\\/.*\\.ya?ml$/"
