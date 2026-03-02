@@ -28,10 +28,13 @@ data:
       safe_search: 0
       autocomplete: "duckduckgo"
       max_page: 0
+      formats:
+        - html
+        - json
 
     server:
       port: 8080
-      limiter: true
+      limiter: false
       public_instance: true
       image_proxy: true
       http_protocol_version: "1.1"
@@ -43,8 +46,9 @@ data:
       # Disabled by default (privacy concerns)
       - name: google
         disabled: false
+      # CAPTCHA requests too often do disabled
       - name: duckduckgo
-        disabled: false
+        disabled: true
       - name: reddit
         disabled: false
       - name: github
