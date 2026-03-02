@@ -28,6 +28,19 @@
             "datasourceTemplate": "helm",
             "registryUrlTemplate": "https://argoproj.github.io/argo-helm",
             "versioningTemplate": "semver"
+        },
+        {
+            "customType": "regex",
+            "description": "Update OCI Helm charts in ArgoCD Applications (ghcr.io)",
+            "managerFilePatterns": [
+                "/^ci-cd\\/argocd\\/environments\\/prod\\/apps\\/.*\\.ya?ml$/"
+            ],
+            "matchStrings": [
+                "repoURL:\\s*ghcr\\.io\\/(?<registryPath>[^\\s]+)\\s*\\n\\s*chart:\\s*(?<chartName>[^\\s]+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>[^\\s]+)"
+            ],
+            "datasourceTemplate": "docker",
+            "depNameTemplate": "ghcr.io/{{{registryPath}}}/{{{chartName}}}",
+            "versioningTemplate": "semver"
         }
     ],
     "packageRules": [
@@ -50,6 +63,16 @@
                 "harbor.okwilkins.dev/**"
             ],
             "enabled": false
+        },
+        {
+            "description": "Force docker datasource for OCI Helm charts (ghcr.io)",
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "ghcr.io/grafana/helm-charts/grafana-operator"
+            ],
+            "enabled": true
         }
     ]
 }
