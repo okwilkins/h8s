@@ -1,0 +1,55 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "dependencyDashboard": true,
+    "automerge": false,
+    "prHourlyLimit": 2,
+    "prConcurrentLimit": 10,
+    "argocd": {
+        "managerFilePatterns": [
+            "/^ci-cd\\/argocd\\/environments\\/prod\\/apps\\/.*\\.ya?ml$/"
+        ]
+    },
+    "kubernetes": {
+        "managerFilePatterns": [
+            "/(^|\\/)(applications|ci-cd|networking|observability|security|storage|namespaces|infrastructure)\\/.*\\.ya?ml$/"
+        ]
+    },
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Update ARGOCD_HELM_VER in ArgoCD bootstrap docs",
+            "managerFilePatterns": [
+                "/^ci-cd\\/argocd\\/README\\.md$/"
+            ],
+            "matchStrings": [
+                "export\\s+ARGOCD_HELM_VER=(?<currentValue>[^\\s]+)"
+            ],
+            "depNameTemplate": "argo-cd",
+            "datasourceTemplate": "helm",
+            "registryUrlTemplate": "https://argoproj.github.io/argo-helm",
+            "versioningTemplate": "semver"
+        }
+    ],
+    "packageRules": [
+        {
+            "description": "Label major updates for manual review",
+            "matchUpdateTypes": [
+                "major"
+            ],
+            "labels": [
+                "dependencies",
+                "major-update"
+            ]
+        },
+        {
+            "description": "Ignore private Harbor image tags until registry credentials are configured",
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "harbor.okwilkins.dev/**"
+            ],
+            "enabled": false
+        }
+    ]
+}
