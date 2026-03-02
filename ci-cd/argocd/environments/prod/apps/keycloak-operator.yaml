@@ -10,7 +10,7 @@ spec:
   # https://www.keycloak.org/operator/installation#_installing_by_using_kubectl_without_operator_lifecycle_manager
   source:
     repoURL: https://github.com/keycloak/keycloak-k8s-resources
-    targetRevision: 26.2.3
+    targetRevision: 26.5.4
     path: kubernetes
   destination:
     server: https://kubernetes.default.svc
