@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: ghcr.io/grafana/helm-charts
       chart: grafana-operator
-      targetRevision: v5.17.1
+      targetRevision: 5.22.0
       helm:
         releaseName: grafana-operator
         valueFiles:
