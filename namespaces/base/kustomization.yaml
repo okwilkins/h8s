@@ -13,6 +13,7 @@ resources:
   - ./keycloak-namespace.yaml
   - ./longhorn-system-namespace.yaml
   - ./monitoring-namespace.yaml
+  - ./renovate-namespace.yaml
   - ./vault-namespace.yaml
   - ./searxng-namespace.yaml
   - ./terraform-namespace.yaml
