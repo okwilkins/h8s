@@ -58,3 +58,21 @@ renovate:
   mendRnvGithubAppId: ""
 ```
 
+### 4. Install GitHub App on Repository
+
+**Important**: The `mendRnvAutodiscoverFilter` setting does not work properly in Renovate CE. Instead, you must restrict the GitHub App to only the repositories you want Renovate to process.
+
+After creating the GitHub App:
+
+1. Go to GitHub → Settings → GitHub Apps → **h8s-renovate** → **Install App**
+2. Select **Only select repositories** and choose only `okwilkins/h8s`
+3. Click **Install**
+
+**Do NOT** select "All repositories" - Renovate will attempt to process every repo the app has access to (up to the 10-repo limit for the free CE license).
+
+The Renovate pod will automatically discover the repository on the next sync cycle (every 4 hours). To trigger immediately, restart the pod:
+
+```bash
+kubectl delete pod -n renovate -l app.kubernetes.io/name=mend-renovate-ce
+```
+

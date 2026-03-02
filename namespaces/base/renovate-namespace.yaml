@@ -5,3 +5,4 @@ metadata:
   labels:
     app.kubernetes.io/name: renovate
     app.kubernetes.io/part-of: ci-cd
+    harbor-image-pulls: "true"
