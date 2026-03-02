@@ -1,0 +1,62 @@
+# https://github.com/mend/renovate-ce-ee/blob/mend-renovate-ce-14.0.0/helm-charts/mend-renovate-ce/values.yaml
+
+renovate:
+  mendRnvAcceptTos: "y"
+  # Free 10-repo Community Edition key
+  mendRnvLicenseKey: "eyJsaW1pdCI6IjEwIn0=.30440220457941b71ea8eb345c729031718b692169f0ce2cf020095fd328812f4d7d5bc1022022648d1a29e71d486f89f27bdc8754dfd6df0ddda64a23155000a61a105da2a1"
+  mendRnvPlatform: "github"
+  mendRnvEndpoint: "https://api.github.com/"
+
+  mendRnvGithubAppId: "2992155"
+
+  # Scan only this repository
+  mendRnvAutodiscoverFilter: "okwilkins/h8s"
+  # App sync runs every 4 hours to discover new repos
+  mendRnvCronAppSync: "0 */4 * * *"
+  # Job scheduler runs hourly to process updates
+  mendRnvCronJobSchedulerAll: "0 * * * *"
+
+  # Startup behavior
+  mendRnvEnqueueJobsOnStartup: "discovered"
+  mendRnvSyncOnStartup: "true"
+
+  # API and monitoring
+  mendRnvApiEnabled: "true"
+  mendRnvPrometheusMetricsEnabled: "true"
+
+  extraEnvVars:
+    - name: MEND_RNV_GITHUB_APP_KEY
+      valueFrom:
+        secretKeyRef:
+          name: renovate-github-app-key
+          key: PRIVATE_KEY
+
+# The SQLite database and Renovate cache will be stored here
+cachePersistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    memory: "4Gi"
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 12021
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
