@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng-limiter
+  namespace: searxng
+data:
+  limiter.toml: |-
+    [botdetection.ip_lists]
+    pass_ip = [
+      "127.0.0.0/8",
+      "10.0.0.0/8",
+      "192.168.0.0/16"
+    ]

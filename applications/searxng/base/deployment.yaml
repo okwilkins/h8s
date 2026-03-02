@@ -48,6 +48,9 @@ spec:
           volumeMounts:
             - name: config-writable
               mountPath: /etc/searxng
+            - name: limiter-config
+              mountPath: /etc/searxng/limiter.toml
+              subPath: limiter.toml
             - name: cache
               mountPath: /var/cache/searxng
             - name: tmp
@@ -84,6 +87,9 @@ spec:
             name: searxng-settings
         - name: config-writable
           emptyDir: {}
+        - name: limiter-config
+          configMap:
+            name: searxng-limiter
         - name: cache
           persistentVolumeClaim:
             claimName: searxng-cache-pvc
