@@ -34,7 +34,7 @@ data:
 
     server:
       port: 8080
-      limiter: false
+      limiter: true
       public_instance: true
       image_proxy: true
       http_protocol_version: "1.1"
