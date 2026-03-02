@@ -1,5 +1,13 @@
 # https://github.com/mend/renovate-ce-ee/blob/mend-renovate-ce-14.0.0/helm-charts/mend-renovate-ce/values.yaml
 
+image:
+  repository: harbor.okwilkins.dev/ghcr-cache/mend/renovate-ce
+  pullPolicy: IfNotPresent
+  useFull: false
+
+imagePullSecrets:
+  - name: harbor-credentials
+
 renovate:
   mendRnvAcceptTos: "y"
   # Free 10-repo Community Edition key
