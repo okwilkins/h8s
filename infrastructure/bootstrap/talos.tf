@@ -77,6 +77,8 @@ data "talos_machine_configuration" "nodes" {
     yamlencode({
       machine = {
         install = {
+          disk  = "/dev/vda"
+          wipe  = true
           image = "factory.talos.dev/installer/${talos_image_factory_schematic.this.id}:${var.talos_version}"
         }
         network = {
