@@ -1,9 +1,0 @@
-# Patch for Proxmox and Longhorn
-customization:
-  systemExtensions:
-    officialExtensions:
-      # For QEMU support with Proxmox
-      - siderolabs/qemu-guest-agent
-      # Longhorn support
-      - siderolabs/iscsi-tools
-      - siderolabs/util-linux-tools

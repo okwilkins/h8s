@@ -13,13 +13,57 @@ A single `terraform apply` handles the full bootstrap sequence:
 7. Bootstraps etcd on the first node
 8. Retrieves the kubeconfig and talosconfig
 
-This replaces the old `scripts/gen_configs.sh` + `scripts/apply_configs.sh` bash workflow.
-
 It does **not** install Cilium, ArgoCD, or any cluster workloads — see [What to do next](#what-to-do-next).
+
+## Hardware
+
+Two GMKtec G3 mini-PCs, each with:
+- CPU: Intel N100
+- RAM: 32 GB
+- Storage: 1 TB NVMe
+
+## Proxmox Setup
+
+Proxmox VE is the bare-metal Type-1 hypervisor running on each physical machine. It hosts VMs
+running Talos Linux, which form the Kubernetes cluster.
+
+### Initial Installation
+
+1. Download the Proxmox VE ISO.
+2. Flash to USB and boot the machine from it.
+3. Set hostname (e.g. `pve-1`), static IP, and root password during installation.
+4. Access the UI at `https://<node-ip>:8006` (uses a self-signed certificate — proceed past browser warning).
+
+```
+Username: root
+Password: saved in password manager
+```
+
+### Talos Image
+
+Terraform automatically registers the customisation schematic with the [Talos image factory](https://factory.talos.dev)
+and downloads the resulting ISO into each Proxmox node's local storage. The following extensions are baked in:
+
+| Extension                       | Purpose                                                      |
+|---------------------------------|--------------------------------------------------------------|
+| `siderolabs/qemu-guest-agent`   | Proxmox VM communication (shutdown, IP reporting, snapshots) |
+| `siderolabs/iscsi-tools`        | Required by Longhorn for persistent storage                  |
+| `siderolabs/util-linux-tools`   | Required by Longhorn for persistent storage                  |
+
+### VM Configuration
+
+VMs are created and configured entirely by Terraform. For reference, the settings used are:
+
+- **BIOS/UEFI**: OVMF (UEFI)
+- **CPU type**: `x86-64-v2-AES`
+- **Disk**: VirtIO (`virtio0`), raw format, discard + SSD emulation enabled
+- **Network**: LAN bridge (`vmbr0`), VirtIO model
+- **QEMU guest agent**: enabled (VirtIO channel)
+- **Boot order**: disk first, CDROM second (boots from ISO when disk is blank; boots from disk thereafter)
 
 ## Prerequisites
 
-- Proxmox is installed and reachable on the LAN
+- Proxmox is installed and reachable on the LAN (see [Proxmox Setup](#proxmox-setup) above)
 - An SSH agent is running with a key authorised for `root` on the Proxmox host — the `bpg/proxmox` provider uses SSH for ISO upload
 - Node IPs are reserved as static DHCP leases in your router so they don't change between reboots
 - The Nix shell is active (`nix shell` from the repo root), providing `terraform`, `talosctl`, and `kubectl`
