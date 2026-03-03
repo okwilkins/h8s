@@ -2,26 +2,69 @@
 # Cluster Access Credentials
 # ============================================================
 # Both outputs are marked sensitive so they don't print to stdout on apply.
+# 
+# Files generated:
+#   - talosconfig.yaml (Talos client config, in this directory)
+#   - ~/.kube/config (Kubernetes config, merged with existing)
 #
 # Usage after apply:
-#   terraform output -raw talosconfig > ~/.talos/config
-#   terraform output -raw kubeconfig  > ~/.kube/config
-#
-# Or to write both at once:
-#   terraform output -raw talosconfig > /tmp/talosconfig && \
-#     talosctl config merge /tmp/talosconfig && rm /tmp/talosconfig
-#   terraform output -raw kubeconfig  > ~/.kube/config
+#   export KUBECONFIG=~/.kube/config
+#   talosctl --talosconfig $(pwd)/talosconfig.yaml version
 
 output "talosconfig" {
-  description = "Talosconfig for use with talosctl. Write to ~/.talos/config or merge with talosctl config merge."
+  description = "Talosconfig for use with talosctl. Also written to talosconfig.yaml."
   value       = talos_machine_secrets.this.client_configuration.ca_certificate != "" ? data.talos_client_configuration.this.talos_config : null
   sensitive   = true
 }
 
 output "kubeconfig" {
-  description = "Kubeconfig for use with kubectl. Write to ~/.kube/config."
+  description = "Kubeconfig for use with kubectl. Merged into ~/.kube/config."
   value       = talos_cluster_kubeconfig.this.kubeconfig_raw
   sensitive   = true
+}
+
+# ============================================================
+# Write configs to files
+# ============================================================
+
+# Write talosconfig to bootstrap directory
+resource "local_file" "talosconfig" {
+  content  = data.talos_client_configuration.this.talos_config
+  filename = "${path.module}/talosconfig.yaml"
+}
+
+# Merge kubeconfig into ~/.kube/config
+resource "null_resource" "kubeconfig_merge" {
+  triggers = {
+    kubeconfig = talos_cluster_kubeconfig.this.kubeconfig_raw
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      # Create ~/.kube if it doesn't exist
+      mkdir -p ~/.kube
+      
+      # Write the new kubeconfig to a temp file
+      cat > /tmp/new_kubeconfig.yaml << 'EOF'
+      ${talos_cluster_kubeconfig.this.kubeconfig_raw}
+      EOF
+      
+      # If ~/.kube/config exists, merge; otherwise just copy
+      if [ -f ~/.kube/config ]; then
+        # Merge existing with new using kubectl
+        KUBECONFIG=~/.kube/config:/tmp/new_kubeconfig.yaml kubectl config view --flatten > /tmp/merged_kubeconfig.yaml
+        mv /tmp/merged_kubeconfig.yaml ~/.kube/config
+      else
+        cp /tmp/new_kubeconfig.yaml ~/.kube/config
+      fi
+      
+      # Cleanup
+      rm -f /tmp/new_kubeconfig.yaml /tmp/merged_kubeconfig.yaml
+    EOT
+  }
+
+  depends_on = [talos_cluster_kubeconfig.this]
 }
 
 output "schematic_id" {
