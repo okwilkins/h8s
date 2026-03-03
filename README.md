@@ -34,15 +34,19 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 
 ```text
 ├── applications
-│   └── excalidraw                  | Self-hosted Excalidraw.
+│   ├── excalidraw                  | Self-hosted Excalidraw.
+│   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd
 │   ├── argo-workflows              | CI/CD pipelines (WIP).
-│   └── argocd                      | GitOps CD for Kubernetes resources.
+│   ├── argocd                      | GitOps CD for Kubernetes resources.
+│   └── renovate                    | Automated dependency updates.
 ├── images
 │   ├── coredns
 │   ├── terraform
 │   └── image-buildah
 ├── infrastructure
+│   ├── bootstrap                   | Cluster bootstrap configuration.
+│   ├── proxmox                     | Proxmox VE management and configuration.
 │   ├── talos                       | Scripts and definintions for Talos running on Proxmox.
 │   └── terraform                   | Terraform for internal infrastructure.
 ├── namespaces                      | Holds all namespaces for the cluster.
@@ -56,12 +60,12 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   ├── grafana                     | Metrics and log observability.
 │   ├── loki                        | Log collection.
 │   ├── prometheus                  | Metrics collection.
-│   └── promtail                    | Log transport agent. 
+│   └── promtail                    | Log collection and shipping agent.
 ├── security
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
 │   ├── external-secrets-operator   | Takes secrets hosted internally with Vault and manages them inside the cluster.
 │   ├── keycloak                    | (WIP) Cluster SSO.
-│   └── vault                       | Secrets storage and certificate authority. 
+│   └── vault                       | Secrets storage and certificate authority.
 ├── storage
     ├── cloudnative-pg              | PostrgreSQL database management for various Applications.
     ├── harbor                      | Container and binary registry.
