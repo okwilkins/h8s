@@ -108,6 +108,8 @@ terraform init
 terraform apply
 ```
 
+**Note:** You may need to run `terraform apply` 2-3 times for it to complete successfully. During bootstrap, Talos restarts the node after etcd bootstrap, causing the initial Helm Cilium installation to fail when the Kubernetes API isn't ready yet. Subsequent runs will succeed once the API comes back online.
+
 Apply takes several minutes. The slow steps are the ISO download to Proxmox (~500 MB) and waiting for Talos to install to disk and reboot before the ISO detachment and config apply can proceed.
 
 ## Retrieve credentials
