@@ -60,17 +60,19 @@ resource "helm_release" "cilium" {
 # ============================================================
 # Cilium Manifests (IP Pools & L2 Policies)
 # ============================================================
-# Apply Cilium manifests using kubectl kustomize with credentials
-# injected directly from the Talos kubeconfig. This avoids CRD
-# validation issues during Terraform planning.
+# Apply Cilium manifests using kubectl with explicit node IP connection.
+# This bypasses the VIP entirely during bootstrap.
 
 resource "null_resource" "cilium_manifests" {
   provisioner "local-exec" {
     command = <<-EOT
-      echo '${talos_cluster_kubeconfig.this.kubeconfig_raw}' | sed 's/192.168.1.120:6443/${local.first_node_ip}:6443/g' > /tmp/kubeconfig_$$.yaml && \
       kubectl kustomize ${path.module}/../../networking/cilium/environments/prod | \
-      kubectl --kubeconfig=/tmp/kubeconfig_$$.yaml apply -f - && \
-      rm /tmp/kubeconfig_$$.yaml
+      kubectl --server=https://${local.first_node_ip}:6443 \
+              --certificate-authority=<(echo '${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)}' | base64 -d) \
+              --client-certificate=<(echo '${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)}' | base64 -d) \
+              --client-key=<(echo '${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)}' | base64 -d) \
+              --insecure-skip-tls-verify=true \
+              apply -f -
     EOT
   }
 
