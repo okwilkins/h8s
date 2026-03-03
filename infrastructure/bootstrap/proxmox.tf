@@ -33,7 +33,7 @@ resource "proxmox_virtual_environment_download_file" "talos_iso" {
 # ============================================================
 # One VM per node, driven by the var.nodes map. The map key is the hostname,
 # which maps to a stable node number - this is the fix for the Longhorn
-# diskUUID pitfall documented in infrastructure/talos/README.md.
+# diskUUID pitfall documented in infrastructure/bootstrap/README.md.
 
 resource "proxmox_virtual_environment_vm" "nodes" {
   for_each = var.nodes

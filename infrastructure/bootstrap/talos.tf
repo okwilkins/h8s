@@ -6,7 +6,7 @@
 # in state, so it won't be re-fetched on every apply (unlike the old curl in
 # gen_configs.sh).
 #
-# Extensions match infrastructure/talos/iso_factory_patch.yaml:
+# Extensions baked into the ISO:
 #   - siderolabs/qemu-guest-agent   (Proxmox VM integration)
 #   - siderolabs/iscsi-tools        (Longhorn iSCSI support)
 #   - siderolabs/util-linux-tools   (Longhorn util-linux support)
@@ -49,8 +49,7 @@ resource "talos_machine_secrets" "this" {}
 # Generates the full machine config for each node, equivalent to the
 # `talosctl gen config --output-types controlplane` calls in gen_configs.sh.
 #
-# The three patch files from infrastructure/talos/machine_patches/ are inlined
-# here as config_patches so all configuration lives in one place.
+# All patches are inlined as config_patches so all configuration lives in one place.
 
 locals {
   # Extract the numeric suffix from the node name for use in hostname patch.
