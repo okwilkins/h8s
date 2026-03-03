@@ -66,18 +66,25 @@ resource "helm_release" "cilium" {
 resource "null_resource" "cilium_manifests" {
   provisioner "local-exec" {
     command = <<-EOT
-      kubectl kustomize ${path.module}/../../networking/cilium/environments/prod | \
-      kubectl --server=https://${local.first_node_ip}:6443 \
-              --client-certificate=<(cat <<'CERT_EOF'
+      CERT_FILE=$(mktemp)
+      KEY_FILE=$(mktemp)
+      
+      cat <<'CERT_EOF' > "$CERT_FILE"
 ${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)}
 CERT_EOF
-) \
-              --client-key=<(cat <<'KEY_EOF'
+      
+      cat <<'KEY_EOF' > "$KEY_FILE"
 ${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)}
 KEY_EOF
-) \
+      
+      kubectl kustomize ${path.module}/../../networking/cilium/environments/prod | \
+      kubectl --server=https://${local.first_node_ip}:6443 \
+              --client-certificate="$CERT_FILE" \
+              --client-key="$KEY_FILE" \
               --insecure-skip-tls-verify=true \
               apply -f -
+      
+      rm -f "$CERT_FILE" "$KEY_FILE"
     EOT
   }
 
