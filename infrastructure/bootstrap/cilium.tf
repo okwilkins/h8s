@@ -68,9 +68,14 @@ resource "null_resource" "cilium_manifests" {
     command = <<-EOT
       kubectl kustomize ${path.module}/../../networking/cilium/environments/prod | \
       kubectl --server=https://${local.first_node_ip}:6443 \
-              --certificate-authority=<(echo '${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)}' | base64 -d) \
-              --client-certificate=<(echo '${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)}' | base64 -d) \
-              --client-key=<(echo '${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)}' | base64 -d) \
+              --client-certificate=<(cat <<'CERT_EOF'
+${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)}
+CERT_EOF
+) \
+              --client-key=<(cat <<'KEY_EOF'
+${base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)}
+KEY_EOF
+) \
               --insecure-skip-tls-verify=true \
               apply -f -
     EOT
