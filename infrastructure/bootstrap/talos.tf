@@ -182,12 +182,6 @@ resource "talos_machine_configuration_apply" "nodes" {
 # happen once - Talos detects an already-bootstrapped cluster and is idempotent.
 # Replaces the manual `talosctl bootstrap` step.
 
-locals {
-  # Stable first node: sort by name and take the first entry
-  first_node_name = tolist(sort(keys(var.nodes)))[0]
-  first_node_ip   = var.nodes[local.first_node_name].ip_address
-}
-
 resource "talos_machine_bootstrap" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = local.first_node_ip
