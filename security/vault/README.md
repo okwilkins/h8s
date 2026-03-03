@@ -4,11 +4,28 @@ Vault is a tool for securely accessing secrets. A secret is anything that you wa
 
 ## Installation
 
-[ArgoCD](../../ci-cd/argocd/README.md) handles the installation of Vault. There are some steps to take after ArgoCD has installed everything however.
+[ArgoCD](../../ci-cd/argocd/README.md) handles the installation of Vault. The [bootstrap Terraform](../../infrastructure/bootstrap/README.md) automatically initializes, unseals, and configures Vault during cluster setup.
 
-### First Time Installation
+### Automated Initialization (Bootstrap)
 
-If installing for the first time, you will need to [initialise the vault](https://developer.hashicorp.com/vault/docs/commands/operator/init). Run:
+When you run `terraform apply` in the bootstrap directory, the following happens automatically:
+
+1. **Vault Initialization**: Terraform runs `vault operator init` and saves the output to `vault-init.json`
+2. **Vault Unsealing**: Terraform unseals Vault using the unseal keys from the init output
+3. **Kubernetes Auth**: Terraform enables and configures the Kubernetes auth method
+4. **Secret Engines**: Terraform enables KV v2 and PKI secret engines
+5. **Policies & Roles**: Terraform creates policies and Kubernetes auth roles for ESO and cert-manager
+6. **Secrets**: Terraform generates and stores passwords, keys, and certificates
+
+**IMPORTANT**: The `vault-init.json` file in `infrastructure/bootstrap/` contains the unseal keys and root token. It is gitignored and must be backed up securely alongside `terraform.tfstate`. Losing this file means losing access to Vault forever.
+
+### Manual Operations
+
+The following sections document manual operations that may be needed in certain scenarios.
+
+#### First Time Installation (Manual Alternative)
+
+If you need to initialize Vault manually (e.g., if the automated process failed), run:
 
 ```bash
 kubectl exec -ti vault-0 -n vault -- vault operator init
@@ -22,9 +39,9 @@ You will then need to unseal the server:
 kubectl exec -ti vault-0 -n vault -- vault operator unseal
 ```
 
-### Kubernetes Service Accounts
+#### Kubernetes Service Accounts (Manual)
 
-In order for ESO to use a service account to access Vault, run the following:
+If the automated setup didn't complete successfully, you can manually configure Kubernetes auth:
 
 ```bash
 kubectl exec -ti vault-0 -n vault -- /bin/sh
@@ -51,9 +68,9 @@ vault write auth/kubernetes/role/external-secrets-vault-auth \
     ttl=24h
 ```
 
-### Cert Manager Root CA Service
+#### Cert Manager Root CA Service (Manual)
 
-Vault is setup to be the root CA service for [cert-manager](../../networking/cert-manager/README.md). Run the following (assuming you have run the above):
+If PKI wasn't configured automatically:
 
 ```bash
 kubectl exec -ti vault-0 -n vault -- /bin/sh
@@ -106,11 +123,14 @@ Read more here:
 
 ### Pod Rescheduling
 
-Whenever the pod(s) for Vault are rescheduled, they will need to be [unsealed](https://developer.hashicorp.com/vault/docs/concepts/seal) again. Run:
+Whenever the pod(s) for Vault are rescheduled, they will need to be [unsealed](https://developer.hashicorp.com/vault/docs/concepts/seal) again. Use the unseal keys from `vault-init.json`:
 
 ```bash
-kubectl exec -ti vault-0 -n vault -- vault operator unseal
+# Extract unseal keys from vault-init.json and unseal Vault
+for key in $(cat infrastructure/bootstrap/vault-init.json | jq -r '.unseal_keys_b64[]'); do
+  kubectl exec -ti vault-0 -n vault -- vault operator unseal "$key"
+done
 ```
 
-Enter in 3 of the keys produced from the [first time installation](#first-time-installation).
+Enter in 3 of the keys produced from the initialization.
 
