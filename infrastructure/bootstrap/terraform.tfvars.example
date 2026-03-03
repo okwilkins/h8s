@@ -1,0 +1,67 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored - do not commit it.
+#
+# Proxmox credentials are NOT set here - they go in environment variables:
+#
+#   export PROXMOX_VE_ENDPOINT="https://192.168.1.10:8006"
+#   export PROXMOX_VE_INSECURE="true"
+#   export PROXMOX_VE_USERNAME="root@pam"
+#   export PROXMOX_VE_PASSWORD="your-proxmox-password"
+
+# ============================================================
+# Proxmox
+# ============================================================
+
+# Name of the Proxmox node you are connecting to (Datacenter > node name in the UI).
+# In a multi-node cluster this can be any node - just keep it consistent with
+# proxmox_node_address below.
+proxmox_node_name = "server-01"
+
+# IP of the Proxmox node above, used for both the API endpoint and SSH.
+proxmox_node_address = "192.168.1.123"
+
+# Datastore for the Talos ISO (must support 'iso' content type - 'local' usually works)
+proxmox_iso_datastore = "local"
+
+# Datastore for VM disks (e.g. 'local-lvm', 'local-zfs')
+proxmox_disk_datastore = "local-lvm"
+
+# ============================================================
+# Talos / Cluster
+# ============================================================
+
+talos_version = "v1.12.4"
+cluster_name  = "talos-homelab"
+
+# Virtual IP - must be in the same subnet as nodes
+cluster_vip = "192.168.1.100"
+
+# ============================================================
+# Nodes
+# ============================================================
+# One entry per physical machine. The map key IS the Kubernetes node hostname -
+# keep these stable across rebuilds to avoid Longhorn diskUUID mismatches.
+#
+# vm_id must be unique across your entire Proxmox node.
+# ip_address should be reserved/static in your DHCP server or router.
+
+nodes = {
+  "controlplane-worker-1" = {
+    vm_id       = 100
+    pve_node    = "server-01"
+    cpu_cores   = 4
+    memory_mb   = 16384
+    disk_gb     = 100
+    ip_address  = "192.168.1.101"
+    mac_address = "BC:24:11:00:00:01" # Must match your router's static DHCP lease for this IP
+  }
+  "controlplane-worker-2" = {
+    vm_id       = 101
+    pve_node    = "server-02"
+    cpu_cores   = 4
+    memory_mb   = 16384
+    disk_gb     = 100
+    ip_address  = "192.168.1.102"
+    mac_address = "BC:24:11:00:00:02" # Must match your router's static DHCP lease for this IP
+  }
+}

@@ -1,0 +1,14 @@
+# Terraform state - contains cluster PKI secrets, treat like secret.yaml
+*.tfstate
+*.tfstate.backup
+*.tfstate.*.backup
+
+# Terraform working directory
+.terraform/
+
+# Actual variable values (IPs, credentials)
+terraform.tfvars
+
+# Generated credential outputs
+kubeconfig.yaml
+talosconfig.yaml
