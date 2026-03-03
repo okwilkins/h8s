@@ -4,6 +4,12 @@ Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes.
 
 ## Installation
 
+ArgoCD is now automatically installed during cluster bootstrap via Terraform.
+
+### Manual Installation (if needed)
+
+If you need to install ArgoCD manually (e.g., for a new environment or recovery):
+
 ```bash
 export CLUSTER_ENV=prod
 export ARGOCD_HELM_VER=9.4.6
