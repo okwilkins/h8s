@@ -72,7 +72,7 @@ data "talos_machine_configuration" "nodes" {
   kubernetes_version = null # use the version bundled with talos_version
 
   config_patches = [
-    # Patch 1: Per-node identity - hostname, install image, VIP on eth0.
+    # Patch 1: Per-node identity - hostname, install image, VIP on ens18.
     # Mirrors controlplane_worker_template.yaml with placeholders resolved.
     yamlencode({
       machine = {
@@ -85,7 +85,7 @@ data "talos_machine_configuration" "nodes" {
           nameservers = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"]
           interfaces = [
             {
-              interface = "eth0"
+              interface = "ens18"
               dhcp      = true
               vip = {
                 ip = var.cluster_vip
