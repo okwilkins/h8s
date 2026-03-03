@@ -30,7 +30,23 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 3.0"
     }
+
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
+
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.3"
+    }
   }
+}
+
+# Get the first node IP for initial Kubernetes API access (before VIP is ready)
+locals {
+  first_node_name = tolist(sort(keys(var.nodes)))[0]
+  first_node_ip   = var.nodes[local.first_node_name].ip_address
 }
 
 # Credentials are supplied exclusively via environment variables - never hardcoded.
@@ -60,7 +76,7 @@ provider "talos" {}
 
 provider "helm" {
   kubernetes = {
-    host                   = talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
+    host                   = "https://${local.first_node_ip}:6443"
     client_certificate     = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)
     client_key             = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)
     cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)
@@ -68,7 +84,7 @@ provider "helm" {
 }
 
 provider "kubernetes" {
-  host                   = talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
+  host                   = "https://${local.first_node_ip}:6443"
   client_certificate     = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)
   client_key             = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)
   cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)
