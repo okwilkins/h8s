@@ -12,3 +12,7 @@ terraform.tfvars
 # Generated credential outputs
 kubeconfig.yaml
 talosconfig.yaml
+
+# Vault initialization output - contains unseal keys and root token
+# CRITICAL: Back this up securely! Required to unseal Vault after restarts.
+vault-init.json
