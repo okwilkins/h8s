@@ -150,6 +150,8 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
     └── longhorn                    | Cluster CSI.
 ```
 
+It's important to node that if you make changes to this structure that you change both AGENTS.md and README.md to reflect this.
+
 ## Common Patterns
 
 ### Kustomize Overlay
