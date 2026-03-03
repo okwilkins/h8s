@@ -13,7 +13,7 @@ A single `terraform apply` handles the full bootstrap sequence:
 7. Bootstraps etcd on the first node
 8. Retrieves the kubeconfig and talosconfig
 
-It does **not** install Cilium, ArgoCD, or any cluster workloads — see [What to do next](#what-to-do-next).
+It does **not** install cluster workloads beyond Cilium and ArgoCD — see [What to do next](#what-to-do-next).
 
 ## Hardware
 
@@ -136,11 +136,16 @@ Store both in a password manager as secure notes or file attachments.
 Export these before running any Terraform commands:
 
 ```bash
+# Proxmox credentials
 export PROXMOX_VE_ENDPOINT="https://192.168.1.10:8006"
 export PROXMOX_VE_INSECURE="true"
 
 export PROXMOX_VE_USERNAME="root@pam"
 export PROXMOX_VE_PASSWORD="your-proxmox-password"
+
+# External secrets (required)
+export TF_VAR_cloudflare_tunnel_token="your-token-here"
+export TF_VAR_github_app_private_key="$(cat /path/to/private-key.pem)"
 ```
 
 ## Bootstrap
@@ -214,3 +219,81 @@ This resets each node to Talos maintenance mode (graceful etcd leave, disk wipe,
 
 Save `terraform.tfstate` before destroying if you want to preserve the cluster PKI for a future rebuild with the same certificates.
 
+## What to do next
+
+After `terraform apply` completes, the cluster is running with Cilium CNI, ArgoCD, and a fully configured Vault. The following steps are required to fully operationalize the cluster:
+
+### 1. Save Critical Files
+
+**IMPORTANT**: The bootstrap process generates two critical files that must be backed up securely:
+
+1. **`terraform.tfstate`** - Contains cluster PKI (CA certs, keys, tokens)
+2. **`vault-init.json`** - Contains Vault unseal keys and root token
+
+Both files are gitignored. Store them in your password manager or encrypted storage. Losing these files will require a complete cluster rebuild.
+
+### 2. Set External Secrets
+
+Some secrets require external credentials that cannot be auto-generated. These are provided via environment variables:
+
+```bash
+# Cloudflare tunnel token - see networking/cloudflared/README.md for how to generate
+export TF_VAR_cloudflare_tunnel_token="your-token-here"
+
+# GitHub App private key - see ci-cd/renovate/README.md for how to create the app and download the key
+export TF_VAR_github_app_private_key="$(cat /path/to/private-key.pem)"
+```
+
+**How to obtain these credentials:**
+
+- **Cloudflare tunnel token**: See `networking/cloudflared/README.md` for instructions on generating the token using the Cloudflare API
+- **GitHub App private key**: See `ci-cd/renovate/README.md` for instructions on creating the GitHub App and downloading the private key
+
+These environment variables are required. Terraform will fail if they are not set.
+
+### 3. Verify External Secrets Operator
+
+Once Vault secrets are populated, verify ESO is syncing them to Kubernetes:
+
+```bash
+# Check External Secrets
+kubectl get externalsecrets -A
+
+# Check synced secrets
+kubectl get secrets -n harbor
+kubectl get secrets -n monitoring
+```
+
+### 4. Harbor Configuration (Terraform)
+
+After ESO has synced the Harbor secrets, apply the Harbor Terraform:
+
+```bash
+cd infrastructure/terraform
+terraform apply -target=harbor_project.main
+```
+
+This creates Harbor projects, registries, users, and robot accounts using the secrets synced from Vault.
+
+### 5. Access ArgoCD
+
+Get the ArgoCD admin password:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+Access the UI at `https://argocd.okwilkins.dev`
+
+### 6. Ongoing Operations
+
+**Vault Unsealing**: After pod rescheduling, Vault will need to be unsealed using the keys from `vault-init.json`:
+
+```bash
+# Extract unseal keys from vault-init.json and unseal
+for key in $(cat vault-init.json | jq -r '.unseal_keys_b64[]'); do
+  kubectl exec -ti vault-0 -n vault -- vault operator unseal "$key"
+done
+```
+
+**Secret Rotation**: Update Vault secrets as needed. ESO will automatically sync changes to Kubernetes.

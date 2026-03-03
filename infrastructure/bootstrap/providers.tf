@@ -40,6 +40,16 @@ terraform {
       source  = "hashicorp/external"
       version = "~> 2.3"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
+
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -89,3 +99,6 @@ provider "kubernetes" {
   client_key             = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)
   cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)
 }
+
+# Note: We don't use the Vault provider because it requires network access to Vault.
+# Instead, all Vault operations are performed via kubectl exec in vault-init.tf and vault.tf

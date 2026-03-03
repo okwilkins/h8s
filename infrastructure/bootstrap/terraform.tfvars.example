@@ -65,3 +65,16 @@ nodes = {
     mac_address = "BC:24:11:00:00:02" # Must match your router's static DHCP lease for this IP
   }
 }
+
+# ============================================================
+# External Secrets (Required Environment Variables)
+# ============================================================
+# These secrets are NOT set in this file - they must be provided
+# via environment variables before running terraform apply:
+#
+#   export TF_VAR_cloudflare_tunnel_token="your-token-here"
+#   export TF_VAR_github_app_private_key="$(cat /path/to/private-key.pem)"
+#
+# To obtain these credentials:
+# - Cloudflare: See networking/cloudflared/README.md
+# - Renovate: See ci-cd/renovate/README.md
