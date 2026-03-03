@@ -72,8 +72,15 @@ data "talos_machine_configuration" "nodes" {
   kubernetes_version = null # use the version bundled with talos_version
 
   config_patches = [
-    # Patch 1: Per-node identity - hostname, install image, VIP on ens18.
-    # Mirrors controlplane_worker_template.yaml with placeholders resolved.
+    # Hostname per node
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "HostnameConfig"
+      hostname   = each.key
+      auto       = "off"
+    }),
+
+    # Per-node identity - hostname, install image, VIP on ens18.
     yamlencode({
       machine = {
         install = {
@@ -96,8 +103,7 @@ data "talos_machine_configuration" "nodes" {
       }
     }),
 
-    # Patch 2: Machine-level features - KubePrism + Longhorn bind mount.
-    # Mirrors machine_patches/machine_patch.yaml verbatim.
+    # Machine-level features - KubePrism + Longhorn bind mount.
     yamlencode({
       machine = {
         features = {
@@ -119,8 +125,7 @@ data "talos_machine_configuration" "nodes" {
       }
     }),
 
-    # Patch 3: Cluster-level settings - Cilium CNI, no kube-proxy, VIP endpoint.
-    # Mirrors cluster_patch.yaml with VIP placeholder resolved.
+    # Cluster-level settings - Cilium CNI, no kube-proxy, VIP endpoint.
     yamlencode({
       cluster = {
         allowSchedulingOnControlPlanes = true
