@@ -26,6 +26,7 @@
           go-task
           jq
           opentofu
+          yq
         ];
       in
       {
