@@ -119,6 +119,8 @@ export PROXMOX_VE_PASSWORD="your-proxmox-password"
 
 ## Bootstrap
 
+> **Note:** If you have a saved backup of your cluster state, place the `terraform.tfstate` file in this directory before running the commands below. This preserves your cluster PKI (CA certs, keys, join tokens) and allows you to restore without a full rebuild.
+
 ```bash
 terraform init
 terraform apply
