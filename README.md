@@ -46,8 +46,6 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   └── image-buildah
 ├── infrastructure
 │   ├── bootstrap                   | Cluster bootstrap configuration.
-│   ├── proxmox                     | Proxmox VE management and configuration.
-│   ├── talos                       | Scripts and definintions for Talos running on Proxmox.
 │   └── terraform                   | Terraform for internal infrastructure.
 ├── namespaces                      | Holds all namespaces for the cluster.
 ├── networking
@@ -66,7 +64,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   ├── external-secrets-operator   | Takes secrets hosted internally with Vault and manages them inside the cluster.
 │   ├── keycloak                    | (WIP) Cluster SSO.
 │   └── vault                       | Secrets storage and certificate authority.
-├── storage
+└── storage
     ├── cloudnative-pg              | PostrgreSQL database management for various Applications.
     ├── harbor                      | Container and binary registry.
     └── longhorn                    | Cluster CSI.
