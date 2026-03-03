@@ -85,25 +85,7 @@ Copy the output into your `terraform.tfvars` file and configure a static DHCP le
 
 `terraform.tfvars` and `terraform.tfstate` are both gitignored because the state contains the cluster PKI (CA certs, keys, join tokens). If you lose either on a rebuild you will need to fully wipe and re-bootstrap.
 
-Store both in a password manager (e.g. 1Password, Bitwarden, or KeePassXC) as secure notes or file attachments:
-
-```bash
-# Copy tfvars content into a secure note, or attach the file directly.
-# For state - do this after every apply:
-cat terraform.tfstate  # paste into secure note
-# or attach the file if your password manager supports attachments
-```
-
-Alternatively, use an encrypted archive:
-
-```bash
-# Save
-tar czf - terraform.tfvars terraform.tfstate | age -r <your-age-public-key> > bootstrap-secrets.age
-# Restore
-age -d bootstrap-secrets.age | tar xz
-```
-
-The bare minimum to save is `terraform.tfstate` — the tfvars can be reconstructed from memory/notes but the state PKI cannot.
+Store both in a password manager as secure notes or file attachments.
 
 ## Set credentials
 
@@ -130,29 +112,20 @@ Apply takes several minutes. The slow steps are the ISO download to Proxmox (~50
 
 ## Retrieve credentials
 
-Both outputs are marked sensitive so they are not printed automatically. Write them after apply completes:
+After `terraform apply` completes, credentials are automatically configured:
+
+- **Talos config**: Written to `talosconfig.yaml` in this directory
+- **Kubeconfig**: Merged into `~/.kube/config` (creates file if it doesn't exist, merges with existing contexts if it does)
 
 ```bash
-# kubeconfig - WARNING: overwrites your current context
-terraform output -raw kubeconfig > ~/.kube/config
+# Use talosconfig from this directory
+talosctl --talosconfig $(pwd)/talosconfig.yaml version
 
-# talosconfig - merges with any existing config
-terraform output -raw talosconfig > /tmp/talosconfig \
-  && talosctl config merge /tmp/talosconfig \
-  && rm /tmp/talosconfig
-
-# Verify
+# Kubeconfig is already in the standard location
 kubectl get nodes
-talosctl --nodes 192.168.1.101 version
 ```
 
-## What to do next
-
-The cluster is running but has no CNI — pods will not schedule until Cilium is installed.
-
-1. Install Cilium — see [`networking/cilium/README.md`](../../networking/cilium/README.md)
-2. Install ArgoCD — see [`ci-cd/argocd/README.md`](../../ci-cd/argocd/README.md). ArgoCD will then reconcile the rest of the cluster from git.
-3. Populate Vault secrets — search the repo for `ExternalSecret` manifests to find what needs adding.
+**Note:** The kubeconfig merge preserves any existing contexts/clusters you have. The new cluster context will be added alongside them.
 
 ## Ongoing operations
 
