@@ -80,7 +80,6 @@ data "talos_machine_configuration" "nodes" {
           image = "factory.talos.dev/installer/${talos_image_factory_schematic.this.id}:${var.talos_version}"
         }
         network = {
-          hostname    = each.key
           nameservers = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"]
           interfaces = [
             {
