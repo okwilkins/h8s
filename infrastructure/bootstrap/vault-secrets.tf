@@ -106,6 +106,10 @@ resource "random_password" "cosign_password" {
 # ============================================================
 
 resource "null_resource" "vault_secret_harbor_admin" {
+  triggers = {
+    secret_hash = md5("HARBOR_ADMIN_USERNAME=admin HARBOR_ADMIN_PASSWORD=${random_password.harbor_admin_password.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -123,6 +127,10 @@ resource "null_resource" "vault_secret_harbor_admin" {
 }
 
 resource "null_resource" "vault_secret_harbor_main_user" {
+  triggers = {
+    secret_hash = md5("PASSWORD=${random_password.harbor_main_user_password.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -139,6 +147,10 @@ resource "null_resource" "vault_secret_harbor_main_user" {
 }
 
 resource "null_resource" "vault_secret_harbor_dagger" {
+  triggers = {
+    secret_hash = md5("SECRET=${random_password.harbor_dagger_robot_secret.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -155,6 +167,10 @@ resource "null_resource" "vault_secret_harbor_dagger" {
 }
 
 resource "null_resource" "vault_secret_harbor_image_pull" {
+  triggers = {
+    secret_hash = md5("ROBOT_PASSWORD=${random_password.harbor_image_pull_robot_password.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -175,6 +191,10 @@ resource "null_resource" "vault_secret_harbor_image_pull" {
 # ============================================================
 
 resource "null_resource" "vault_secret_grafana" {
+  triggers = {
+    secret_hash = md5("GF_SECURITY_ADMIN_USER=admin GF_SECURITY_ADMIN_PASSWORD=${random_password.grafana_admin_password.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -196,6 +216,10 @@ resource "null_resource" "vault_secret_grafana" {
 # ============================================================
 
 resource "null_resource" "vault_secret_cosign" {
+  triggers = {
+    secret_hash = md5("COSIGN_PASSWORD=${random_password.cosign_password.result} ${tls_private_key.cosign_key.private_key_pem} ${tls_private_key.cosign_key.public_key_pem}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -232,6 +256,10 @@ resource "null_resource" "vault_secret_cosign" {
 # ============================================================
 
 resource "null_resource" "vault_secret_searxng" {
+  triggers = {
+    secret_hash = md5("SECRET=${random_password.searxng_secret.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -252,6 +280,10 @@ resource "null_resource" "vault_secret_searxng" {
 # ============================================================
 
 resource "null_resource" "vault_secret_cnpg_harbor" {
+  triggers = {
+    secret_hash = md5("username=harbor password=${random_password.cnpg_harbor_password.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -269,6 +301,10 @@ resource "null_resource" "vault_secret_cnpg_harbor" {
 }
 
 resource "null_resource" "vault_secret_cnpg_terraform" {
+  triggers = {
+    secret_hash = md5("username=terraform password=${random_password.cnpg_terraform_backend_password.result}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -276,7 +312,7 @@ resource "null_resource" "vault_secret_cnpg_terraform" {
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
         vault login \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cnpg/cnpg-terraform-backend-prod-app-user-credentials \\
-          username=app \\
+          username=terraform \\
           password='${random_password.cnpg_terraform_backend_password.result}' || exit 1
       "
     EOT
@@ -297,6 +333,10 @@ resource "null_resource" "vault_secret_cnpg_terraform" {
 #   terraform apply
 
 resource "null_resource" "vault_secret_cloudflare" {
+  triggers = {
+    secret_hash = md5("token=${var.cloudflare_tunnel_token}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
@@ -313,6 +353,10 @@ resource "null_resource" "vault_secret_cloudflare" {
 }
 
 resource "null_resource" "vault_secret_renovate" {
+  triggers = {
+    secret_hash = md5("private-key=${var.github_app_private_key}")
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
