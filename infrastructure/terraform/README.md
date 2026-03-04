@@ -14,9 +14,11 @@ kubectl -n terraform port-forward svc/cnpg-terraform-backend-prod-rw 5432:5432
 To then export the connection details needed, run in a separate shell:
 
 ```bash
-export PG_USER=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o json | jq -r '.data.username' | base64 -d)
-export PG_PASS=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o json | jq -r '.data.password' | base64 -d)
-export PG_CONN_STR=postgres://$PG_USER:$PG_PASS@localhost/terraform_backend
+export PGUSER=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o json | jq -r '.data.username' | base64 -d)
+export PGPASSWORD=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o json | jq -r '.data.password' | base64 -d)
+export PGHOST=localhost
+export PGPORT=5432
+export PGDATABASE=terraform_backend
 ```
 
 More details on the [Postgres backend can be read here](https://developer.hashicorp.com/terraform/language/backend/pg).
