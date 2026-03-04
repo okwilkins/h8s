@@ -65,7 +65,6 @@ spec:
               readOnly: true
             - name: proxmox-hosts-volume
               mountPath: /etc/proxmox-hosts
-              subPath: hosts
               readOnly: true
           ports:
             - name: dns
@@ -108,4 +107,7 @@ spec:
         - name: proxmox-hosts-volume
           secret:
             secretName: proxmox-hosts-file
+            items:
+              - key: hosts
+                path: hosts
             optional: true
