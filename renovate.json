@@ -4,36 +4,15 @@
     "automerge": false,
     "prHourlyLimit": 0,
     "prConcurrentLimit": 0,
-    "argocd": {
-        "managerFilePatterns": [
-            "/^ci-cd\\/argocd\\/environments\\/prod\\/apps\\/.*\\.ya?ml$/"
-        ]
-    },
-    "kubernetes": {
-        "managerFilePatterns": [
-            "/(^|\\/)(applications|ci-cd|networking|observability|security|storage|namespaces|infrastructure)\\/.*\\.ya?ml$/"
-        ]
-    },
+    "argocd": {},
+    "kubernetes": {},
+    "terraform": {},
     "customManagers": [
-        {
-            "customType": "regex",
-            "description": "Update ARGOCD_HELM_VER in ArgoCD bootstrap docs",
-            "managerFilePatterns": [
-                "/^ci-cd\\/argocd\\/README\\.md$/"
-            ],
-            "matchStrings": [
-                "export\\s+ARGOCD_HELM_VER=(?<currentValue>[^\\s]+)"
-            ],
-            "depNameTemplate": "argo-cd",
-            "datasourceTemplate": "helm",
-            "registryUrlTemplate": "https://argoproj.github.io/argo-helm",
-            "versioningTemplate": "semver"
-        },
         {
             "customType": "regex",
             "description": "Update OCI Helm charts in ArgoCD Applications (ghcr.io)",
             "managerFilePatterns": [
-                "/^ci-cd\\/argocd\\/environments\\/prod\\/apps\\/.*\\.ya?ml$/"
+                "/ci-cd/argocd/.*\\.ya?ml$/"
             ],
             "matchStrings": [
                 "repoURL:\\s*ghcr\\.io\\/(?<registryPath>[^\\s]+)\\s*\\n\\s*chart:\\s*(?<chartName>[^\\s]+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>[^\\s]+)"
