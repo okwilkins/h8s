@@ -61,3 +61,6 @@ data:
       - name: archlinux
       - name: github
 
+      - name: wikidata
+        disabled: true
+
