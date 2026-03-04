@@ -264,16 +264,15 @@ kubectl get secrets -n harbor
 kubectl get secrets -n monitoring
 ```
 
-### 4. Harbor Configuration (Terraform)
+### 4. Run Infrastructure Terraform
 
-After ESO has synced the Harbor secrets, apply the Harbor Terraform:
+After ESO has synced the secrets from Vault, navigate to the infrastructure Terraform directory and follow the instructions in the README there:
 
 ```bash
-cd infrastructure/terraform
-terraform apply -target=harbor_project.main
+cd ../terraform
 ```
 
-This creates Harbor projects, registries, users, and robot accounts using the secrets synced from Vault.
+See `infrastructure/terraform/README.md` for detailed setup instructions including database port-forwarding and Harbor configuration.
 
 ### 5. Access ArgoCD
 
