@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hubble-okwilkins-dev
+  namespace: kube-system
+spec:
+  secretName: hubble-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: hubble.okwilkins.dev
+  dnsNames:
+    - hubble.okwilkins.dev

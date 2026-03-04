@@ -95,6 +95,18 @@ spec:
         certificateRefs:
           - name: search-okwilkins-dev-tls
             namespace: searxng
+    - protocol: HTTPS
+      name: home-lan-hubble
+      hostname: hubble.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: hubble-okwilkins-dev-tls
+            namespace: kube-system
     - protocol: TLS
       name: home-lan-pg-tf-backend
       hostname: pg-tf-backend.okwilkins.dev
