@@ -37,7 +37,6 @@ data:
       limiter: true
       public_instance: true
       image_proxy: true
-      http_protocol_version: "1.1"
 
     valkey:
       url: "redis://searxng-redis:6379/0"
