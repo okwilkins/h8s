@@ -383,7 +383,8 @@ locals {
   # Get unique Proxmox IPs from nodes map (deduplicate in case multiple nodes on same Proxmox)
   proxmox_ips = distinct([for node in var.nodes : node.proxmox_ip])
 
-  # Generate hosts file entries - use pve1, pve2, etc. as hostnames
+  # Generate hosts file entries with FQDNs - CoreDNS hosts plugin needs full domain names
+  # to match queries in the okwilkins.dev zone (e.g., pve1.okwilkins.dev)
   proxmox_hosts_entries = [
     for idx, ip in local.proxmox_ips : "${ip} pve${idx + 1}.okwilkins.dev"
   ]
