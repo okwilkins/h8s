@@ -22,6 +22,12 @@ singleBinary:
   replicas: 1
   persistence:
     size: 100Gi
+  extraVolumes:
+    - name: cache
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: cache
+      mountPath: /loki
 write:
   replicas: 0
 read:
