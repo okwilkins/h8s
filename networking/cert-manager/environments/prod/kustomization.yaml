@@ -13,3 +13,4 @@ resources:
   - ./certificates/harbor-okwilkins-dev.yaml
   - ./certificates/search-okwilkins-dev.yaml
   - ./certificates/pg-tf-backend-okwilkins-dev.yaml
+  - ./certificates/hubble-okwilkins-dev.yaml
