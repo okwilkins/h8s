@@ -54,9 +54,17 @@ terraform {
 }
 
 # Get the first node IP for initial Kubernetes API access (before VIP is ready)
+# and the Proxmox SSH address from the node matching proxmox_node_name
 locals {
   first_node_name = tolist(sort(keys(var.nodes)))[0]
   first_node_ip   = var.nodes[local.first_node_name].ip_address
+
+  # Find the node that matches proxmox_node_name and get its Proxmox IP
+  proxmox_ssh_node = [
+    for name, node in var.nodes : node
+    if node.pve_node == var.proxmox_node_name
+  ][0]
+  proxmox_ssh_address = local.proxmox_ssh_node.proxmox_ip
 }
 
 # Credentials are supplied exclusively via environment variables - never hardcoded.
@@ -71,13 +79,14 @@ locals {
 #   Datastore.AllocateSpace, Datastore.Audit on the relevant storage and node.
 provider "proxmox" {
   # SSH access is required by bpg/proxmox for certain operations (e.g. uploading
-  # ISO files via SFTP). Configure the node address to match your Proxmox host.
+  # ISO files via SFTP). The node address is derived from the nodes map based
+  # on the proxmox_node_name variable.
   ssh {
     agent    = true
     username = "root"
     node {
       name    = var.proxmox_node_name
-      address = var.proxmox_node_address
+      address = local.proxmox_ssh_address
     }
   }
 }

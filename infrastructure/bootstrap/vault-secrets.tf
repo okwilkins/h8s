@@ -371,3 +371,55 @@ resource "null_resource" "vault_secret_renovate" {
 
   depends_on = [null_resource.vault_enable_kv]
 }
+
+# ============================================================
+# Proxmox Server IPs for CoreDNS
+# ============================================================
+# Generates a hosts file format from the nodes map and stores in Vault
+# for ESO to sync to CoreDNS. This hides Proxmox IPs from git while
+# allowing DNS resolution of friendly names like pve1.okwilkins.dev
+
+locals {
+  # Get unique Proxmox IPs from nodes map (deduplicate in case multiple nodes on same Proxmox)
+  proxmox_ips = distinct([for node in var.nodes : node.proxmox_ip])
+
+  # Generate hosts file entries - use pve1, pve2, etc. as hostnames
+  proxmox_hosts_entries = [
+    for idx, ip in local.proxmox_ips : "${ip} pve${idx + 1}.okwilkins.dev"
+  ]
+  proxmox_hosts_content = join("\n", local.proxmox_hosts_entries)
+}
+
+resource "null_resource" "vault_secret_proxmox_hosts" {
+  count = length(var.nodes) > 0 ? 1 : 0
+
+  triggers = {
+    hosts_hash = md5(local.proxmox_hosts_content)
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      VAULT_TOKEN=$(cat ${path.module}/vault-init.json | jq -r '.root_token')
+      
+      # Write the hosts file temporarily
+      echo '${local.proxmox_hosts_content}' > /tmp/proxmox-hosts
+      
+      # Copy to vault pod
+      kubectl cp /tmp/proxmox-hosts vault-0:/tmp/proxmox-hosts -n vault
+      
+      # Store in Vault
+      kubectl exec vault-0 -n vault -- /bin/sh -c "
+        export VAULT_TOKEN=\"$VAULT_TOKEN\"
+        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault kv put kubernetes-homelab/proxmox/hosts-file \\
+          hosts=@/tmp/proxmox-hosts || exit 1
+      "
+      
+      # Cleanup
+      rm -f /tmp/proxmox-hosts
+      kubectl exec vault-0 -n vault -- rm -f /tmp/proxmox-hosts
+    EOT
+  }
+
+  depends_on = [null_resource.vault_enable_kv]
+}

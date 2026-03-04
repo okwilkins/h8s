@@ -3,17 +3,12 @@
 # ============================================================
 
 variable "proxmox_node_name" {
-  description = "Name of the Proxmox node used for SSH by the bpg provider. In a multi-node cluster this should be the node whose IP is set in proxmox_node_address."
-  type        = string
-}
-
-variable "proxmox_node_address" {
-  description = "IP address or hostname of the Proxmox node, used for SSH by the bpg provider."
+  description = "Name of the Proxmox node used for SSH by the bpg provider. This must match the 'pve_node' field of one of your nodes in the nodes map."
   type        = string
 }
 
 variable "proxmox_iso_datastore" {
-  description = "Proxmox datastore ID to upload the Talos ISO into (must support ISO content type)."
+  description = "Proxmox datastore ID to upload the Talos ISO into (must support 'iso' content type)."
   type        = string
   default     = "local"
 }
@@ -59,8 +54,9 @@ variable "nodes" {
 
   type = map(object({
     # Proxmox VM settings
-    vm_id    = number # Must be unique across the entire Proxmox cluster
-    pve_node = string # Proxmox node name to place this VM on
+    vm_id      = number # Must be unique across the entire Proxmox cluster
+    pve_node   = string # Proxmox node name to place this VM on
+    proxmox_ip = string # IP address of the Proxmox server hosting this VM
 
     # Hardware resources
     cpu_cores = number
@@ -81,6 +77,7 @@ variable "nodes" {
     "controlplane-worker-1" = {
       vm_id       = 100
       pve_node    = "server-01"
+      proxmox_ip  = "192.168.1.XXX" # Replace with actual Proxmox server 1 IP
       cpu_cores   = 4
       memory_mb   = 16384
       disk_gb     = 100
@@ -90,6 +87,7 @@ variable "nodes" {
     "controlplane-worker-2" = {
       vm_id       = 101
       pve_node    = "server-02"
+      proxmox_ip  = "192.168.1.XXX" # Replace with actual Proxmox server 2 IP
       cpu_cores   = 4
       memory_mb   = 16384
       disk_gb     = 100
