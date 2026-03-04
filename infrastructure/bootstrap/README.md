@@ -81,8 +81,8 @@ cp terraform.tfvars.example terraform.tfvars
 ### Example `terraform.tfvars`
 
 ```hcl
-proxmox_node_name    = "pve"
-proxmox_node_address = "192.168.1.10"
+# Proxmox node to use for SSH (must match a 'pve_node' value in nodes map below)
+proxmox_node_name = "server-01"
 
 proxmox_iso_datastore  = "local"
 proxmox_disk_datastore = "local-lvm"
@@ -95,23 +95,31 @@ nodes = {
   "controlplane-worker-1" = {
     vm_id       = 100
     pve_node    = "server-01"
+    proxmox_ip  = "192.168.1.XXX"  # IP of the Proxmox server hosting this VM
     cpu_cores   = 4
     memory_mb   = 16384
     disk_gb     = 100
-    ip_address  = "192.168.1.101"
+    ip_address  = "192.168.1.XXX"
     mac_address = "BC:24:11:xx:xx:xx" # Must match your router's static DHCP lease for this IP
   }
   "controlplane-worker-2" = {
     vm_id       = 101
     pve_node    = "server-02"
+    proxmox_ip  = "192.168.1.XXX"  # IP of the Proxmox server hosting this VM
     cpu_cores   = 4
     memory_mb   = 16384
     disk_gb     = 100
-    ip_address  = "192.168.1.102"
+    ip_address  = "192.168.1.XXX"
     mac_address = "BC:24:11:xx:xx:xx" # Must match your router's static DHCP lease for this IP
   }
 }
 ```
+
+**Proxmox IP handling:** The `proxmox_ip` field in each node specifies the IP address of the Proxmox server hosting that VM. Terraform uses this to:
+1. Connect via SSH to the Proxmox server specified by `proxmox_node_name` (for ISO uploads)
+2. Generate a hosts file for CoreDNS that maps friendly names (`pve1.okwilkins.dev`, `pve2.okwilkins.dev`) to Proxmox IPs
+
+This keeps Proxmox IPs out of git while still allowing DNS resolution of friendly URLs.
 
 **Node names are the Kubernetes hostnames.** Keep them stable across rebuilds — renaming or swapping node entries will cause Longhorn to detect a disk UUID mismatch and refuse to start. Add new nodes by adding new keys; never reorder or rename existing ones.
 
@@ -137,7 +145,9 @@ Export these before running any Terraform commands:
 
 ```bash
 # Proxmox credentials
-export PROXMOX_VE_ENDPOINT="https://192.168.1.10:8006"
+# IMPORTANT: This endpoint must match the proxmox_node_name in terraform.tfvars
+# For example, if proxmox_node_name = "server-01", use the proxmox_ip from that node
+export PROXMOX_VE_ENDPOINT="https://192.168.1.123:8006"
 export PROXMOX_VE_INSECURE="true"
 
 export PROXMOX_VE_USERNAME="root@pam"
@@ -147,6 +157,8 @@ export PROXMOX_VE_PASSWORD="your-proxmox-password"
 export TF_VAR_cloudflare_tunnel_token="your-token-here"
 export TF_VAR_github_app_private_key="$(cat /path/to/private-key.pem)"
 ```
+
+**Note on PROXMOX_VE_ENDPOINT:** The endpoint URL must correspond to the Proxmox server specified by `proxmox_node_name` in your `terraform.tfvars`. Terraform will look up the SSH address from the matching node's `proxmox_ip` field. If these don't match, Terraform operations may fail.
 
 ## Bootstrap
 

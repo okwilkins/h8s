@@ -12,13 +12,10 @@
 # Proxmox
 # ============================================================
 
-# Name of the Proxmox node you are connecting to (Datacenter > node name in the UI).
-# In a multi-node cluster this can be any node - just keep it consistent with
-# proxmox_node_address below.
+# Name of the Proxmox node to use for SSH by Terraform.
+# This must match the 'pve_node' field of one of your nodes below.
+# Terraform will look up the IP from that node's 'proxmox_ip' field.
 proxmox_node_name = "server-01"
-
-# IP of the Proxmox node above, used for both the API endpoint and SSH.
-proxmox_node_address = "192.168.1.123"
 
 # Datastore for the Talos ISO (must support 'iso' content type - 'local' usually works)
 proxmox_iso_datastore = "local"
@@ -44,11 +41,13 @@ cluster_vip = "192.168.1.100"
 #
 # vm_id must be unique across your entire Proxmox node.
 # ip_address should be reserved/static in your DHCP server or router.
+# proxmox_ip is the IP of the Proxmox server hosting this VM (used for DNS and SSH).
 
 nodes = {
   "controlplane-worker-1" = {
     vm_id       = 100
     pve_node    = "server-01"
+    proxmox_ip  = "192.168.1.XXX"  # Replace with actual Proxmox server 1 IP
     cpu_cores   = 4
     memory_mb   = 16384
     disk_gb     = 100
@@ -58,6 +57,7 @@ nodes = {
   "controlplane-worker-2" = {
     vm_id       = 101
     pve_node    = "server-02"
+    proxmox_ip  = "192.168.1.XXX"  # Replace with actual Proxmox server 2 IP
     cpu_cores   = 4
     memory_mb   = 16384
     disk_gb     = 100
