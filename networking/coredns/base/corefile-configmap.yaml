@@ -5,6 +5,15 @@ metadata:
   namespace: coredns-lan
 data:
   Corefile: |-
+    # Zone-specific server block for Proxmox hosts
+    # This ensures hosts plugin is queried before template for these specific domains
+    pve1.okwilkins.dev pve2.okwilkins.dev:53 {
+        hosts /etc/proxmox-hosts/hosts
+        log . {
+            class error
+        }
+        errors
+    }
     okwilkins.dev:53 {
         ready
         log . {
@@ -12,10 +21,6 @@ data:
         }
         header {
             response set ra
-        }
-        # Proxmox hosts - IPs synced from Vault via ESO
-        hosts /etc/proxmox-hosts {
-            fallthrough
         }
         template IN A {
             match (^|\.)okwilkins\.dev\.$
