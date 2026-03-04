@@ -13,6 +13,10 @@ data:
         header {
             response set ra
         }
+        # Proxmox hosts - IPs synced from Vault via ESO
+        hosts /etc/proxmox-hosts {
+            fallthrough
+        }
         template IN A {
             match (^|\.)okwilkins\.dev\.$
             answer "{{ .Name }} 60 IN A 192.168.1.121"
