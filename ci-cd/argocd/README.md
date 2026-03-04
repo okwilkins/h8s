@@ -12,7 +12,7 @@ If you need to install ArgoCD manually (e.g., for a new environment or recovery)
 
 ```bash
 export CLUSTER_ENV=prod
-export ARGOCD_HELM_VER=9.4.6
+export ARGOCD_HELM_VER=9.4.7
 
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
