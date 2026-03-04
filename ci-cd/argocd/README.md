@@ -6,24 +6,6 @@ Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes.
 
 ArgoCD is now automatically installed during cluster bootstrap via Terraform.
 
-### Manual Installation (if needed)
-
-If you need to install ArgoCD manually (e.g., for a new environment or recovery):
-
-```bash
-export CLUSTER_ENV=prod
-export ARGOCD_HELM_VER=9.4.7
-
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
-helm upgrade argocd argo/argo-cd \
-    --install \
-    --namespace argocd \
-    --create-namespace \
-    --version ${ARGOCD_HELM_VER} \
-    -f environments/${CLUSTER_ENV}/values.yaml
-```
-
 ### After Bootstrapping
 
 After bootstrapping, the above command will need to be run again in order to run again to have the Prometheus service monitors be installed. They will only be available after [Prometheus is installed](../../observability/prometheus).
