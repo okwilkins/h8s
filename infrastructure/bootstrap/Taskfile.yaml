@@ -1,0 +1,33 @@
+version: "3"
+run: once
+dotenv: ['.env']
+
+vars:
+  ROOT_DIR:
+    sh: git rev-parse --show-toplevel
+
+tasks:
+  init:
+    desc: "tofu init"
+    cmds:
+      - tofu init
+
+  plan:
+    desc: "tofu plan"
+    cmds:
+      - tofu plan
+
+  apply:
+    desc: "tofu apply"
+    cmds:
+      - tofu apply
+
+  deploy:
+    desc: "Full deploy (init + apply)"
+    cmds:
+      - tofu init
+      - task: apply
+
+  default:
+    cmds:
+      - task --list
