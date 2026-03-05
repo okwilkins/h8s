@@ -27,6 +27,7 @@
           jq
           opentofu
           yq
+          sshpass
         ];
       in
       {
