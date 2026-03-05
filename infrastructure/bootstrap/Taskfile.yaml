@@ -28,6 +28,11 @@ tasks:
       - tofu init
       - task: apply
 
+  destroy:
+    desc: "tofu destroy"
+    cmds:
+      - tofu destroy
+
   default:
     cmds:
       - task --list
