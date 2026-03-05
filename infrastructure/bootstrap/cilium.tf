@@ -27,7 +27,7 @@ locals {
 
 data "external" "cilium_version" {
   program = ["bash", "-c", <<-EOT
-    version=$(yq '.spec.sources[0].targetRevision' ${path.module}/../../ci-cd/argocd/environments/prod/apps/cilium-helm.yaml)
+    version=$(yq -r '.spec.sources[0].targetRevision' $ROOT_DIR/ci-cd/argocd/environments/prod/apps/cilium-helm.yaml)
     echo "{\"version\": \"$version\"}"
   EOT
   ]
