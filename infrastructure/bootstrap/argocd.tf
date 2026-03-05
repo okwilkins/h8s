@@ -25,7 +25,7 @@ locals {
 
 data "external" "argocd_version" {
   program = ["bash", "-c", <<-EOT
-    version=$(yq '.spec.sources[0].targetRevision' ${path.module}/../../ci-cd/argocd/environments/prod/apps/argocd-helm.yaml)
+    version=$(yq -r '.spec.sources[0].targetRevision' $ROOT_DIR/ci-cd/argocd/environments/prod/apps/argocd-helm.yaml)
     echo "{\"version\": \"$version\"}"
   EOT
   ]
