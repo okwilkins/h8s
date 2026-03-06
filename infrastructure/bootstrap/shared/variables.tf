@@ -2,6 +2,11 @@
 # General
 # ============================================================
 
+variable "project_root" {
+  description = "Root directory for infrastructure"
+  type        = string
+}
+
 variable "infra_root" {
   description = "Root directory for infrastructure"
   type        = string
