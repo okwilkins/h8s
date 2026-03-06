@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# Default TF_DIR to 06-vault-init if not set
+: "${TF_DIR:=$INFRA_ROOT/06-vault-init}"
 : "${OUT_FILE:=./secrets/vault-init.json}"
 : "${NAMESPACE:=vault}"
 : "${POD_NAME:=vault-0}"
