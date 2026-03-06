@@ -80,6 +80,34 @@ tasks:
     cmds:
       - tofu destroy -auto-approve
 
+  # ArgoCD - Install ArgoCD for GitOps
+  argocd:install:
+    desc: "Install ArgoCD for GitOps"
+    dir: '$INFRA_ROOT/05-argocd'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  argocd:destroy:
+    desc: "Destroy ArgoCD installation"
+    dir: '$INFRA_ROOT/05-argocd'
+    cmds:
+      - tofu destroy -auto-approve
+
+  # Vault Init - Initialize Vault outputs for helper scripts
+  vault:init:
+    desc: "Initialize Vault outputs (creates outputs for helper scripts)"
+    dir: '$INFRA_ROOT/06-vault-init'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  vault:destroy:
+    desc: "Destroy Vault outputs"
+    dir: '$INFRA_ROOT/06-vault-init'
+    cmds:
+      - tofu destroy -auto-approve
+
   # Composite tasks
   cluster:bootstrap:
     desc: "Run all bootstrap stages in sequence"
@@ -89,10 +117,14 @@ tasks:
       - task: proxmox:provision:install
       - task: talos:configure:install
       - task: cilium:install
+      - task: argocd:install
+      - task: vault:init
 
   cluster:destroy:
     desc: "Destroy all resources in reverse order"
     cmds:
+      - task: vault:destroy
+      - task: argocd:destroy
       - task: cilium:destroy
       - task: talos:configure:destroy
       - task: proxmox:provision:destroy
@@ -109,6 +141,8 @@ tasks:
       - rm -f {{.STATES_DIR}}/03-talos-configure
       - rm -f {{.STATES_DIR}}/03-talos-provision
       - rm -f {{.STATES_DIR}}/04-cilium
+      - rm -f {{.STATES_DIR}}/05-argocd
+      - rm -f {{.STATES_DIR}}/06-vault-init
       - echo "State files removed. You will need to re-run cluster:bootstrap to recreate the cluster."
 
   clean:all:
