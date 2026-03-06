@@ -40,6 +40,17 @@ variable "proxmox_iso_datastore" {
   default     = "local"
 }
 
+variable "proxmox_node_name" {
+  description = "Name of the Proxmox node used for SSH by the bpg provider. This must match the 'pve_node' field of one of your nodes in the nodes map."
+  type        = string
+}
+
+variable "proxmox_disk_datastore" {
+  description = "Proxmox datastore ID to store VM disks (e.g. 'local-lvm', 'local-zfs')."
+  type        = string
+  default     = "local-lvm"
+}
+
 # ============================================================
 # Talos
 # ============================================================
@@ -49,6 +60,18 @@ variable "talos_version" {
   type        = string
   default     = "v1.12.0"
 }
+
+variable "talos_cluster_name" {
+  description = "Kubernetes cluster name, used in generated configs and kubeconfig context."
+  type        = string
+  default     = "talos-homelab"
+}
+
+variable "talos_cluster_vip" {
+  description = "Virtual IP shared across all controlplane nodes. Must be within the subnet but outside DHCP range."
+  type        = string
+}
+
 # ============================================================
 # Nodes
 # ============================================================
