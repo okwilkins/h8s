@@ -1,5 +1,5 @@
 terraform {
   backend "local" {
-    path = "../states/00-talos-factory.tfstate"
+    path = "$INFRA_ROOT/states/00-talos-factory.tfstate"
   }
 }
