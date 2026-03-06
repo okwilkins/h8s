@@ -70,4 +70,20 @@ provider "proxmox" {
   username = var.proxmox_username
   password = var.proxmox_password
   insecure = var.proxmox_insecure
+
+  # For production prefer an API token scoped to:
+  #   VM.Config.*, VM.PowerMgmt, VM.Allocate, Datastore.AllocateTemplate,
+  #   Datastore.AllocateSpace, Datastore.Audit on the relevant storage and node.
+  # SSH access is required by bpg/proxmox for certain operations (e.g. uploading
+  # ISO files via SFTP). The node address is derived from the nodes map based
+  # on the proxmox_node_name variable.
+  ssh {
+    agent    = true
+    username = "root"
+    node {
+      name    = var.proxmox_node_name
+      address = local.proxmox_ssh_address
+    }
+  }
 }
+
