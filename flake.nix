@@ -28,6 +28,7 @@
           opentofu
           yq
           sshpass
+          netcat
         ];
       in
       {
