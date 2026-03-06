@@ -33,6 +33,11 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = tools;
+          shellHook = ''
+            export PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+            # TODO: Change this to just be infrastructure when refactoring everything together: i.e. move terraform into this project
+            export INFRA_ROOT=$PROJECT_ROOT/infrastructure/bootstrap
+          '';
         };
 
         packages.tools = pkgs.buildEnv {
