@@ -1,38 +1,143 @@
 version: "3"
 run: once
-dotenv: ['.env']
 
 vars:
-  ROOT_DIR:
-    sh: git rev-parse --show-toplevel
+  STATES_DIR: "$INFRA_ROOT/states"
 
 tasks:
-  init:
-    desc: "tofu init"
-    cmds:
-      - tofu init
-
-  plan:
-    desc: "tofu plan"
-    cmds:
-      - tofu plan
-
-  apply:
-    desc: "tofu apply"
-    cmds:
-      - tofu apply
-
-  deploy:
-    desc: "Full deploy (init + apply)"
-    cmds:
-      - tofu init
-      - task: apply
-
-  destroy:
-    desc: "tofu destroy"
-    cmds:
-      - tofu destroy
-
   default:
+    desc: "List all available tasks"
     cmds:
       - task --list
+
+  # Talos Factory
+  talos-factory:
+    desc: "Generate Talos schematic with custom extensions"
+    cmds:
+      - task: talos-factory-bootstrap
+
+  talos-factory-bootstrap:
+    internal: true
+    dir: '$INFRA_ROOT/00-talos-factory'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  talos-factory-destroy:
+    desc: "Destroy Talos factory schematic"
+    dir: '$INFRA_ROOT/00-talos-factory'
+    cmds:
+      - tofu destroy -auto-approve
+
+  # Proxmox ISO - Download Talos ISO to Proxmox nodes
+  proxmox-iso:
+    desc: "Download Talos ISO to Proxmox nodes"
+    cmds:
+      - task: proxmox-iso-bootstrap
+
+  proxmox-iso-bootstrap:
+    internal: true
+    dir: '$INFRA_ROOT/01-proxmox-iso-upload'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  proxmox-iso-destroy:
+    desc: "Remove Talos ISO from Proxmox nodes"
+    dir: '$INFRA_ROOT/01-proxmox-iso-upload'
+    cmds:
+      - tofu destroy -auto-approve
+
+  # Proxmox Provision - Create VMs on Proxmox
+  proxmox-provision:
+    desc: "Create VMs on Proxmox"
+    cmds:
+      - task: proxmox-provision-bootstrap
+
+  proxmox-provision-bootstrap:
+    internal: true
+    dir: '$INFRA_ROOT/02-proxmox-provision'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  proxmox-provision-destroy:
+    desc: "Destroy Proxmox VMs"
+    dir: '$INFRA_ROOT/02-proxmox-provision'
+    cmds:
+      - tofu destroy -auto-approve
+
+  # Talos Configure - Configure nodes, bootstrap etcd, retrieve kubeconfig
+  talos-configure:
+    desc: "Configure Talos nodes, bootstrap etcd, retrieve kubeconfig"
+    cmds:
+      - task: talos-configure-bootstrap
+
+  talos-configure-bootstrap:
+    internal: true
+    dir: '$INFRA_ROOT/03-talos-configure'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  talos-configure-destroy:
+    desc: "Destroy Talos configuration and nodes"
+    dir: '$INFRA_ROOT/03-talos-configure'
+    cmds:
+      - tofu destroy -auto-approve
+
+  # Cilium - Install Cilium CNI
+  cilium:
+    desc: "Install Cilium CNI"
+    cmds:
+      - task: cilium-bootstrap
+
+  cilium-bootstrap:
+    internal: true
+    dir: '$INFRA_ROOT/04-cilium'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  cilium-destroy:
+    desc: "Destroy Cilium CNI installation"
+    dir: '$INFRA_ROOT/04-cilium'
+    cmds:
+      - tofu destroy -auto-approve
+
+  # Composite tasks
+  bootstrap-all:
+    desc: "Run all bootstrap stages in sequence"
+    cmds:
+      - task: talos-factory-bootstrap
+      - task: proxmox-iso-bootstrap
+      - task: proxmox-provision-bootstrap
+      - task: talos-configure-bootstrap
+      - task: cilium-bootstrap
+
+  destroy-all:
+    desc: "Destroy all resources in reverse order"
+    cmds:
+      - task: cilium-destroy
+      - task: talos-configure-destroy
+      - task: proxmox-provision-destroy
+      - task: proxmox-iso-destroy
+      - task: talos-factory-destroy
+
+  # Utility tasks
+  clean-states:
+    desc: "Remove all Terraform state files (DANGEROUS - destroys all state!)"
+    cmds:
+      - rm -f {{.STATES_DIR}}/00-talos-factory.tfstate
+      - rm -f {{.STATES_DIR}}/01-proxmox-iso-upload
+      - rm -f {{.STATES_DIR}}/02-proxmox-provision
+      - rm -f {{.STATES_DIR}}/03-talos-configure
+      - rm -f {{.STATES_DIR}}/03-talos-provision
+      - rm -f {{.STATES_DIR}}/04-cilium
+      - echo "State files removed. You will need to re-run bootstrap-all to recreate the cluster."
+
+  clean-all:
+    desc: "Destroy all resources and remove state files (COMPLETE RESET)"
+    cmds:
+      - task: destroy-all
+      - task: clean-states
