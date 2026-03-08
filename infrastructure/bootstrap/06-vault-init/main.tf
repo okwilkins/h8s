@@ -54,3 +54,36 @@ resource "null_resource" "vault_bootstrap" {
 
   depends_on = [null_resource.wait_for_kubernetes_api]
 }
+
+# ============================================================
+# Enable Vault KV v2 Secrets Engine
+# ============================================================
+# Enables the KV v2 secrets engine at the kubernetes-homelab path.
+# This must be done before any secrets can be stored.
+
+resource "null_resource" "vault_enable_kv" {
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      source ${var.infra_root}/scripts/common.sh
+      load_tf_kube_env
+      create_cert_dir
+
+      # Extract root token from vault-init.json
+      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
+      export VAULT_TOKEN
+
+      # Enable KV v2 secrets engine
+      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
+        export VAULT_TOKEN=\"$VAULT_TOKEN\"
+        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault secrets enable -path=kubernetes-homelab kv-v2 2>/dev/null || echo 'KV secrets engine already enabled'
+      "
+    EOT
+  }
+
+  depends_on = [null_resource.vault_bootstrap]
+}
