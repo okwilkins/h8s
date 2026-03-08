@@ -60,20 +60,32 @@ resource "helm_release" "argocd" {
 resource "null_resource" "app_of_apps" {
   triggers = {
     manifest_hash = md5(yamlencode(local.app_of_apps_manifest))
+    manifest      = yamlencode(local.app_of_apps_manifest)
+    infra_root    = var.infra_root
   }
 
   depends_on = [helm_release.argocd]
 
   provisioner "local-exec" {
     command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-
+      source ${self.triggers.infra_root}/scripts/common.sh  # Change to self.triggers
       load_tf_kube_env
       create_cert_dir
-
       kubectl_wrapper apply -f - \
         <<'MANIFEST'
-      ${yamlencode(local.app_of_apps_manifest)}
+      ${self.triggers.manifest}  # Change to self.triggers
+      MANIFEST
+    EOT
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      source ${self.triggers.infra_root}/scripts/common.sh  # Change to self.triggers
+      load_tf_kube_env
+      create_cert_dir
+      kubectl_wrapper delete application --ignore-not-found -f - \
+        <<'MANIFEST'
+      ${self.triggers.manifest}  # Change to self.triggers
       MANIFEST
     EOT
   }
