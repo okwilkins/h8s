@@ -240,6 +240,23 @@ If Vault initialisation fails:
 2. Verify Cilium is running: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml get pods -n kube-system`
 3. Check Vault pod logs: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml logs -n vault vault-0`
 
+#### Cilium GatewayClass fails on initial cluster setup
+
+The Cilium GatewayClass resource often fails to be created properly during the initial cluster bootstrap. If you see errors related to GatewayClass not being ready or missing:
+
+1. Delete the existing GatewayClass:
+   ```bash
+   kubectl delete gatewayclass cilium
+   ```
+
+2. Let ArgoCD recreate it by syncing the application
+
+3. For added reliability, restart the Cilium pods:
+   ```bash
+   kubectl rollout restart deployment -n kube-system cilium-operator
+   kubectl rollout restart daemonset -n kube-system cilium
+   ```
+
 ### Set External Secrets
 
 **How to obtain these credentials:**
