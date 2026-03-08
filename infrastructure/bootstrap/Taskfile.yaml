@@ -94,13 +94,14 @@ tasks:
     cmds:
       - tofu destroy -auto-approve
 
-  # Vault Init - Initialize Vault outputs for helper scripts
+  # Vault Init - Initialise Vault outputs for helper scripts
   vault:init:
-    desc: "Initialize Vault outputs (creates outputs for helper scripts)"
+    desc: "Initialise Vault (create outputs and run bootstrap)"
     dir: '$INFRA_ROOT/06-vault-init'
     cmds:
       - tofu init
       - tofu apply -auto-approve
+      - bash $INFRA_ROOT/scripts/vault-bootstrap.sh
 
   vault:destroy:
     desc: "Destroy Vault outputs"
