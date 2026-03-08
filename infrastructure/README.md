@@ -271,3 +271,14 @@ done
 
 **Secret Rotation**: Update Vault secrets as needed. ESO will automatically sync changes to Kubernetes.
 
+## Extracting the Vault CA Certificate
+
+Vault acts as the cluster's internal Certificate Authority. To trust certificates issued by Vault in your browser, you need to extract the CA certificate:
+
+```bash
+VAULT_TOKEN=$(jq -r '.root_token' 06-vault-init/secrets/vault-init.json)
+kubectl exec -n vault vault-0 -- /bin/sh -c \
+  "VAULT_TOKEN='$VAULT_TOKEN' vault read -field=certificate pki/cert/ca" \
+  > vault-ca-cert.pem
+```
+
