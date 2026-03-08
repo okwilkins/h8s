@@ -101,7 +101,9 @@ tasks:
     cmds:
       - tofu init
       - tofu apply -auto-approve
-      - bash $INFRA_ROOT/scripts/vault-bootstrap.sh
+      - |
+        export TF_DIR="$INFRA_ROOT/03-talos-configure"
+        bash $INFRA_ROOT/scripts/vault-bootstrap.sh
 
   vault:destroy:
     desc: "Destroy Vault outputs"
@@ -132,14 +134,7 @@ tasks:
   clean:states:
     desc: "Remove all Terraform state files (DANGEROUS - destroys all state!)"
     cmds:
-      - rm -f {{.STATES_DIR}}/00-talos-factory.tfstate
-      - rm -f {{.STATES_DIR}}/01-proxmox-iso-upload
-      - rm -f {{.STATES_DIR}}/02-proxmox-provision
-      - rm -f {{.STATES_DIR}}/03-talos-configure
-      - rm -f {{.STATES_DIR}}/03-talos-provision
-      - rm -f {{.STATES_DIR}}/04-cilium
-      - rm -f {{.STATES_DIR}}/05-argocd
-      - rm -f {{.STATES_DIR}}/06-vault-init
+      - rm -rf {{.STATES_DIR}}
       - echo "State files removed. You will need to re-run cluster:bootstrap to recreate the cluster."
 
   clean:all:
