@@ -107,7 +107,7 @@ resource "null_resource" "vault_secret_harbor_admin" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/harbor-admin-credentials \\
           HARBOR_ADMIN_USERNAME=admin \\
           HARBOR_ADMIN_PASSWORD='${random_password.harbor_admin_password.result}' || exit 1
@@ -134,7 +134,7 @@ resource "null_resource" "vault_secret_harbor_main_user" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/main-user-secret \\
           PASSWORD='${random_password.harbor_main_user_password.result}' || exit 1
       "
@@ -160,7 +160,7 @@ resource "null_resource" "vault_secret_harbor_dagger" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/dagger-robot-secret \\
           SECRET='${random_password.harbor_dagger_robot_secret.result}' || exit 1
       "
@@ -186,7 +186,7 @@ resource "null_resource" "vault_secret_harbor_image_pull" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/image-pull \\
           ROBOT_PASSWORD='${random_password.harbor_image_pull_robot_password.result}' || exit 1
       "
@@ -216,7 +216,7 @@ resource "null_resource" "vault_secret_grafana" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/grafana/grafana-admin-credentials \\
           GF_SECURITY_ADMIN_USER=admin \\
           GF_SECURITY_ADMIN_PASSWORD='${random_password.grafana_admin_password.result}' || exit 1
@@ -256,7 +256,7 @@ resource "null_resource" "vault_secret_cosign" {
       # Store in Vault
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cosign/key-pair \\
           COSIGN_PASSWORD='${random_password.cosign_password.result}' \\
           cosign.key=@/tmp/cosign.key \\
@@ -292,7 +292,7 @@ resource "null_resource" "vault_secret_searxng" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/searxng/searxng-secret \\
           SECRET='${random_password.searxng_secret.result}' || exit 1
       "
@@ -322,7 +322,7 @@ resource "null_resource" "vault_secret_cnpg_harbor" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cnpg/cnpg-harbor-prod-app-user-credentials \\
           username=harbor \\
           password='${random_password.cnpg_harbor_password.result}' || exit 1
@@ -349,7 +349,7 @@ resource "null_resource" "vault_secret_cnpg_terraform" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cnpg/cnpg-terraform-backend-prod-app-user-credentials \\
           username=terraform \\
           password='${random_password.cnpg_terraform_backend_password.result}' || exit 1
@@ -387,7 +387,7 @@ resource "null_resource" "vault_secret_cloudflare" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cloudflare/cloudflared-token \\
           token='${var.cloudflare_tunnel_token}' || exit 1
       "
@@ -413,7 +413,7 @@ resource "null_resource" "vault_secret_renovate" {
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/renovate/github-app \\
           private-key='${var.github_app_private_key}' || exit 1
       "
