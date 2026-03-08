@@ -1,28 +1,28 @@
 ######################
 # Kubernetes Secrets #
 ######################
-data "kubernetes_secret" "harbor_admin_secret" {
+data "kubernetes_secret_v1" "harbor_admin_secret" {
   metadata {
     name      = "harbor-admin-credentials"
     namespace = "harbor"
   }
 }
 
-data "kubernetes_secret" "harbor_dagger_robot_secret" {
+data "kubernetes_secret_v1" "harbor_dagger_robot_secret" {
   metadata {
     name      = "harbor-dagger-robot-secret"
     namespace = "harbor"
   }
 }
 
-data "kubernetes_secret" "harbor_image_pull_robot_secret" {
+data "kubernetes_secret_v1" "harbor_image_pull_robot_secret" {
   metadata {
     name      = "harbor-image-pull-robot-secret"
     namespace = "harbor"
   }
 }
 
-data "kubernetes_secret" "main_user_secret" {
+data "kubernetes_secret_v1" "main_user_secret" {
   metadata {
     name      = "harbor-main-user-secret"
     namespace = "harbor"
@@ -44,8 +44,8 @@ locals {
   harbor_path     = data.kubernetes_resource.harbor_route.object.spec.rules[0].matches[0].path.value
   harbor_scheme   = "https"
   harbor_url      = "${local.harbor_scheme}://${local.harbor_hostname}${local.harbor_path}"
-  harbor_user     = data.kubernetes_secret.harbor_admin_secret.data.HARBOR_ADMIN_USERNAME
-  harbor_pass     = data.kubernetes_secret.harbor_admin_secret.data.HARBOR_ADMIN_PASSWORD
+  harbor_user     = data.kubernetes_secret_v1.harbor_admin_secret.data.HARBOR_ADMIN_USERNAME
+  harbor_pass     = data.kubernetes_secret_v1.harbor_admin_secret.data.HARBOR_ADMIN_PASSWORD
 }
 
 
@@ -103,7 +103,7 @@ resource "harbor_registry" "ghcr" {
 #########
 resource "harbor_user" "main" {
   username  = "oli"
-  password  = data.kubernetes_secret.main_user_secret.data.PASSWORD
+  password  = data.kubernetes_secret_v1.main_user_secret.data.PASSWORD
   full_name = "Oliver Kenyon Wilkins"
   email     = "okwilkins@googlemail.com"
 }
@@ -133,7 +133,7 @@ resource "harbor_robot_account" "terraform" {
   name        = "dagger"
   description = "robot for dagger to perform ci-cd operations"
   level       = "system"
-  secret      = data.kubernetes_secret.harbor_dagger_robot_secret.data.SECRET
+  secret      = data.kubernetes_secret_v1.harbor_dagger_robot_secret.data.SECRET
   permissions {
     access {
       action   = "push"
@@ -188,7 +188,7 @@ resource "harbor_robot_account" "image_pull" {
   name        = "image-pull"
   description = "robot account for general K8s image pulls from cache projects"
   level       = "system"
-  secret      = data.kubernetes_secret.harbor_image_pull_robot_secret.data.ROBOT_PASSWORD
+  secret      = data.kubernetes_secret_v1.harbor_image_pull_robot_secret.data.ROBOT_PASSWORD
 
   permissions {
     access {
