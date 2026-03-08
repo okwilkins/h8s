@@ -63,9 +63,6 @@ spec:
             - name: blocklist-volume
               mountPath: /blocklist
               readOnly: true
-            - name: proxmox-hosts-volume
-              mountPath: /etc/proxmox-hosts
-              readOnly: true
           ports:
             - name: dns
               protocol: UDP
@@ -104,10 +101,3 @@ spec:
         - name: blocklist-volume
           persistentVolumeClaim:
             claimName: coredns-blocklist
-        - name: proxmox-hosts-volume
-          secret:
-            secretName: proxmox-hosts-file
-            items:
-              - key: hosts
-                path: hosts
-            optional: true
