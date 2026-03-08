@@ -20,7 +20,7 @@ kubectl_wrapper wait \
   --for=jsonpath='{.status.phase}'=Running \
   "pod/${POD_NAME}" \
   -n "$NAMESPACE" \
-  --timeout=180s >/dev/null
+  --timeout=1800s >/dev/null
 
 echo "Checking Vault status..."
 STATUS_JSON="$(
