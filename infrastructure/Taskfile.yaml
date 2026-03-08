@@ -122,9 +122,58 @@ tasks:
     cmds:
       - tofu destroy -auto-approve
 
+  # Platform Configuration - Configure Harbor and other platform resources
+  platform:configure:
+    desc: "Configure Harbor registry and platform resources (run after cluster:bootstrap)"
+    dir: '$INFRA_ROOT/platform-config'
+    cmds:
+      - |
+        # Start port-forward in background and save PID
+        kubectl -n terraform port-forward svc/cnpg-terraform-backend-prod-rw 5432:5432 &
+        echo $! > /tmp/platform-config-pf.pid
+
+        # Verify port-forward is working
+        if ! nc -z localhost 5432 2>/dev/null; then
+          echo "Error: Port-forward not established. Waiting a bit longer..."
+          sleep 5
+          if ! nc -z localhost 5432 2>/dev/null; then
+            echo "Error: Could not establish port-forward to Postgres"
+            exit 1
+          fi
+        fi
+
+        echo "Port-forward established successfully"
+      - defer: |
+          if [ -f /tmp/platform-config-pf.pid ]; then
+            PF_PID=$(cat /tmp/platform-config-pf.pid)
+            echo "Cleaning up port-forward (PID: $PF_PID)..."
+            kill $PF_PID 2>/dev/null || true
+            wait $PF_PID 2>/dev/null || true
+            rm -f /tmp/platform-config-pf.pid
+          fi
+      - |
+        # Extract credentials from Kubernetes secrets
+        echo "Extracting database credentials..."
+        export PGUSER=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o jsonpath='{.data.username}' | base64 -d)
+        export PGPASSWORD=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o jsonpath='{.data.password}' | base64 -d)
+        export PGHOST=localhost
+        export PGPORT=5432
+        export PGDATABASE=terraform_backend
+
+        if [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
+          echo "Error: Could not extract database credentials from secrets"
+          exit 1
+        fi
+
+        echo "Running Terraform..."
+        terraform init
+        terraform apply -auto-approve
+
+        echo "Platform configuration complete!"
+
   # Composite tasks
   cluster:bootstrap:
-    desc: "Run all bootstrap stages in sequence"
+    desc: "Run all bootstrap stages in sequence (stages 1-8). Run 'task platform:configure' afterwards for Step 9."
     cmds:
       - task: talos:factory:install
       - task: proxmox:iso:install

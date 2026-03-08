@@ -6,7 +6,7 @@ This directory contains all infrastructure configuration for the cluster.
 
 OpenTofu configuration for bootstrapping a Talos Linux cluster on Proxmox from scratch.
 
-The bootstrap process runs through 8 sequential stages, each managed by its own OpenTofu configuration:
+The bootstrap process runs through 9 sequential stages, each managed by its own OpenTofu configuration. Stages 1-8 are automated via `task cluster:bootstrap`. Stage 9 (Platform Configuration) must be run manually after bootstrap completes.
 
 1. **Talos Factory** (`00-talos-factory`) - Registers a custom extension schematic with the [Talos image factory](https://factory.talos.dev) and retrieves the ISO URL
 2. **Proxmox ISO Upload** (`01-proxmox-iso-upload`) - Downloads the custom Talos ISO into Proxmox storage
@@ -16,8 +16,9 @@ The bootstrap process runs through 8 sequential stages, each managed by its own 
 6. **ArgoCD Install** (`05-argocd`) - Installs ArgoCD for GitOps management
 7. **Vault Init** (`06-vault-init`) - Initialises Vault and generates bootstrap outputs
 8. **Vault Secrets** (`07-vault-resources-provision`) - Provisions all secrets in Vault (passwords, keys, external secrets)
+9. **Platform Configuration** (`platform-config/`) - Configures Harbor registry and other platform resources (run manually after bootstrap via `task platform:configure`)
 
-All stages are orchestrated via a Taskfile. Run `task cluster:bootstrap` to execute the full sequence.
+All stages are orchestrated via a Taskfile. Run `task cluster:bootstrap` to execute stages 1-8, then run `task platform:configure` for stage 9.
 
 ## Platform Configuration
 
@@ -152,6 +153,8 @@ Store all files from `states/`, `03-talos-configure/secrets/`, and `vault-init.j
 
 ## Bootstrap
 
+> **Important:** All `task` commands in this guide must be run within the Nix development shell using `nix develop -c`. This ensures all required tools and environment variables (including `INFRA_ROOT`) are available.
+
 > **Note:** If you have a saved backup of your cluster state, restore the files from your backup into the `states/` directory before running the commands below. This preserves your cluster PKI (CA certs, keys, join tokens) and allows you to restore without a full rebuild.
 
 Run the complete bootstrap sequence:
@@ -170,6 +173,20 @@ This command executes all 7 stages in sequence:
 7. Initialises Vault and provisions secrets
 
 Apply takes several minutes. The slow steps are the ISO download to Proxmox (~500 MB) and waiting for Talos to install to disk and reboot before the ISO detachment and config apply can proceed.
+
+### Complete the Setup
+
+Once `task cluster:bootstrap` completes successfully:
+
+1. **Configure kubectl** - Follow the instructions in [Retrieve Credentials](#retrieve-credentials) to configure kubectl for normal use
+2. **Wait for ArgoCD sync** - Allow ArgoCD time to deploy the applications, including the Postgres database required for the platform configuration backend
+3. **Configure platform resources** - Run the platform configuration to set up Harbor:
+
+   ```bash
+   nix develop -c task platform:configure
+   ```
+
+> **Note:** The `platform:configure` task requires ArgoCD to have deployed the Postgres database first. This happens automatically via the GitOps applications deployed during bootstrap.
 
 ## Retrieve Credentials
 
@@ -206,7 +223,7 @@ export TALOSCONFIG=$(pwd)/03-talos-configure/secrets/talosconfig.yaml
 If the bootstrap fails during the Cilium stage with errors about the Kubernetes API not being ready, this is normal. Talos restarts the node after etcd bootstrap, which can cause transient API unavailability. Simply run the bootstrap again:
 
 ```bash
-task cluster:bootstrap
+nix develop -c task cluster:bootstrap
 ```
 
 The process is idempotent and will skip already-completed stages.
