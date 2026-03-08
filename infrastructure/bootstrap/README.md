@@ -1,19 +1,19 @@
 # Bootstrap
 
-Terraform root for bootstrapping a Talos Linux cluster on Proxmox from scratch.
+OpenTofu configuration for bootstrapping a Talos Linux cluster on Proxmox from scratch.
 
-A single `terraform apply` handles the full bootstrap sequence:
+The bootstrap process runs through 7 sequential stages, each managed by its own OpenTofu configuration:
 
-1. Registers the extension schematic with the [Talos image factory](https://factory.talos.dev) and retrieves the ISO URL
-2. Downloads the custom Talos ISO into Proxmox storage
-3. Creates the VMs on Proxmox
-4. Waits for Talos to install itself to disk, then detaches the ISO
-5. Generates per-node machine configs (with all patches applied)
-6. Applies configs to each node
-7. Bootstraps etcd on the first node
-8. Retrieves the kubeconfig and talosconfig
+1. **Talos Factory** (`00-talos-factory`) - Registers a custom extension schematic with the [Talos image factory](https://factory.talos.dev) and retrieves the ISO URL
+2. **Proxmox ISO Upload** (`01-proxmox-iso-upload`) - Downloads the custom Talos ISO into Proxmox storage
+3. **Proxmox Provision** (`02-proxmox-provision`) - Creates the VMs on Proxmox with proper configuration
+4. **Talos Configure** (`03-talos-configure`) - Generates per-node machine configs, applies them, bootstraps etcd, and retrieves credentials
+5. **Cilium Install** (`04-cilium`) - Installs Cilium CNI for networking
+6. **ArgoCD Install** (`05-argocd`) - Installs ArgoCD for GitOps management
+7. **Vault Init** (`06-vault-init`) - Initialises Vault and generates bootstrap outputs
+8. **Vault Secrets** (`07-vault-resources-provision`) - Provisions all secrets in Vault (passwords, keys, external secrets)
 
-It does **not** install cluster workloads beyond Cilium and ArgoCD — see [What to do next](#what-to-do-next).
+All stages are orchestrated via a Taskfile. Run `task cluster:bootstrap` to execute the full sequence.
 
 ## Hardware
 
@@ -66,60 +66,30 @@ VMs are created and configured entirely by Terraform. For reference, the setting
 - Proxmox is installed and reachable on the LAN (see [Proxmox Setup](#proxmox-setup) above)
 - An SSH agent is running with a key authorised for `root` on the Proxmox host — the `bpg/proxmox` provider uses SSH for ISO upload
 - Node IPs are reserved as static DHCP leases in your router so they don't change between reboots
-- The Nix shell is active (`nix shell` from the repo root), providing `terraform`, `talosctl`, and `kubectl`
 
 ## Configure
 
-Copy the example vars file and fill in your values:
+Copy the example secrets file and fill in your values:
 
 ```bash
-cp terraform.tfvars.example terraform.tfvars
+cp shared/secrets.auto.tfvars.example shared/secrets.auto.tfvars
 ```
 
-`terraform.tfvars` is gitignored. See [Saving your vars](#saving-your-vars).
+`shared/secrets.auto.tfvars` is gitignored. See [Saving your vars](#saving-your-vars).
 
-### Example `terraform.tfvars`
+### Example Configuration
 
-```hcl
-# Proxmox node to use for SSH (must match a 'pve_node' value in nodes map below)
-proxmox_node_name = "server-01"
+The `secrets.auto.tfvars` file contains all sensitive configuration including:
+- Proxmox endpoint and credentials
+- Talos cluster virtual IP
+- Node definitions (VM IDs, IPs, MAC addresses)
+- External secrets (Cloudflare tunnel token, GitHub App private key)
 
-proxmox_iso_datastore  = "local"
-proxmox_disk_datastore = "local-lvm"
-
-talos_version = "v1.10.3"
-cluster_name  = "talos-homelab"
-cluster_vip   = "192.168.1.100"
-
-nodes = {
-  "controlplane-worker-1" = {
-    vm_id       = 100
-    pve_node    = "server-01"
-    proxmox_ip  = "192.168.1.XXX"  # IP of the Proxmox server hosting this VM
-    cpu_cores   = 4
-    memory_mb   = 16384
-    disk_gb     = 100
-    ip_address  = "192.168.1.XXX"
-    mac_address = "BC:24:11:xx:xx:xx" # Must match your router's static DHCP lease for this IP
-  }
-  "controlplane-worker-2" = {
-    vm_id       = 101
-    pve_node    = "server-02"
-    proxmox_ip  = "192.168.1.XXX"  # IP of the Proxmox server hosting this VM
-    cpu_cores   = 4
-    memory_mb   = 16384
-    disk_gb     = 100
-    ip_address  = "192.168.1.XXX"
-    mac_address = "BC:24:11:xx:xx:xx" # Must match your router's static DHCP lease for this IP
-  }
-}
-```
-
-**Proxmox IP handling:** The `proxmox_ip` field in each node specifies the IP address of the Proxmox server hosting that VM. Terraform uses this to:
-1. Connect via SSH to the Proxmox server specified by `proxmox_node_name` (for ISO uploads)
-2. Generate a hosts file for CoreDNS that maps friendly names (`pve1.okwilkins.dev`, `pve2.okwilkins.dev`) to Proxmox IPs
-
-This keeps Proxmox IPs out of git while still allowing DNS resolution of friendly URLs.
+**Important notes:**
+- Replace all placeholder values (e.g., `<PROXMOX_IP>`, `<YOUR_PROXMOX_PASSWORD>`, `<VIRTUAL_IP>`) with your actual values
+- The `proxmox_node_name` must match the `pve_node` field of one of your nodes
+- Generate MAC addresses using: `printf "BC:24:11:%02X:%02X:%02X\n" $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256))`
+- Configure static DHCP leases in your router for each node's MAC address
 
 **Node names are the Kubernetes hostnames.** Keep them stable across rebuilds — renaming or swapping node entries will cause Longhorn to detect a disk UUID mismatch and refuse to start. Add new nodes by adding new keys; never reorder or rename existing ones.
 
@@ -133,160 +103,140 @@ printf "BC:24:11:%02X:%02X:%02X\n" $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256
 
 Copy the output into your `terraform.tfvars` file and configure a static DHCP lease in your router for that MAC address.
 
-## Saving your vars
+## Saving Your State
 
-`terraform.tfvars` and `terraform.tfstate` are both gitignored because the state contains the cluster PKI (CA certs, keys, join tokens). If you lose either on a rebuild you will need to fully wipe and re-bootstrap.
+The bootstrap process generates critical files that must be backed up securely. Losing these files will require a complete cluster rebuild:
 
-Store both in a password manager as secure notes or file attachments.
+### 1. OpenTofu State Files (`states/` directory)
 
-## Set credentials
+All OpenTofu state is stored in the `states/` directory, with separate files for each stage:
+- `00-talos-factory.tfstate` - Talos image factory registration
+- `01-proxmox-iso-upload` - ISO upload state
+- `02-proxmox-provision` - VM provisioning state
+- `03-talos-configure` - Talos configuration and cluster PKI (CA certs, keys, join tokens)
+- `04-cilium` - Cilium CNI installation state
+- `05-argocd` - ArgoCD installation state
+- `06-vault-init` - Vault initialisation state
+- `07-vault-resources-provision` - Vault secrets provisioning state
 
-Export these before running any Terraform commands:
+**The `03-talos-configure` state file is particularly critical** as it contains the cluster's PKI (Certificate Authority certificates, keys, and join tokens).
 
-```bash
-# Proxmox credentials
-# IMPORTANT: This endpoint must match the proxmox_node_name in terraform.tfvars
-# For example, if proxmox_node_name = "server-01", use the proxmox_ip from that node
-export PROXMOX_VE_ENDPOINT="https://192.168.1.123:8006"
-export PROXMOX_VE_INSECURE="true"
+### 2. Credential Files (`03-talos-configure/secrets/` directory)
 
-export PROXMOX_VE_USERNAME="root@pam"
-export PROXMOX_VE_PASSWORD="your-proxmox-password"
+After bootstrap completes, credentials are written to:
+- `03-talos-configure/secrets/talosconfig.yaml` - Talos configuration file
+- `03-talos-configure/secrets/kubeconfig.yaml` - Kubernetes configuration file
 
-# External secrets (required)
-export TF_VAR_cloudflare_tunnel_token="your-token-here"
-export TF_VAR_github_app_private_key="$(cat /path/to/private-key.pem)"
-```
+### 3. Vault Initialisation File
 
-**Note on PROXMOX_VE_ENDPOINT:** The endpoint URL must correspond to the Proxmox server specified by `proxmox_node_name` in your `terraform.tfvars`. Terraform will look up the SSH address from the matching node's `proxmox_ip` field. If these don't match, Terraform operations may fail.
+During the Vault initialisation stage, a `vault-init.json` file is generated containing:
+- Vault unseal keys
+- Vault root token
+
+### Backup Strategy
+
+Store all files from `states/`, `03-talos-configure/secrets/`, and `vault-init.json` in your password manager or encrypted storage. These files are all gitignored and must be preserved for cluster recovery.
+
 
 ## Bootstrap
 
-> **Note:** If you have a saved backup of your cluster state, place the `terraform.tfstate` file in this directory before running the commands below. This preserves your cluster PKI (CA certs, keys, join tokens) and allows you to restore without a full rebuild.
+> **Note:** If you have a saved backup of your cluster state, restore the files from your backup into the `states/` directory before running the commands below. This preserves your cluster PKI (CA certs, keys, join tokens) and allows you to restore without a full rebuild.
+
+Run the complete bootstrap sequence:
 
 ```bash
-terraform init
-terraform apply
+task cluster:bootstrap
 ```
 
-**Note:** You may need to run `terraform apply` 2-3 times for it to complete successfully. During bootstrap, Talos restarts the node after etcd bootstrap, causing the initial Helm Cilium installation to fail when the Kubernetes API isn't ready yet. Subsequent runs will succeed once the API comes back online.
+This command executes all 7 stages in sequence:
+1. Generates Talos schematic with custom extensions
+2. Downloads Talos ISO to Proxmox nodes
+3. Creates VMs on Proxmox
+4. Configures Talos nodes, bootstraps etcd, and retrieves credentials
+5. Installs Cilium CNI
+6. Installs ArgoCD for GitOps
+7. Initialises Vault and provisions secrets
 
 Apply takes several minutes. The slow steps are the ISO download to Proxmox (~500 MB) and waiting for Talos to install to disk and reboot before the ISO detachment and config apply can proceed.
 
-## Retrieve credentials
+## Retrieve Credentials
 
-After `terraform apply` completes, credentials are automatically configured:
+After `task cluster:bootstrap` completes, credentials are written to the `03-talos-configure/secrets/` directory:
 
-- **Talos config**: Written to `talosconfig.yaml` in this directory
-- **Kubeconfig**: Merged into `~/.kube/config` (creates file if it doesn't exist, merges with existing contexts if it does)
+- **Talos config**: `03-talos-configure/secrets/talosconfig.yaml`
+- **Kubeconfig**: `03-talos-configure/secrets/kubeconfig.yaml`
 
 ```bash
-# Use talosconfig from this directory
-talosctl --talosconfig $(pwd)/talosconfig.yaml version
+# Use talosconfig from the secrets directory
+talosctl --talosconfig 03-talos-configure/secrets/talosconfig.yaml version
 
-# Kubeconfig is already in the standard location
-kubectl get nodes
+# Use kubeconfig from the secrets directory
+kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml get nodes
+```
+
+To use these credentials as your default configurations:
+
+```bash
+# Copy kubeconfig to default location (merges with existing contexts)
+cp 03-talos-configure/secrets/kubeconfig.yaml ~/.kube/config
+
+# Or set environment variables
+export KUBECONFIG=$(pwd)/03-talos-configure/secrets/kubeconfig.yaml
+export TALOSCONFIG=$(pwd)/03-talos-configure/secrets/talosconfig.yaml
 ```
 
 **Note:** The kubeconfig merge preserves any existing contexts/clusters you have. The new cluster context will be added alongside them.
 
-## Ongoing operations
+### Troubleshooting
 
-### Upgrading Talos
+#### Bootstrap fails at Cilium installation
 
-Bump `talos_version` in `terraform.tfvars`, then:
-
-```bash
-terraform apply
-```
-
-This regenerates and re-applies machine configs (the `install.image` URL updates to the new version) but does **not** recreate VMs. The actual OS upgrade is then triggered node-by-node using the installer URL from state:
+If the bootstrap fails during the Cilium stage with errors about the Kubernetes API not being ready, this is normal. Talos restarts the node after etcd bootstrap, which can cause transient API unavailability. Simply run the bootstrap again:
 
 ```bash
-INSTALLER=$(terraform output -raw talos_installer_url)
-
-talosctl upgrade --nodes 192.168.1.101 --image "$INSTALLER"
-talosctl upgrade --nodes 192.168.1.102 --image "$INSTALLER"
+task cluster:bootstrap
 ```
 
-Wait for each node to rejoin the cluster before upgrading the next.
+The process is idempotent and will skip already-completed stages.
 
-### Adding a node
+#### VMs fail to boot from ISO
 
-Add a new entry to `nodes` in `terraform.tfvars` with a unique `vm_id` and a reserved IP, then:
+If VMs boot into the Proxmox UEFI shell instead of the Talos ISO:
+1. Check that the ISO was uploaded successfully to the correct datastore
+2. Verify the VM's boot order is set correctly (disk first, CDROM second)
+3. Ensure the ISO is attached to the VM's CDROM drive
 
-```bash
-terraform apply
-```
+#### SSH authentication fails during ISO upload
 
-Terraform will create only the new VM and apply its config. Existing nodes are not touched.
+The `bpg/proxmox` provider requires SSH access to upload the ISO. Ensure:
+1. Your SSH agent is running: `eval $(ssh-agent -s)`
+2. Your key is added: `ssh-add ~/.ssh/id_rsa`
+3. You can SSH to the Proxmox host as root without password: `ssh root@<proxmox-ip>`
 
-### Tearing down
+#### Talos nodes not joining the cluster
 
-```bash
-terraform destroy
-```
+If nodes fail to join after configuration:
+1. Check node network connectivity: `ping <node-ip>`
+2. Verify static DHCP leases are correctly configured in your router
+3. Check Talos logs: `talosctl --talosconfig 03-talos-configure/secrets/talosconfig.yaml logs --nodes <node-ip>`
+4. Ensure MAC addresses in your configuration match the router's static leases
 
-This resets each node to Talos maintenance mode (graceful etcd leave, disk wipe, reboot) before removing the VMs from Proxmox. After destroy completes the machines are ready to be re-bootstrapped.
+#### Vault fails to initialise
 
-Save `terraform.tfstate` before destroying if you want to preserve the cluster PKI for a future rebuild with the same certificates.
+If Vault initialisation fails:
+1. Check that the Kubernetes API is accessible: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml get nodes`
+2. Verify Cilium is running: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml get pods -n kube-system`
+3. Check Vault pod logs: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml logs -n vault vault-0`
 
-## What to do next
-
-After `terraform apply` completes, the cluster is running with Cilium CNI, ArgoCD, and a fully configured Vault. The following steps are required to fully operationalize the cluster:
-
-### 1. Save Critical Files
-
-**IMPORTANT**: The bootstrap process generates two critical files that must be backed up securely:
-
-1. **`terraform.tfstate`** - Contains cluster PKI (CA certs, keys, tokens)
-2. **`vault-init.json`** - Contains Vault unseal keys and root token
-
-Both files are gitignored. Store them in your password manager or encrypted storage. Losing these files will require a complete cluster rebuild.
-
-### 2. Set External Secrets
-
-Some secrets require external credentials that cannot be auto-generated. These are provided via environment variables:
-
-```bash
-# Cloudflare tunnel token - see networking/cloudflared/README.md for how to generate
-export TF_VAR_cloudflare_tunnel_token="your-token-here"
-
-# GitHub App private key - see ci-cd/renovate/README.md for how to create the app and download the key
-export TF_VAR_github_app_private_key="$(cat /path/to/private-key.pem)"
-```
+### Set External Secrets
 
 **How to obtain these credentials:**
-
 - **Cloudflare tunnel token**: See `networking/cloudflared/README.md` for instructions on generating the token using the Cloudflare API
 - **GitHub App private key**: See `ci-cd/renovate/README.md` for instructions on creating the GitHub App and downloading the private key
 
 These environment variables are required. Terraform will fail if they are not set.
 
-### 3. Verify External Secrets Operator
-
-Once Vault secrets are populated, verify ESO is syncing them to Kubernetes:
-
-```bash
-# Check External Secrets
-kubectl get externalsecrets -A
-
-# Check synced secrets
-kubectl get secrets -n harbor
-kubectl get secrets -n monitoring
-```
-
-### 4. Run Infrastructure Terraform
-
-After ESO has synced the secrets from Vault, navigate to the infrastructure Terraform directory and follow the instructions in the README there:
-
-```bash
-cd ../terraform
-```
-
-See `infrastructure/terraform/README.md` for detailed setup instructions including database port-forwarding and Harbor configuration.
-
-### 5. Access ArgoCD
+### Access ArgoCD
 
 Get the ArgoCD admin password:
 
@@ -296,7 +246,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 Access the UI at `https://argocd.okwilkins.dev`
 
-### 6. Ongoing Operations
+### Ongoing Operations
 
 **Vault Unsealing**: After pod rescheduling, Vault will need to be unsealed using the keys from `vault-init.json`:
 
@@ -308,3 +258,4 @@ done
 ```
 
 **Secret Rotation**: Update Vault secrets as needed. ESO will automatically sync changes to Kubernetes.
+
