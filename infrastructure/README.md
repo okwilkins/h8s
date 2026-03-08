@@ -1,8 +1,12 @@
-# Bootstrap
+# Infrastructure
+
+This directory contains all infrastructure configuration for the H8s (Homernetes) cluster.
+
+## Bootstrap
 
 OpenTofu configuration for bootstrapping a Talos Linux cluster on Proxmox from scratch.
 
-The bootstrap process runs through 7 sequential stages, each managed by its own OpenTofu configuration:
+The bootstrap process runs through 8 sequential stages, each managed by its own OpenTofu configuration:
 
 1. **Talos Factory** (`00-talos-factory`) - Registers a custom extension schematic with the [Talos image factory](https://factory.talos.dev) and retrieves the ISO URL
 2. **Proxmox ISO Upload** (`01-proxmox-iso-upload`) - Downloads the custom Talos ISO into Proxmox storage
@@ -14,6 +18,14 @@ The bootstrap process runs through 7 sequential stages, each managed by its own 
 8. **Vault Secrets** (`07-vault-resources-provision`) - Provisions all secrets in Vault (passwords, keys, external secrets)
 
 All stages are orchestrated via a Taskfile. Run `task cluster:bootstrap` to execute the full sequence.
+
+## Platform Configuration
+
+The `platform-config/` directory contains Terraform configurations for managing platform-level resources that don't have mature Kubernetes operators, such as:
+
+- **Harbor** - Container registry projects, users, robot accounts, and pull-through caches
+
+See [platform-config/README.md](platform-config/README.md) for detailed setup instructions.
 
 ## Hardware
 
