@@ -38,7 +38,7 @@
             export PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
             export TF_VAR_project_root=$PROJECT_ROOT
             # TODO: Change this to just be infrastructure when refactoring everything together: i.e. move terraform into this project
-            export INFRA_ROOT=$PROJECT_ROOT/infrastructure/bootstrap
+            export INFRA_ROOT=$PROJECT_ROOT/infrastructure
             export TF_VAR_infra_root=$INFRA_ROOT
           '';
         };
