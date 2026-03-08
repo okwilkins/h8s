@@ -16,6 +16,7 @@ Doing a homelab Kubernetes cluster has been a source of a lot of joy for me pers
 Most importantly: ***I find it fun!*** It keeps me excited and hungry at work and on my other personal projects.
 
 ## Features
+- Automated Bootstrap - 8-stage fully declaritive pipeline for complete cluster provisioning from bare metal in under 10 mins.
 - Container registry.
 - Home-wide ad blocker and DNS.
 - Internal certificate authority.
