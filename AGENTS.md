@@ -122,9 +122,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   ├── coredns
 │   ├── terraform
 │   └── image-buildah
-├── infrastructure
-│   ├── bootstrap                   | Cluster bootstrap configuration.
-│   └── terraform                   | Terraform for internal infrastructure.
+├── infrastructure                  | Complete bootstrapping of the cluster with Proxmox and Talos + platform configuration.
 ├── namespaces                      | Holds all namespaces for the cluster.
 ├── networking
 │   ├── cert-manager                | Certificate controller for the self-hosted certificate authority.
