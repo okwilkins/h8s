@@ -101,9 +101,6 @@ tasks:
     cmds:
       - tofu init
       - tofu apply -auto-approve
-      - |
-        export TF_DIR="$INFRA_ROOT/03-talos-configure"
-        bash $INFRA_ROOT/scripts/vault-bootstrap.sh
 
   vault:destroy:
     desc: "Destroy Vault outputs"
