@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 : "${INFRA_ROOT:?INFRA_ROOT must be set}"
 : "${TF_DIR:=$INFRA_ROOT/06-vault-init}"
-: "${OUT_FILE:=./secrets/vault-init.json}"
+: "${OUT_FILE:=$INFRA_ROOT/secrets/vault-init.json}"
 : "${NAMESPACE:=vault}"
 : "${POD_NAME:=vault-0}"
 

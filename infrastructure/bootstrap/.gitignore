@@ -15,4 +15,5 @@ talosconfig.yaml
 
 # Vault initialization output - contains unseal keys and root token
 # CRITICAL: Back this up securely! Required to unseal Vault after restarts.
+secrets/
 vault-init.json
