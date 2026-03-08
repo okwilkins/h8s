@@ -1,1 +1,1 @@
-/home/oli/Documents/projects/h8s/infrastructure/bootstrap/shared/variables.tf
+../shared/variables.tf
