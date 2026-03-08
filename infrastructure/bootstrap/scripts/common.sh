@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-# Default TF_DIR to 06-vault-init if not set
+: "${INFRA_ROOT:?INFRA_ROOT must be set}"
 : "${TF_DIR:=$INFRA_ROOT/06-vault-init}"
 : "${OUT_FILE:=./secrets/vault-init.json}"
 : "${NAMESPACE:=vault}"
@@ -20,7 +20,13 @@ kubectl_wrapper() {
 }
 
 tf_output_raw() {
-  tofu -chdir="$TF_DIR" output -raw "$1"
+  local output
+
+  if ! output=$(tofu -chdir="$TF_DIR" output -no-color -raw "$1" 2>/dev/null); then
+    echo "Failed to read Terraform output '$1' from $TF_DIR" >&2
+    exit 1
+  fi
+  printf '%s' "${output%$'\n'}"
 }
 
 load_tf_kube_env() {
@@ -28,6 +34,8 @@ load_tf_kube_env() {
   CA_CERT="$(tf_output_raw ca_cert)"
   CLIENT_CERT="$(tf_output_raw client_cert)"
   CLIENT_KEY="$(tf_output_raw client_key)"
+
+  export SERVER CA_CERT CLIENT_CERT CLIENT_KEY
 }
 
 create_cert_dir() {
@@ -41,4 +49,3 @@ create_cert_dir() {
   chmod 700 "$CERT_DIR"
   chmod 600 "$CERT_DIR/ca.crt" "$CERT_DIR/client.crt" "$CERT_DIR/client.key"
 }
-

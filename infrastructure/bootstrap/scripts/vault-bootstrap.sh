@@ -5,10 +5,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-load_tf_kube_env()
-create_cert_dir()
+load_tf_kube_env
+create_cert_dir
 
-echo "Waiting for Vault pod..."
+echo "Waiting for Vault pod to be created..."
+kubectl_wrapper wait \
+  --for=create \
+  "pod/${POD_NAME}" \
+  -n "$NAMESPACE" \
+  --timeout=180s >/dev/null
+
+echo "Waiting for Vault pod to start running..."
 kubectl_wrapper wait \
   --for=jsonpath='{.status.phase}'=Running \
   "pod/${POD_NAME}" \
