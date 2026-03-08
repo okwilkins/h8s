@@ -157,7 +157,7 @@ Store all files from `states/`, `03-talos-configure/secrets/`, and `vault-init.j
 Run the complete bootstrap sequence:
 
 ```bash
-task cluster:bootstrap
+nix develop -c task cluster:bootstrap
 ```
 
 This command executes all 7 stages in sequence:
