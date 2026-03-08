@@ -61,10 +61,6 @@ resource "null_resource" "vault_bootstrap" {
 # Enables Kubernetes auth method for service account authentication.
 
 resource "null_resource" "vault_k8s_auth" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -96,10 +92,6 @@ resource "null_resource" "vault_k8s_auth" {
 # Enables the KV v2 secrets engine at the kubernetes-homelab path.
 
 resource "null_resource" "vault_enable_kv" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -127,10 +119,6 @@ resource "null_resource" "vault_enable_kv" {
 # Enables the PKI secrets engine for certificate management.
 
 resource "null_resource" "vault_enable_pki" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -158,10 +146,6 @@ resource "null_resource" "vault_enable_pki" {
 # ============================================================
 
 resource "null_resource" "vault_policy_external_secrets" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -196,10 +180,6 @@ POLICY
 }
 
 resource "null_resource" "vault_policy_pki" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -235,10 +215,6 @@ POLICY
 # ============================================================
 
 resource "null_resource" "vault_role_external_secrets" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -272,10 +248,6 @@ resource "null_resource" "vault_role_external_secrets" {
 }
 
 resource "null_resource" "vault_role_vault_issuer" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -313,10 +285,6 @@ resource "null_resource" "vault_role_vault_issuer" {
 # ============================================================
 
 resource "null_resource" "vault_pki_root_ca" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -350,10 +318,6 @@ resource "null_resource" "vault_pki_root_ca" {
 }
 
 resource "null_resource" "vault_pki_config_urls" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
@@ -385,10 +349,6 @@ resource "null_resource" "vault_pki_config_urls" {
 }
 
 resource "null_resource" "vault_pki_role" {
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = <<-EOT
       source ${var.infra_root}/scripts/common.sh
