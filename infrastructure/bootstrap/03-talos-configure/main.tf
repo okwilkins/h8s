@@ -185,3 +185,78 @@ resource "talos_cluster_kubeconfig" "this" {
 
   depends_on = [talos_machine_bootstrap.this]
 }
+
+# ============================================================
+# Talos Client Configuration Data Source
+# ============================================================
+# Generates the talosconfig for use with talosctl.
+
+data "talos_client_configuration" "this" {
+  cluster_name         = var.talos_cluster_name
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoints            = [for name, node in var.nodes : node.ip_address]
+  nodes                = [for name, node in var.nodes : node.ip_address]
+}
+
+# ============================================================
+# Write Secrets to Files
+# ============================================================
+# Writes talosconfig and kubeconfig to the secrets/ directory for safekeeping.
+# These files contain sensitive credentials and should never be committed to git.
+
+resource "local_file" "talosconfig" {
+  content  = data.talos_client_configuration.this.talos_config
+  filename = "${path.module}/secrets/talosconfig.yaml"
+}
+
+resource "local_file" "kubeconfig" {
+  content  = talos_cluster_kubeconfig.this.kubeconfig_raw
+  filename = "${path.module}/secrets/kubeconfig.yaml"
+}
+
+# ============================================================
+# Merge Kubeconfig into ~/.kube/config
+# ============================================================
+# Merges the generated kubeconfig into the user's default kubeconfig location.
+# This allows kubectl to work without specifying --kubeconfig explicitly.
+
+resource "null_resource" "kubeconfig_merge" {
+  triggers = {
+    kubeconfig = talos_cluster_kubeconfig.this.kubeconfig_raw
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      # Create ~/.kube if it doesn't exist
+      mkdir -p ~/.kube
+      
+      # Write the new kubeconfig to a temp file
+      cat > /tmp/new_kubeconfig.yaml << 'EOF'
+      ${talos_cluster_kubeconfig.this.kubeconfig_raw}
+      EOF
+      
+      # Extract cluster and context names from new config
+      NEW_CLUSTER=$(grep -A1 "^clusters:" /tmp/new_kubeconfig.yaml | grep "name:" | awk '{print $2}')
+      NEW_CONTEXT=$(grep -A1 "^contexts:" /tmp/new_kubeconfig.yaml | grep "name:" | awk '{print $2}')
+      
+      # If ~/.kube/config exists, remove old cluster/context first, then merge
+      if [ -f ~/.kube/config ]; then
+        # Delete old cluster and context if they exist (to avoid cert mismatch)
+        kubectl config delete-cluster "$NEW_CLUSTER" 2>/dev/null || true
+        kubectl config delete-context "$NEW_CONTEXT" 2>/dev/null || true
+        
+        # Now merge: new config takes precedence
+        KUBECONFIG=/tmp/new_kubeconfig.yaml:~/.kube/config kubectl config view --flatten > /tmp/merged_kubeconfig.yaml
+        mv /tmp/merged_kubeconfig.yaml ~/.kube/config
+      else
+        cp /tmp/new_kubeconfig.yaml ~/.kube/config
+      fi
+      
+      # Cleanup
+      rm -f /tmp/new_kubeconfig.yaml /tmp/merged_kubeconfig.yaml
+    EOT
+  }
+
+  depends_on = [talos_cluster_kubeconfig.this]
+}

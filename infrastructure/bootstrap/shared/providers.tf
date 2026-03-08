@@ -62,6 +62,13 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+
+    local = {
+      # https://registry.terraform.io/providers/hashicorp/local
+      # https://github.com/hashicorp/terraform-provider-local
+      source  = "hashicorp/local"
+      version = "~> 2.5"
+    }
   }
 }
 
