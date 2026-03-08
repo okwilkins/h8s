@@ -13,7 +13,7 @@ kubectl_wrapper wait \
   --for=create \
   "pod/${POD_NAME}" \
   -n "$NAMESPACE" \
-  --timeout=180s >/dev/null
+  --timeout=1800s >/dev/null
 
 echo "Waiting for Vault pod to start running..."
 kubectl_wrapper wait \
