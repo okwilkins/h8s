@@ -124,10 +124,6 @@ tasks:
   cluster:destroy:
     desc: "Destroy all resources in reverse order"
     cmds:
-      - task: vault:destroy
-      - task: argocd:destroy
-      - task: cilium:destroy
-      - task: talos:configure:destroy
       - task: proxmox:provision:destroy
       - task: proxmox:iso:destroy
       - task: talos:factory:destroy
