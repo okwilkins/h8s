@@ -14,8 +14,6 @@
 
 locals {
   argocd_values = file("${var.project_root}/ci-cd/argocd/environments/prod/values.yaml")
-  # Extract the ArgoCD Helm chart version from the ArgoCD Application
-  # manifest to ensure consistency between bootstrap and GitOps.
   argocd_app = yamldecode(
     file("${var.project_root}/ci-cd/argocd/environments/prod/apps/argocd-helm.yaml")
   )
@@ -23,7 +21,6 @@ locals {
     local.argocd_app.spec.sources[0].targetRevision,
     null
   )
-  # Load the app-of-apps manifest
   app_of_apps_manifest = yamldecode(
     file("${var.project_root}/ci-cd/argocd/environments/prod/app-of-apps.yaml")
   )
@@ -69,27 +66,15 @@ resource "null_resource" "app_of_apps" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      CERT_DIR=$(mktemp -d)
-      trap "rm -rf $CERT_DIR" EXIT
-      
-      echo "$CA_CERT" > "$CERT_DIR/ca.crt"
-      echo "$CLIENT_CERT" > "$CERT_DIR/client.crt"
-      echo "$CLIENT_KEY" > "$CERT_DIR/client.key"
-      
-      kubectl apply -f - \
-        --server=https://${local.first_node_ip}:6443 \
-        --certificate-authority="$CERT_DIR/ca.crt" \
-        --client-certificate="$CERT_DIR/client.crt" \
-        --client-key="$CERT_DIR/client.key" \
+      source ${var.infra_root}/scripts/common.sh
+
+      load_tf_kube_env
+      create_cert_dir
+
+      kubectl_wrapper apply -f - \
         <<'MANIFEST'
       ${yamlencode(local.app_of_apps_manifest)}
       MANIFEST
     EOT
-
-    environment = {
-      CA_CERT     = sensitive(base64decode(data.terraform_remote_state.talos_configure.outputs.kubernetes_client_configuration.ca_certificate))
-      CLIENT_CERT = sensitive(base64decode(data.terraform_remote_state.talos_configure.outputs.kubernetes_client_configuration.client_certificate))
-      CLIENT_KEY  = sensitive(base64decode(data.terraform_remote_state.talos_configure.outputs.kubernetes_client_configuration.client_key))
-    }
   }
 }
