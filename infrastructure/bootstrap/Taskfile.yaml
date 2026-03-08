@@ -108,6 +108,20 @@ tasks:
     cmds:
       - tofu destroy -auto-approve
 
+  # Vault Secrets - Provision secrets in Vault
+  vault:secrets:install:
+    desc: "Provision all secrets in Vault (passwords, keys, external secrets)"
+    dir: '$INFRA_ROOT/07-vault-resources-provision'
+    cmds:
+      - tofu init
+      - tofu apply -auto-approve
+
+  vault:secrets:destroy:
+    desc: "Destroy Vault secrets (secrets remain in Vault, only Terraform state removed)"
+    dir: '$INFRA_ROOT/07-vault-resources-provision'
+    cmds:
+      - tofu destroy -auto-approve
+
   # Composite tasks
   cluster:bootstrap:
     desc: "Run all bootstrap stages in sequence"
@@ -119,6 +133,7 @@ tasks:
       - task: cilium:install
       - task: argocd:install
       - task: vault:init
+      - task: vault:secrets:install
 
   cluster:destroy:
     desc: "Destroy all resources in reverse order"
