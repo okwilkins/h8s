@@ -1,6 +1,6 @@
 # Infrastructure
 
-This directory contains all infrastructure configuration for the H8s (Homernetes) cluster.
+This directory contains all infrastructure configuration for the cluster.
 
 ## Bootstrap
 
