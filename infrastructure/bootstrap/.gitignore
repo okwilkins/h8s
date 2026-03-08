@@ -2,6 +2,7 @@
 *.tfstate
 *.tfstate.backup
 *.tfstate.*.backup
+states/**
 
 # Terraform working directory
 .terraform/
@@ -9,11 +10,16 @@
 # Actual variable values (IPs, credentials)
 terraform.tfvars
 
-# Generated credential outputs
-kubeconfig.yaml
-talosconfig.yaml
+# Shared secrets
+shared/secrets.auto.tfvars
 
 # Vault initialization output - contains unseal keys and root token
 # CRITICAL: Back this up securely! Required to unseal Vault after restarts.
 secrets/
 vault-init.json
+
+# Downloaded PVE CA certificates - these are node-specific and should not be committed
+# Import these into your browser trust store after running terraform apply
+pve-ca-*.pem
+
+.env
