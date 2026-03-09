@@ -23,7 +23,7 @@ spec:
         fsGroup: 3000
       initContainers:
         - name: init-config
-          image: busybox:latest
+          image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.37.0
           command:
             - "sh"
             - "-c"
