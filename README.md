@@ -1,5 +1,7 @@
 # H8s (Homernetes)
 
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.35-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io) [![Talos Linux](https://img.shields.io/badge/Talos-v1.12.0-00A3E0?style=for-the-badge&logo=linux&logoColor=white)](https://www.talos.dev) [![Cilium](https://img.shields.io/badge/Cilium-1.19.1-F8C517?style=for-the-badge&logo=cilium&logoColor=black)](https://cilium.io) [![ArgoCD](https://img.shields.io/badge/ArgoCD-9.4.7-EF7B4D?style=for-the-badge&logo=argo&logoColor=white)](https://argoproj.github.io/cd) [![Nix Flakes](https://img.shields.io/badge/Nix-Flakes-5277C3?style=for-the-badge&logo=nixos&logoColor=white)](https://nixos.org) [![Stars](https://img.shields.io/github/stars/okwilkins/h8s?style=for-the-badge&logo=github&color=brightgreen)](https://github.com/okwilkins/h8s/stargazers)
+
 H8s is a home infrastructure project that combines the power of Kubernetes with the security-first approach of Talos OS.
 This project provides a my setup, designed specifically for home labs and personal cloud environments.
 
