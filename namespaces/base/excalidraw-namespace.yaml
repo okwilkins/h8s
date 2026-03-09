@@ -4,3 +4,4 @@ metadata:
   name: excalidraw
   labels:
     name: excalidraw
+    harbor-image-pulls: "true"
