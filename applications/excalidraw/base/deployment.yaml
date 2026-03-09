@@ -15,12 +15,12 @@ spec:
       labels:
         app: excalidraw
     spec:
+      imagePullSecrets:
+        - name: harbor-credentials
       containers:
         - name: excalidraw
-          # TODO: Switch to self-hosted image once that is setup
-          # at Excalidraw they only seem to have a latest tag...?
-          image: excalidraw/excalidraw:latest
-          # Change this from always after this too ^
+          # NOTE: Using digest for reproducibility since only 'latest' tag exists
+          image: harbor.okwilkins.dev/docker-hub-cache/excalidraw/excalidraw@sha256:3c2513e830bb6e195147c05b34ecf8393d0ba2b1cc86e93b407a5777d6135c6c
           imagePullPolicy: Always
           ports:
             - name: http
