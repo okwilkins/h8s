@@ -4,21 +4,36 @@
     "automerge": false,
     "prHourlyLimit": 0,
     "prConcurrentLimit": 0,
-    "argocd": {},
-    "kubernetes": {},
+    "argocd": {
+        "fileMatch": [
+            "ci-cd/argocd/.*/.*\\.ya?ml$"
+        ]
+    },
+    "kubernetes": {
+        "fileMatch": [
+            ".*\\.yaml$",
+            ".*\\.yml$"
+        ],
+        "ignorePaths": [
+            "infrastructure/",
+            "**/docker-compose*.yaml"
+        ]
+    },
     "terraform": {},
+    "nix": {
+        "enabled": true
+    },
     "customManagers": [
         {
             "customType": "regex",
-            "description": "Update OCI Helm charts in ArgoCD Applications (ghcr.io)",
+            "description": "Update Kustomize remote resource URLs",
             "managerFilePatterns": [
-                "/ci-cd/argocd/.*\\.ya?ml$/"
+                "/.*/kustomization\\.yaml$/"
             ],
             "matchStrings": [
-                "repoURL:\\s*ghcr\\.io\\/(?<registryPath>[^\\s]+)\\s*\\n\\s*chart:\\s*(?<chartName>[^\\s]+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>[^\\s]+)"
+                "-\\s+https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentValue>[^/]+)/.*"
             ],
-            "datasourceTemplate": "docker",
-            "depNameTemplate": "ghcr.io/{{{registryPath}}}/{{{chartName}}}",
+            "datasourceTemplate": "github-tags",
             "versioningTemplate": "semver"
         }
     ],
