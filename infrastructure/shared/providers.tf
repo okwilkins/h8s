@@ -11,7 +11,7 @@ terraform {
     # https://github.com/bpg/terraform-provider-proxmox
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.97"
+      version = "~> 0.98"
     }
 
     # https://registry.terraform.io/providers/siderolabs/talos
