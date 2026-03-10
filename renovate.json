@@ -5,14 +5,14 @@
     "prHourlyLimit": 0,
     "prConcurrentLimit": 0,
     "argocd": {
-        "fileMatch": [
-            "ci-cd/argocd/.*/.*\\.ya?ml$"
+        "managerFilePatterns": [
+            "/ci-cd/argocd/.*/.*\\.ya?ml$/"
         ]
     },
     "kubernetes": {
-        "fileMatch": [
-            ".*\\.yaml$",
-            ".*\\.yml$"
+        "managerFilePatterns": [
+            "/.*\\.yaml$/",
+            "/.*\\.yml$/"
         ],
         "ignorePaths": [
             "infrastructure/",
