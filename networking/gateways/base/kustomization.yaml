@@ -21,6 +21,7 @@ resources:
   - ./http-routes/harbor.yaml
   - ./http-routes/searxng.yaml
   - ./http-routes/hubble-ui.yaml
+  - ./http-routes/pocket-id.yaml
   - ./tls-routes/pg-tf-backend.yaml
   # Reference grants
   - ./reference-grants/default-gateway-argocd-tls.yaml
@@ -32,3 +33,4 @@ resources:
   - ./reference-grants/default-gateway-search-tls.yaml
   - ./reference-grants/default-gateway-pg-tf-backend-tls.yaml
   - ./reference-grants/default-gateway-hubble-tls.yaml
+  - ./reference-grants/default-gateway-pocket-id-tls.yaml
