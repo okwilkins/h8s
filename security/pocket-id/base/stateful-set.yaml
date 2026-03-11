@@ -58,14 +58,14 @@ spec:
                 - ALL
           livenessProbe:
             httpGet:
-              port: 1411
-              path: /heathz
+              port: http
+              path: /healthz
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              port: 1411
-              path: /heathz
+              port: http
+              path: /healthz
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
