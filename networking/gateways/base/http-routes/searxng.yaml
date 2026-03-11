@@ -16,6 +16,14 @@ spec:
         - path:
             type: PathPrefix
             value: /
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Proto
+                value: https
+              - name: X-Forwarded-Host
+                value: search.okwilkins.dev
       backendRefs:
         - name: searxng
           port: 8080
