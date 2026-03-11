@@ -24,7 +24,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: pocket-id
-          image: harbor.okwilkins.dev/ghcr-cache/pocket-id/pocket-id:v1.16.0
+          image: harbor.okwilkins.dev/ghcr-cache/pocket-id/pocket-id:v2.4.0
           imagePullPolicy: IfNotPresent
           # https://pocket-id.org/docs/configuration/environment-variables
           env:
