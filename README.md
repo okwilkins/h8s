@@ -63,7 +63,6 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 ├── security
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
 │   ├── external-secrets-operator   | Takes secrets hosted internally with Vault and manages them inside the cluster.
-│   ├── keycloak                    | (WIP) Cluster SSO.
 │   └── vault                       | Secrets storage and certificate authority.
 └── storage
     ├── cloudnative-pg              | PostrgreSQL database management for various Applications.
