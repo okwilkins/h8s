@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: pocket-id
+  namespace: pocket-id
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+    - name: cloudflare-gateway
+      namespace: cloudflare
+  hostnames:
+    - auth.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: pocket-id
+          port: 1411

@@ -107,6 +107,18 @@ spec:
         certificateRefs:
           - name: hubble-okwilkins-dev-tls
             namespace: kube-system
+    - protocol: HTTPS
+      name: home-lan-pocket-id
+      hostname: auth.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: auth-okwilkins-dev-tls
+            namespace: pocket-id
     - protocol: TLS
       name: home-lan-pg-tf-backend
       hostname: pg-tf-backend.okwilkins.dev
