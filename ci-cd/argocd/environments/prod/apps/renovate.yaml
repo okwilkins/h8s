@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://mend.github.io/renovate-ce-ee
       chart: mend-renovate-ce
-      targetRevision: 14.0.0
+      targetRevision: 14.1.0
       helm:
         releaseName: renovate
         valueFiles:
