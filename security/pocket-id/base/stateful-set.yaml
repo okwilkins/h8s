@@ -18,6 +18,10 @@ spec:
     spec:
       imagePullSecrets:
         - name: harbor-credentials
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
       containers:
         - name: pocket-id
           image: harbor.okwilkins.dev/ghcr-cache/pocket-id/pocket-id:v1.16.0
@@ -34,6 +38,8 @@ spec:
               value: "1000"
             - name: ANALYTICS_DISABLED
               value: "true"
+            - name: DB_CONNECTION_STRING
+              value: "/app/data/pocket-id.db"
             - name: ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
