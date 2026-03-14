@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mazanoke
+  name: mazanoke-deployment
+  namespace: mazanoke
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mazanoke
+  template:
+    metadata:
+      labels:
+        app: mazanoke
+    spec:
+      imagePullSecrets:
+        - name: harbor-credentials
+      containers:
+        - name: mazanoke
+          image: ghcr.io/civilblur/mazanoke:1.1.5
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
