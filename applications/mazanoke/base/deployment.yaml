@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: mazanoke
-  name: mazanoke-deployment
+  name: mazanoke
   namespace: mazanoke
 spec:
   replicas: 1
@@ -19,8 +19,8 @@ spec:
         - name: harbor-credentials
       containers:
         - name: mazanoke
-          image: ghcr.io/civilblur/mazanoke:1.1.5
-          imagePullPolicy: Always
+          image: harbor.okwilkins.dev/ghcr-cache/civilblur/mazanoke:v1.1.5
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 80
