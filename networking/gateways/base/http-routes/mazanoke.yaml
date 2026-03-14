@@ -10,7 +10,7 @@ spec:
     - name: cloudflare-gateway
       namespace: cloudflare
   hostnames:
-    - optimize.okwilkins.dev
+    - convert.okwilkins.dev
   rules:
     - matches:
         - path:
