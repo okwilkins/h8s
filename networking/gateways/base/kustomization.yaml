@@ -34,5 +34,5 @@ resources:
   - ./reference-grants/default-gateway-search-tls.yaml
   - ./reference-grants/default-gateway-pg-tf-backend-tls.yaml
   - ./reference-grants/default-gateway-hubble-tls.yaml
-  - ./reference-grants/default-gateway-optimize-tls.yaml
+  - ./reference-grants/default-gateway-mazanoke-tls.yaml
   - ./reference-grants/default-gateway-pocket-id-tls.yaml
