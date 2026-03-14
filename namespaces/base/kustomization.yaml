@@ -12,6 +12,7 @@ resources:
   - ./harbor-namespace.yaml
   - ./keycloak-namespace.yaml
   - ./longhorn-system-namespace.yaml
+  - ./mazanoke-namespace.yaml
   - ./monitoring-namespace.yaml
   - ./pocket-id-namespace.yaml
   - ./renovate-namespace.yaml
