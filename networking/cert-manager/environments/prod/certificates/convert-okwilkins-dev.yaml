@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: convert-okwilkins-dev
+  namespace: mazanoke
+spec:
+  secretName: convert-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: convert.okwilkins.dev
+  dnsNames:
+    - convert.okwilkins.dev

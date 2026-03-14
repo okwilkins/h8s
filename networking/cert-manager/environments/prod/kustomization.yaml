@@ -15,3 +15,4 @@ resources:
   - ./certificates/pg-tf-backend-okwilkins-dev.yaml
   - ./certificates/hubble-okwilkins-dev.yaml
   - ./certificates/auth-okwilkins-dev.yaml
+  - ./certificates/convert-okwilkins-dev.yaml
