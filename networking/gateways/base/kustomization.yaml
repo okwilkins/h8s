@@ -20,6 +20,7 @@ resources:
   - ./http-routes/argo-workflows.yaml
   - ./http-routes/harbor.yaml
   - ./http-routes/searxng.yaml
+  - ./http-routes/mazanoke.yaml
   - ./http-routes/hubble-ui.yaml
   - ./http-routes/pocket-id.yaml
   - ./tls-routes/pg-tf-backend.yaml
@@ -33,4 +34,5 @@ resources:
   - ./reference-grants/default-gateway-search-tls.yaml
   - ./reference-grants/default-gateway-pg-tf-backend-tls.yaml
   - ./reference-grants/default-gateway-hubble-tls.yaml
+  - ./reference-grants/default-gateway-optimize-tls.yaml
   - ./reference-grants/default-gateway-pocket-id-tls.yaml
