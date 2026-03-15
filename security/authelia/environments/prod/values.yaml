@@ -23,13 +23,14 @@ configMap:
       enabled: false
     postgres:
       enabled: true
-      host: cnpg-authelia-prod-rw.authelia.svc.cluster.local
-      port: 5432
+      address: 'tcp://cnpg-authelia-prod-rw.authelia.svc.cluster.local:5432'
       database: authelia
       username: authelia
-      passwordSecret:
-        name: cnpg-authelia-prod-app-user-credentials
-        key: password
-      encryptionKeySecret:
-        name: authelia-encryption-key
-        key: encryption-key
+      password:
+        disabled: false
+        secret_name: cnpg-authelia-prod-app-user-credentials
+        path: password
+    encryption_key:
+      disabled: false
+      secret_name: authelia-encryption-key
+      path: encryption-key
