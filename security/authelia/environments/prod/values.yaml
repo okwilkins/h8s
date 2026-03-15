@@ -11,7 +11,7 @@ secret:
 pod:
   initContainers:
     - name: setup-users-database
-      image: harbor.okwilkins.dev/ghcr-cache/busybox:1.37.0
+      image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.37.0
       command:
         - /bin/sh
         - -c
