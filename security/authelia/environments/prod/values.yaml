@@ -7,6 +7,7 @@ secret:
   additionalSecrets:
     authelia-encryption-key: {}
     cnpg-authelia-prod-app-user-credentials: {}
+    authelia-session-secret: {}
 
 pod:
   initContainers:
@@ -62,6 +63,10 @@ configMap:
       path: /config/users_database.yml
 
   session:
+    encryption_key:
+      disabled: false
+      secret_name: authelia-session-secret
+      path: session-secret
     cookies:
       - domain: okwilkins.dev
 
