@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-authelia-prod
+  namespace: authelia
+spec:
+  description: Postgres cluster for Authelia
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.4
+  instances: 1
+  storage:
+    size: 1Gi
+  resources:
+    requests:
+      memory: 128Mi
+  managed:
+    roles:
+      - name: authelia
+        ensure: present
+        login: true
+        superuser: false
+        passwordSecret:
+          name: cnpg-authelia-prod-app-user-credentials
+          key: password
+  enableSuperuserAccess: false
+  monitoring:
+    enablePodMonitor: true
