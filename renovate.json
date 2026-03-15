@@ -35,6 +35,18 @@
             ],
             "datasourceTemplate": "github-tags",
             "versioningTemplate": "semver"
+        },
+        {
+            "customType": "regex",
+            "description": "Update CloudNativePG PostgreSQL images",
+            "managerFilePatterns": [
+                "/storage/cloudnative-pg/.*\\.yaml$/"
+            ],
+            "matchStrings": [
+                "imageName:\\s+(?<depName>[^:]+):(?<currentValue>[^\\s]+)"
+            ],
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "semver"
         }
     ],
     "packageRules": [
