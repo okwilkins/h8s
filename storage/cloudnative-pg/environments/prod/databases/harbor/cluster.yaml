@@ -4,7 +4,7 @@ metadata:
   name: cnpg-harbor-prod
   namespace: harbor
 spec:
-  description: Postgres cluster for the Harbor
+  description: Postgres cluster for Harbor
   imageName: ghcr.io/cloudnative-pg/postgresql:17.4
   instances: 1
   storage:
