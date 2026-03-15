@@ -63,6 +63,11 @@ configMap:
   # TODO: Add metrics
   # telemetry:
 
+  webauthn:
+    disable: false
+    display_name: 'Authelia'
+    enable_passkey_login: true
+
   server:
     endpoints:
       authz:
