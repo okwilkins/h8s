@@ -37,6 +37,9 @@ pod:
         name: authelia-users-template
     - name: users-config
       emptyDir: {}
+  extraVolumeMounts:
+    - name: users-config
+      mountPath: /config
 
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
 configMap:
