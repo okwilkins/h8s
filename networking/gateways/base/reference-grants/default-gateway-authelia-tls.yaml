@@ -1,8 +1,8 @@
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: pocket-id-tls-access
-  namespace: pocket-id
+  name: authelia-tls-access
+  namespace: authelia
 spec:
   from:
     - group: gateway.networking.k8s.io
