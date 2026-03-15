@@ -3,6 +3,11 @@ image:
   pullSecrets:
     - harbor-credentials
 
+secret:
+  additionalSecrets:
+    authelia-encryption-key: {}
+    cnpg-authelia-prod-app-user-credentials: {}
+
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
 configMap:
   log:
