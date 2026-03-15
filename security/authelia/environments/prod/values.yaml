@@ -10,15 +10,25 @@ secret:
     authelia-session-secret: {}
 
 pod:
+  securityContext:
+    pod:
+      fsGroup: 1000
+    container:
+      runAsUser: 1000
+      runAsGroup: 1000
   initContainers:
     - name: setup-users-database
       image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.37.0
+      securityContext:
+        runAsUser: 0
       command:
         - /bin/sh
         - -c
         - |
           PASSWORD_HASH=$(cat /tmp/password/hash)
           sed "s#PASSWORD_PLACEHOLDER#$PASSWORD_HASH#" /tmp/users_template/users_template.yml > /config/users_database.yml
+          chown 1000:1000 /config/users_database.yml
+          chmod 644 /config/users_database.yml
           echo "Users database created successfully"
       volumeMounts:
         - name: user-password
