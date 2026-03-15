@@ -108,7 +108,7 @@ spec:
           - name: hubble-okwilkins-dev-tls
             namespace: kube-system
     - protocol: HTTPS
-      name: home-lan-pocket-id
+      name: home-lan-authelia
       hostname: auth.okwilkins.dev
       port: 443
       allowedRoutes:
@@ -118,7 +118,7 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: auth-okwilkins-dev-tls
-            namespace: pocket-id
+            namespace: authelia
     - protocol: HTTPS
       name: home-lan-mazanoke
       hostname: convert.okwilkins.dev

@@ -1,8 +1,8 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: pocket-id
-  namespace: pocket-id
+  name: authelia
+  namespace: authelia
 spec:
   parentRefs:
     - name: default-gateway
@@ -25,5 +25,5 @@ spec:
               - name: X-Forwarded-Host
                 value: auth.okwilkins.dev
       backendRefs:
-        - name: pocket-id
-          port: 1411
+        - name: authelia
+          port: 80
