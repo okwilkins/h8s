@@ -4,3 +4,4 @@ resources:
   - encryption-key-secret.yaml
   - user-password-secret.yaml
   - users-database-configmap.yaml
+  - session-secret.yaml
