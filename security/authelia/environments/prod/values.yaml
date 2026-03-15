@@ -1,0 +1,4 @@
+image:
+  registry: harbor.okwilkins.dev/ghcr-cache
+  pullSecrets:
+    - harbor-credentials
