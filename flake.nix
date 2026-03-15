@@ -29,6 +29,7 @@
           yq
           sshpass
           netcat
+          authelia
         ];
       in
       {
