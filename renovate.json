@@ -26,6 +26,30 @@
     "customManagers": [
         {
             "customType": "regex",
+            "description": "Update Docker Hub cached images in Harbor",
+            "managerFilePatterns": [
+                "/.*\\.yaml$/"
+            ],
+            "matchStrings": [
+                "image:\\s+harbor\\.okwilkins\\.dev/docker-hub-cache/(?<depName>[^\\s:]+):(?<currentValue>[^\\s]+)"
+            ],
+            "datasourceTemplate": "docker",
+            "depNameTemplate": "library/{{depName}}"
+        },
+        {
+            "customType": "regex",
+            "description": "Update GHCR cached images in Harbor",
+            "managerFilePatterns": [
+                "/.*\\.yaml$/"
+            ],
+            "matchStrings": [
+                "image:\\s+harbor\\.okwilkins\\.dev/ghcr-cache/(?<depName>[^\\s:]+):(?<currentValue>[^\\s]+)"
+            ],
+            "datasourceTemplate": "docker",
+            "depNameTemplate": "ghcr.io/{{depName}}"
+        },
+        {
+            "customType": "regex",
             "description": "Update Kustomize remote resource URLs",
             "managerFilePatterns": [
                 "/.*/kustomization\\.yaml$/"
@@ -43,10 +67,10 @@
                 "/storage/cloudnative-pg/.*\\.yaml$/"
             ],
             "matchStrings": [
-                "imageName:\\s+(?<depName>[^:]+):(?<currentValue>[^\\s]+)"
+                "imageName:\\s+(?<depName>[^\\s]+):(?<currentValue>[^\\s]+)"
             ],
             "datasourceTemplate": "docker",
-            "versioningTemplate": "semver"
+            "versioningTemplate": "loose"
         }
     ],
     "packageRules": [
@@ -61,14 +85,14 @@
             ]
         },
         {
-            "description": "Ignore private Harbor image tags until registry credentials are configured",
+            "description": "Enable CloudNativePG images from ghcr.io",
             "matchDatasources": [
                 "docker"
             ],
             "matchPackageNames": [
-                "harbor.okwilkins.dev/**"
+                "ghcr.io/cloudnative-pg/**"
             ],
-            "enabled": false
+            "enabled": true
         },
         {
             "description": "Force docker datasource for OCI Helm charts (ghcr.io)",
