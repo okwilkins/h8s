@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: auth-okwilkins-dev
-  namespace: pocket-id
+  namespace: authelia
 spec:
   secretName: auth-okwilkins-dev-tls
   issuerRef:
