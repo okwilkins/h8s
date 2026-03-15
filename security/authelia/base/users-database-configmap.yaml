@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authelia-users-template
+  namespace: authelia
+data:
+  users_template.yml: |
+    users:
+      okwilkins:
+        disabled: false
+        displayname: "Oliver Wilkins"
+        password: "PASSWORD_PLACEHOLDER"
+        email: okwilkins@googlemail.com
+        groups:
+          - admins

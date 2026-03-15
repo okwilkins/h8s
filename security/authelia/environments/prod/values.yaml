@@ -8,6 +8,36 @@ secret:
     authelia-encryption-key: {}
     cnpg-authelia-prod-app-user-credentials: {}
 
+pod:
+  initContainers:
+    - name: setup-users-database
+      image: harbor.okwilkins.dev/ghcr-cache/busybox:1.37.0
+      command:
+        - /bin/sh
+        - -c
+        - |
+          PASSWORD_HASH=$(cat /tmp/password/hash)
+          sed "s/PASSWORD_PLACEHOLDER/$PASSWORD_HASH/" /tmp/users_template/users_template.yml > /config/users_database.yml
+          echo "Users database created successfully"
+      volumeMounts:
+        - name: user-password
+          mountPath: /tmp/password
+          readOnly: true
+        - name: users-template
+          mountPath: /tmp/users_template
+          readOnly: true
+        - name: config
+          mountPath: /config
+  extraVolumes:
+    - name: user-password
+      secret:
+        secretName: authelia-user-password
+    - name: users-template
+      configMap:
+        name: authelia-users-template
+    - name: config
+      emptyDir: {}
+
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
 configMap:
   log:
@@ -22,6 +52,26 @@ configMap:
       authz:
         ext-authz:
           implementation: "ExtAuthz"
+
+  authentication_backend:
+    file:
+      enabled: true
+      path: /config/users_database.yml
+
+  session:
+    cookies:
+      - domain: okwilkins.dev
+
+  notifier:
+    filesystem:
+      enabled: true
+      filename: /config/notification.txt
+
+  access_control:
+    default_policy: two_factor
+    rules:
+      - domain: "*.okwilkins.dev"
+        policy: two_factor
 
   storage:
     local:
