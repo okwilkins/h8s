@@ -10,6 +10,7 @@ secret:
     authelia-session-secret: {}
 
 pod:
+  replicas: 1
   securityContext:
     pod:
       fsGroup: 1000
