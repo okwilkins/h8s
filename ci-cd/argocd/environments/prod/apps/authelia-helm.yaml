@@ -16,6 +16,9 @@ spec:
           - $h8s/security/authelia/environments/prod/values.yaml
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
+      path: security/authelia/environments/prod/
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
       ref: h8s
   destination:
     server: https://kubernetes.default.svc
