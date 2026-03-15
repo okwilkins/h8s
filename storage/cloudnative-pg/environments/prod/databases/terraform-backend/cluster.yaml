@@ -5,7 +5,7 @@ metadata:
   namespace: terraform
 spec:
   description: Postgres cluster for the Terraform backend of this cluster
-  imageName: ghcr.io/cloudnative-pg/postgresql:17.4
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.9
   instances: 1
   storage:
     size: 10Gi
