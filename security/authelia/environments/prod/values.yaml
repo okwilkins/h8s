@@ -2,3 +2,34 @@ image:
   registry: harbor.okwilkins.dev/ghcr-cache
   pullSecrets:
     - harbor-credentials
+
+# https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
+configMap:
+  log:
+    level: info
+  theme: auto
+
+  # TODO: Add metrics
+  # telemetry:
+
+  server:
+    endpoints:
+      authz:
+        ext-authz:
+          implementation: "ExtAuthz"
+
+  storage:
+    local:
+      enabled: false
+    postgres:
+      enabled: true
+      host: cnpg-authelia-prod-rw.authelia.svc.cluster.local
+      port: 5432
+      database: authelia
+      username: authelia
+      passwordSecret:
+        name: cnpg-authelia-prod-app-user-credentials
+        key: password
+      encryptionKeySecret:
+        name: authelia-encryption-key
+        key: encryption-key
