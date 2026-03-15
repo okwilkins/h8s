@@ -26,7 +26,7 @@ pod:
         - name: users-template
           mountPath: /tmp/users_template
           readOnly: true
-        - name: config
+        - name: users-config
           mountPath: /config
   extraVolumes:
     - name: user-password
@@ -35,7 +35,7 @@ pod:
     - name: users-template
       configMap:
         name: authelia-users-template
-    - name: config
+    - name: users-config
       emptyDir: {}
 
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
