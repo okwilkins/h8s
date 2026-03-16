@@ -22,11 +22,3 @@ spec:
                     secretKeyRef:
                       name: grafana-admin-credentials
                       key: GF_SECURITY_ADMIN_PASSWORD
-  persistentVolumeClaim:
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: longhorn
-      resources:
-        requests:
-          storage: 5Gi
