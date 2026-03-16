@@ -5,7 +5,7 @@ metadata:
   namespace: harbor
 spec:
   description: Postgres cluster for Harbor
-  imageName: ghcr.io/cloudnative-pg/postgresql:17.4
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.3
   instances: 1
   storage:
     size: 10Gi
