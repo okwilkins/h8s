@@ -18,3 +18,8 @@ As an SMTP server has not been setup to send emails, Authelia's text based notif
 kubectl exec -it deploy/authelia -n authelia -c authelia -- cat /config/notification.txt
 ```
 
+## Validating Config
+
+```bash
+kubectl exec -it deployment/authelia -n authelia -c authelia -- authelia config validate
+```
