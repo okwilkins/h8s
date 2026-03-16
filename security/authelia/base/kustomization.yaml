@@ -7,3 +7,4 @@ resources:
   - ./session-secret.yaml
   - ./hmac-secret.yaml
   - ./oidc-rsa-key.yaml
+  - ./grafana-client-secret.yaml
