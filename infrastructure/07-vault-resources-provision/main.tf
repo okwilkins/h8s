@@ -572,7 +572,7 @@ resource "null_resource" "vault_secret_authelia_rsa" {
 
 resource "null_resource" "vault_secret_authelia_grafana_oidc" {
   triggers = {
-    secret_hash = md5("session-secret=${random_password.authelia_grafana_oidc_client_secret.result}")
+    secret_hash = md5("client-secret=${random_password.authelia_grafana_oidc_client_secret.result}")
   }
 
   provisioner "local-exec" {
@@ -581,13 +581,11 @@ resource "null_resource" "vault_secret_authelia_grafana_oidc" {
       load_tf_kube_env
       create_cert_dir
 
-      cat << 'EOF' > /tmp/grafana_hash.txt
-      ${bcrypt(random_password.authelia_grafana_oidc_client_secret.result)}
-      EOF
-
-      cat << 'EOF' > /tmp/grafana_plaintext.txt
-      ${random_password.authelia_grafana_oidc_client_secret.result}
-      EOF
+      printf '%s' '${bcrypt(random_password.authelia_grafana_oidc_client_secret.result)}' \
+        | tr -d '[:space:]' \
+        | base64 > /tmp/grafana_hash_b64.txt
+      printf '%s' '${random_password.authelia_grafana_oidc_client_secret.result}' \
+        | base64 > /tmp/grafana_plaintext_b64.txt
 
       VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
 
@@ -595,16 +593,16 @@ resource "null_resource" "vault_secret_authelia_grafana_oidc" {
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
         vault login -no-store \"\$VAULT_TOKEN\" || exit 1
 
-        echo \"\$(cat /tmp/grafana_hash.txt)\" > /tmp/vault_grafana_hash.txt
-        echo \"\$(cat /tmp/grafana_plaintext.txt)\" > /tmp/vault_grafana_plaintext.txt
-        
+        printf '%s' \"$(cat /tmp/grafana_hash_b64.txt)\" | base64 -d > /tmp/vault_grafana_hash.txt
+        printf '%s' \"$(cat /tmp/grafana_plaintext_b64.txt)\" | base64 -d > /tmp/vault_grafana_plaintext.txt
+
         vault kv put kubernetes-homelab/authelia/grafana-oidc \
           client-secret-hash=@/tmp/vault_grafana_hash.txt \
           client-secret-plaintext=@/tmp/vault_grafana_plaintext.txt || exit 1
-          
+
         rm /tmp/vault_grafana_hash.txt /tmp/vault_grafana_plaintext.txt
       "
-      rm /tmp/grafana_hash.txt /tmp/grafana_plaintext.txt
+      rm /tmp/grafana_hash_b64.txt /tmp/grafana_plaintext_b64.txt
     EOT
   }
 
