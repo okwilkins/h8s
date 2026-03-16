@@ -6,3 +6,4 @@ resources:
   - ./dashboards
   - ./grafana.yaml
   - ./admin-credentials.yaml
+  - ./oidc-client-secret.yaml
