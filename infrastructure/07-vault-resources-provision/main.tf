@@ -522,7 +522,7 @@ resource "null_resource" "vault_secret_authelia_hmac" {
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
         vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/authelia/hmac-secret \\
-          session-secret='${random_password.authelia_hmac_secret.result}' || exit 1
+          hmac-secret='${random_password.authelia_hmac_secret.result}' || exit 1
       "
     EOT
   }
