@@ -113,6 +113,21 @@ configMap:
             disabled: false
             secret_name: authelia-oidc-rsa-key
             path: oidc-rsa-key
+      clients:
+        - client_id: grafana
+          client_name: Grafana
+          client_secret:
+            secret_name: authelia-grafana-client-secret
+            path: client-secret-hash
+          public: false
+          authorization_policy: two_factor
+          redirect_uris:
+            - https://grafana.okwilkins.dev/login/generic_oauth
+          scopes:
+            - openid
+            - profile
+            - email
+            - groups
 
   storage:
     local:
