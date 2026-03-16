@@ -8,6 +8,7 @@ secret:
     authelia-encryption-key: {}
     cnpg-authelia-prod-app-user-credentials: {}
     authelia-session-secret: {}
+    authelia-hmac-secret: {}
 
 pod:
   kind: Deployment
@@ -97,6 +98,21 @@ configMap:
     rules:
       - domain: "*.okwilkins.dev"
         policy: two_factor
+
+  identity_providers:
+    oidc:
+      hmac_secret:
+        disabled: false
+        secret_name: authelia-hmac-secret
+        path: hmac-secret
+      jwks:
+        - key_id: default-rsa-key
+          algorithm: RS256
+          use: sig
+          key:
+            disabled: false
+            secret_name: authelia-oidc-rsa-key
+            path: oidc-rsa-key
 
   storage:
     local:
