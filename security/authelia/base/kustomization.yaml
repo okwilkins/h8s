@@ -6,3 +6,4 @@ resources:
   - ./users-database-configmap.yaml
   - ./session-secret.yaml
   - ./hmac-secret.yaml
+  - ./oidc-rsa-key.yaml
