@@ -9,6 +9,8 @@ secret:
     cnpg-authelia-prod-app-user-credentials: {}
     authelia-session-secret: {}
     authelia-hmac-secret: {}
+    authelia-oidc-rsa-key: {}
+    authelia-grafana-client-secret: {}
 
 pod:
   kind: Deployment
@@ -51,9 +53,21 @@ pod:
         name: authelia-users-template
     - name: users-config
       emptyDir: {}
+    - name: oidc-rsa-key
+      secret:
+        secretName: authelia-oidc-rsa-key
+    - name: grafana-client-secret
+      secret:
+        secretName: authelia-grafana-client-secret
   extraVolumeMounts:
     - name: users-config
       mountPath: /config
+    - name: oidc-rsa-key
+      mountPath: /secrets/oidc-rsa-key
+      readOnly: true
+    - name: grafana-client-secret
+      mountPath: /secrets/grafana-client-secret
+      readOnly: true
 
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
 configMap:
@@ -109,18 +123,24 @@ configMap:
         - key_id: default-rsa-key
           algorithm: RS256
           use: sig
-          key:
-            disabled: false
-            secret_name: authelia-oidc-rsa-key
-            path: oidc-rsa-key
+          key: |
+            {{ include "/secrets/oidc-rsa-key/rsa-private-key" | mindent 12 "" }}
+      claims_policies:
+        grafana:
+          id_token: ['email', 'name', 'groups', 'preferred_username']
+      scopes:
+        groups:
+          claims:
+            - groups
       clients:
         - client_id: grafana
           client_name: Grafana
-          client_secret:
-            secret_name: authelia-grafana-client-secret
-            path: client-secret-hash
+          client_secret: "$plaintext${{ secret '/secrets/grafana-client-secret/client-secret-hash' }}"
           public: false
           authorization_policy: two_factor
+          claims_policy: grafana
+          require_pkce: true
+          pkce_challenge_method: 'S256'
           redirect_uris:
             - https://grafana.okwilkins.dev/login/generic_oauth
           scopes:
