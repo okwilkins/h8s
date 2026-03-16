@@ -20,8 +20,9 @@ spec:
       auth_url: https://auth.okwilkins.dev/api/oidc/authorization
       token_url: https://auth.okwilkins.dev/api/oidc/token
       api_url: https://auth.okwilkins.dev/api/oidc/userinfo
-      role_attribute_path: contains(groups[*], 'admin') && 'Admin' || 'Viewer'
+      role_attribute_path: contains(groups[*], 'admins') && 'Admin' || 'Viewer'
       allow_sign_up: "false"
+      use_pkce: "true"
   deployment:
     spec:
       template:
