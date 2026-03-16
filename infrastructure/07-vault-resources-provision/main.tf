@@ -530,6 +530,42 @@ resource "null_resource" "vault_secret_authelia_hmac" {
   depends_on = [data.terraform_remote_state.vault_init]
 }
 
+resource "tls_private_key" "authelia_oidc_rsa" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "null_resource" "vault_secret_authelia_rsa" {
+  triggers = {
+    secret_hash = md5(tls_private_key.authelia_oidc_rsa.private_key_pem)
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      source ${var.infra_root}/scripts/common.sh
+      load_tf_kube_env
+      create_cert_dir
+
+      cat << 'EOF' > /tmp/authelia_rsa.pem
+      ${tls_private_key.authelia_oidc_rsa.private_key_pem}
+      EOF
+
+      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
+
+      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
+        export VAULT_TOKEN=\"$VAULT_TOKEN\"
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
+
+        echo \"$(cat /tmp/authelia_rsa.pem)\" > /tmp/vault_rsa.pem
+        vault kv put kubernetes-homelab/authelia/oidc-rsa-key rsa-private-key=@/tmp/vault_rsa.pem || exit 1
+        rm /tmp/vault_rsa.pem
+      "
+
+      rm /tmp/authelia_rsa.pem
+    EOT
+  }
+}
+
 # ============================================================
 # Pocket ID Secrets
 # ============================================================
