@@ -162,7 +162,7 @@ configMap:
             path: /secrets/argocd-client-secret/client-secret-hash
           public: false
           authorization_policy: two_factor
-          token_endpoint_auth_method: client_secret_basic
+          token_endpoint_auth_method: client_secret_post
           redirect_uris:
             - https://argocd.okwilkins.dev/auth/callback
           scopes:
