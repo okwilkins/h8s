@@ -284,13 +284,15 @@ These environment variables are required. Terraform will fail if they are not se
 
 ### Access ArgoCD
 
-Get the ArgoCD admin password:
+ArgoCD is accessible at `https://argocd.okwilkins.dev`. Login is via Authelia SSO only — the local `admin` account is disabled.
+
+If OIDC is unavailable (e.g. Authelia is down), use core mode to bypass the API server entirely:
 
 ```bash
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+argocd login --core
+argocd app list
+argocd app sync <app-name>
 ```
-
-Access the UI at `https://argocd.okwilkins.dev`
 
 ### Ongoing Operations
 

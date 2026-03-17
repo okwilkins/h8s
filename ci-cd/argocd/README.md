@@ -24,10 +24,26 @@ To install the app of apps, that will install everything else, run:
 kubectl apply -k environments/$CLUSTER_ENV
 ```
 
-## Web UI
+## Access
 
-To gain access to the admin account via the web UI, run this command:
+ArgoCD is accessible at https://argocd.okwilkins.dev
+
+Login is via Authelia SSO only. The local `admin` account is disabled.
+
+## Bootstrapping / Emergency Access
+
+If OIDC is unavailable (e.g. Authelia is down or misconfigured), the ArgoCD CLI
+can bypass the API server entirely using core mode, which talks directly to the
+Kubernetes API via kubeconfig:
 
 ```bash
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+kubectl exec -it -n argocd deploy/argocd-server -- argocd login --core
+argocd app list
+argocd app sync <app-name>
+```
+
+Or from your local machine with a valid kubeconfig:
+
+```bash
+argocd login --core
 ```
