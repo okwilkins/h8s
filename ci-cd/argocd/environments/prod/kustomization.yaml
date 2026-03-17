@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - ./app-of-apps.yaml
   - ./default-app-project.yaml
+  - ./argocd-oidc-secret.yaml

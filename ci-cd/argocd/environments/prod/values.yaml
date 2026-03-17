@@ -6,14 +6,29 @@ global:
 configs:
   params:
     server.insecure: true
+  cm:
+    url: https://argocd.okwilkins.dev
+    oidc.config: |
+      name: Authelia
+      issuer: https://auth.okwilkins.dev
+      clientID: argocd
+      clientSecret: $argocd-oidc-secret:oidc.authelia.clientSecret
+      cliClientID: argocd-cli
+      requestedScopes:
+        - openid
+        - email
+        - groups
+      enableUserInfoGroups: true
+      userInfoPath: /api/oidc/userinfo
+  rbac:
+    policy.csv: |
+      g, admins, role:admin
 controller:
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
 server:
-  config:
-    url: https://argocd.okwilkins.dev
   # As HTTPS is dealt with with Cloudflared, internally use HTTP
   extraArgs:
     - --insecure
