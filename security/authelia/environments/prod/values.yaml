@@ -58,6 +58,9 @@ pod:
     - name: grafana-client-secret
       secret:
         secretName: authelia-grafana-client-secret
+    - name: argocd-client-secret
+      secret:
+        secretName: authelia-argocd-client-secret
   extraVolumeMounts:
     - name: users-config
       mountPath: /config
@@ -66,6 +69,9 @@ pod:
       readOnly: true
     - name: grafana-client-secret
       mountPath: /secrets/grafana-client-secret
+      readOnly: true
+    - name: argocd-client-secret
+      mountPath: /secrets/argocd-client-secret
       readOnly: true
 
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
@@ -150,6 +156,33 @@ configMap:
             - profile
             - email
             - groups
+        - client_id: argocd
+          client_name: Argo CD
+          client_secret:
+            path: /secrets/argocd-client-secret/client-secret-hash
+          public: false
+          authorization_policy: two_factor
+          token_endpoint_auth_method: client_secret_basic
+          redirect_uris:
+            - https://argocd.okwilkins.dev/auth/callback
+          scopes:
+            - openid
+            - groups
+            - email
+        - client_id: argocd-cli
+          client_name: Argo CD (CLI)
+          public: true
+          authorization_policy: two_factor
+          require_pkce: true
+          pkce_challenge_method: S256
+          redirect_uris:
+            - http://localhost:8085/auth/callback
+          scopes:
+            - openid
+            - offline_access
+            - groups
+            - email
+          token_endpoint_auth_method: none
 
   storage:
     local:
