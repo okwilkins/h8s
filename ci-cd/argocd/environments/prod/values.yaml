@@ -8,6 +8,7 @@ configs:
     server.insecure: true
   cm:
     url: https://argocd.okwilkins.dev
+    admin.enabled: "false"
     oidc.config: |
       name: Authelia
       issuer: https://auth.okwilkins.dev
