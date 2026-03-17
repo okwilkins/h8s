@@ -8,3 +8,4 @@ resources:
   - ./hmac-secret.yaml
   - ./oidc-rsa-key.yaml
   - ./grafana-client-secret.yaml
+  - ./argocd-client-secret.yaml
