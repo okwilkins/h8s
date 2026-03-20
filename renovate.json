@@ -65,7 +65,7 @@
             ]
         },
         {
-            "description": "Enable CloudNativePG images from ghcr.io",
+            "description": "CloudNativePG images from ghcr.io",
             "matchDatasources": [
                 "docker"
             ],
@@ -82,6 +82,34 @@
             "matchPackageNames": [
                 "ghcr.io/grafana/helm-charts/grafana-operator"
             ],
+            "enabled": true
+        },
+        {
+            "description": "Resolve images via Harbor docker-hub-cache proxy against Docker Hub",
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "harbor.okwilkins.dev/docker-hub-cache/**"
+            ],
+            "registryUrls": [
+                "https://index.docker.io"
+            ],
+            "overrideDepName": "{{replace 'harbor\\.okwilkins\\.dev/docker-hub-cache/' '' depName}}",
+            "enabled": true
+        },
+        {
+            "description": "Resolve images via Harbor ghcr-cache proxy against GHCR",
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "harbor.okwilkins.dev/ghcr-cache/**"
+            ],
+            "registryUrls": [
+                "https://ghcr.io"
+            ],
+            "overrideDepName": "{{replace 'harbor\\.okwilkins\\.dev/ghcr-cache/' '' depName}}",
             "enabled": true
         }
     ]
