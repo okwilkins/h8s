@@ -11,7 +11,6 @@ resources:
   - ./excalidraw-namespace.yaml
   - ./external-secrets-namespace.yaml
   - ./harbor-namespace.yaml
-  - ./keycloak-namespace.yaml
   - ./longhorn-system-namespace.yaml
   - ./mazanoke-namespace.yaml
   - ./monitoring-namespace.yaml
