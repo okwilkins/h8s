@@ -14,7 +14,6 @@ resources:
   - ./longhorn-system-namespace.yaml
   - ./mazanoke-namespace.yaml
   - ./monitoring-namespace.yaml
-  - ./pocket-id-namespace.yaml
   - ./renovate-namespace.yaml
   - ./vault-namespace.yaml
   - ./searxng-namespace.yaml
