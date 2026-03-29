@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://argoproj.github.io/argo-helm
       chart: argo-workflows
-      targetRevision: 1.0.5
+      targetRevision: 1.0.6
       helm:
         valueFiles:
           - $h8s/ci-cd/argo-workflows/environments/prod/values.yaml
