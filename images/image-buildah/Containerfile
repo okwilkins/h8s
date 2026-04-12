@@ -2,7 +2,7 @@ ARG BUILD_USER=buildah
 ARG BUILD_UID=1000
 ARG BUILD_GID=1000
 
-FROM harbor.okwilkins.dev/docker-hub-cache/nixos/nix:2.32.4 AS builder
+FROM harbor.okwilkins.dev/docker-hub-cache/nixos/nix:2.34.6 AS builder
 
 ARG BUILD_USER
 ARG BUILD_UID
