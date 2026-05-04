@@ -307,6 +307,45 @@ done
 
 **Secret Rotation**: Update Vault secrets as needed. ESO will automatically sync changes to Kubernetes.
 
+## Upgrading Talos
+
+### Do Not Use Terraform to Upgrade
+
+**Do not change `talos_version` in `shared/common.auto.tfvars` to upgrade an existing cluster.** This will brick the nodes.
+
+The `cdrom` block in `02-proxmox-provision/main.tf` has a `lifecycle { ignore_changes = [cdrom] }` directive, meaning Terraform will never update the ISO reference on an existing VM. When stage 01 (`proxmox:iso:install`) runs with a new version, it replaces the old ISO in Proxmox storage. The VMs still reference the old ISO filename — which no longer exists — so they cannot start at all.
+
+The `talos_version` variable in tfvars should only ever be changed when doing a **full cluster rebuild from scratch**.
+
+### Upgrade with talosctl
+
+Talos upgrades on a running cluster are performed with `talosctl upgrade`. You must use the **factory installer image** (not the plain installer) to preserve custom extensions.
+
+The factory installer image is:
+
+```
+factory.talos.dev/installer/<schematic-id>:<version>
+```
+
+The schematic ID is embedded in the ISO filename visible in Proxmox storage (e.g. `talos-v1.12.4-53513e54bb39202f35694412577a6bc53d484744d35a126e5d42ef34785c0d83.iso`, the long hash is the schematic ID). It can also be retrieved from the stage 00 state file.
+
+Upgrade each node one at a time:
+
+```bash
+talosctl upgrade \
+  --nodes <node-ip> \
+  --endpoints <node-ip> \
+  --image factory.talos.dev/installer/<schematic-id>:<new-version> \
+  --talosconfig 03-talos-configure/secrets/talosconfig.yaml \
+  --force
+```
+
+### The `--force` Flag and Etcd Quorum
+
+This cluster has only **2 control plane nodes**, which means etcd has 2 members. Etcd requires a majority quorum, with 2 members both must be available at all times. Talos refuses to upgrade a node by default when doing so would drop below quorum.
+
+Before upgrading, ensure your state files and credentials are backed up (see [Saving Your State](#saving-your-state)).
+
 ## Extracting the Vault CA Certificate
 
 Vault acts as the cluster's internal Certificate Authority. To trust certificates issued by Vault in your browser, you need to extract the CA certificate:
