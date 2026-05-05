@@ -104,8 +104,10 @@ configMap:
       disabled: false
       secret_name: authelia-session-secret
       path: session-secret
+
     cookies:
       - domain: okwilkins.dev
+        subdomain: auth
 
   notifier:
     filesystem:
