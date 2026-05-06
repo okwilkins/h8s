@@ -20,7 +20,7 @@ spec:
       containers:
         - name: excalidraw
           # NOTE: Using digest for reproducibility since only 'latest' tag exists
-          image: harbor.okwilkins.dev/docker-hub-cache/excalidraw/excalidraw@sha256:20ffa04668e19616bb0c1b3632849e5cd96e0bc7a1336b73d9d072667f2c2854
+          image: harbor.okwilkins.dev/docker-hub-cache/excalidraw/excalidraw@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
           imagePullPolicy: Always
           ports:
             - name: http
