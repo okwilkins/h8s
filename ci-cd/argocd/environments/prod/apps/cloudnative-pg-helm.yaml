@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://cloudnative-pg.github.io/charts
       chart: cloudnative-pg
-      targetRevision: 0.28.0
+      targetRevision: 0.28.2
       helm:
         releaseName: cloudnative-pg
   destination:
