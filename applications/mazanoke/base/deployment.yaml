@@ -19,7 +19,7 @@ spec:
         - name: harbor-credentials
       containers:
         - name: mazanoke
-          image: harbor.okwilkins.dev/ghcr-cache/civilblur/mazanoke:v1.1.5
+          image: harbor.okwilkins.dev/ghcr-cache/civilblur/mazanoke:v1.1.6
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
