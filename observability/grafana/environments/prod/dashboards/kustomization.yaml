@@ -8,7 +8,6 @@ resources:
   - ./harbor/
   - ./external-secrets-operator/
   - ./vault/
-  - ./loki/
   - ./cert-manager/
   - ./argo-workflows/
 patches:

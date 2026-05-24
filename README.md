@@ -59,9 +59,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   └── gateways                    | Ingress and networking routing management.
 ├── observability
 │   ├── grafana                     | Metrics and log observability.
-│   ├── loki                        | Log collection.
 │   ├── prometheus                  | Metrics collection.
-│   └── promtail                    | Log collection and shipping agent.
 ├── security
 │   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
