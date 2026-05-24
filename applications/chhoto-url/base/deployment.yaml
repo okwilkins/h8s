@@ -43,8 +43,8 @@ spec:
               value: "True"
             - name: CHHOTO_REDIRECT_METHOD
               value: "PERMANENT"
-            - name: CHHOTO_HASH_ALGORITHM
-              value: "Argon2"
+            # - name: CHHOTO_HASH_ALGORITHM
+            #   value: "Argon2"
             - name: CHHOTO_SLUG_STYLE
               value: "Pair"
             # - name: CHHOTO_SLUG_LENGTH   # Only relevant if SLUG_STYLE=UID
