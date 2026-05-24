@@ -112,7 +112,9 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 
 ```text
 ├── applications
+│   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
+│   ├── mazanoke                    | Browser-based image optimizer.
 │   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd
 │   ├── argo-workflows              | CI/CD pipelines (WIP).
@@ -120,9 +122,9 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   └── renovate                    | Automated dependency updates.
 ├── images
 │   ├── coredns
-│   ├── terraform
-│   └── image-buildah
-├── infrastructure                  | Complete bootstrapping of the cluster with Proxmox and Talos + platform configuration.
+│   ├── image-buildah
+│   └── terraform
+├── infrastructure                  | 8-stage Terraform pipeline for cluster bootstrapping from bare metal via Proxmox and Talos + platform configuration.
 ├── namespaces                      | Holds all namespaces for the cluster.
 ├── networking
 │   ├── cert-manager                | Certificate controller for the self-hosted certificate authority.
@@ -136,11 +138,12 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   ├── prometheus                  | Metrics collection.
 │   └── promtail                    | Log collection and shipping agent.
 ├── security
+│   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
-│   ├── external-secrets-operator   | Takes secrets hosted internally with Vault and manages them inside the cluster.
+│   ├── external-secrets-operator   | Syncs secrets from Vault into the cluster.
 │   └── vault                       | Secrets storage and certificate authority.
 └── storage
-    ├── cloudnative-pg              | PostrgreSQL database management for various Applications.
+    ├── cloudnative-pg              | PostgreSQL database management for applications.
     ├── harbor                      | Container and binary registry.
     └── longhorn                    | Cluster CSI.
 ```
