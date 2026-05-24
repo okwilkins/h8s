@@ -3,6 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: fluent-bit-dashboard
 spec:
+  title: Fluent Bit
   configMapRef:
     name: fluent-bit-collector-dashboard
     key: fluent-bit-collector.json
