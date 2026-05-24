@@ -127,7 +127,7 @@ Whenever the pod(s) for Vault are rescheduled, they will need to be [unsealed](h
 
 ```bash
 # Extract unseal keys from vault-init.json and unseal Vault
-for key in $(cat infrastructure/bootstrap/vault-init.json | jq -r '.unseal_keys_b64[]'); do
+for key in $(cat infrastructure/06-vault-init/secrets/vault-init.json | jq -r '.unseal_keys_b64[]'); do
   kubectl exec -ti vault-0 -n vault -- vault operator unseal "$key"
 done
 ```
