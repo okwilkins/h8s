@@ -134,9 +134,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   └── gateways                    | Ingress and networking routing management.
 ├── observability
 │   ├── grafana                     | Metrics and log observability.
-│   ├── loki                        | Log collection.
 │   ├── prometheus                  | Metrics collection.
-│   └── promtail                    | Log collection and shipping agent.
 ├── security
 │   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.

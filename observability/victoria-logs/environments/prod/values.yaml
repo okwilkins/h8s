@@ -3,3 +3,6 @@ server:
   retentionPeriod: 30d
   persistentVolume:
     size: 100Gi
+
+dashboards:
+  enabled: true

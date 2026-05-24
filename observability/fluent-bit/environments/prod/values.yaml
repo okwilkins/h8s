@@ -33,12 +33,12 @@ config:
         mem_buf_limit: 5MB
         read_from_head: false
 
-    outputs:
-      - name: loki
-        match: "*"
-        host: loki.monitoring.svc.cluster.local
-        uri: /loki/api/v1/push
-        port: 3100
+    # outputs:
+    #   - name: loki
+    #     match: "*"
+    #     host: loki.monitoring.svc.cluster.local
+    #     uri: /loki/api/v1/push
+    #     port: 3100
 
 serviceMonitor:
   enabled: true
