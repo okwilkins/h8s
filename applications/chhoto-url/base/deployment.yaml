@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: chhoto-url
-          image: harbor.okwilkins.dev/docker-hub-cache/sintan1729/chhoto-url:7.1.2
+          image: harbor.okwilkins.dev/docker-hub-cache/sintan1729/chhoto-url:7.1.4
           imagePullPolicy: IfNotPresent
           # Read more here: https://github.com/SinTan1729/chhoto-url/blob/main/INSTALLATION.md
           env:
