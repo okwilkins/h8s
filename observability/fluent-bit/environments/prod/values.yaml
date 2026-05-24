@@ -1,29 +1,17 @@
 # https://artifacthub.io/packages/helm/fluent/fluent-bit-collector/1.0.6?modal=values
 
+luaScripts:
+  audit.lua: |
+    function set_message(tag, timestamp, record)
+        if record["verb"] and record["requestURI"] then
+            record["log"] = record["verb"]:upper() .. " " .. record["requestURI"]
+        end
+        return 1, timestamp, record
+    end
+
 config:
   pipeline:
     inputs:
-      - name: tail
-        alias: k8s-logs
-        path: /var/log/containers/*.log
-        tag_regex: (?<pod_name>[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?<namespace_name>[^_]+)_(?<container_name>.+)-
-        tag: kube.<namespace_name>.<pod_name>.<container_name>
-        read_from_head: true
-        multiline.parser: cri
-        skip_long_lines: true
-        skip_empty_lines: true
-        storage.type: ${STORAGE_TYPE_PREFER_FS}
-        db: ${STORAGE_PATH}/tail.db
-        processors:
-          logs:
-            - name: kubernetes
-              use_kubelet: ${KUBELET_ENDPOINT}
-              kubelet_host: ${NODE_IP}
-              kubelet_port: 10250
-              kube_tag_prefix: kube.
-              regex_parser: kubernetes-tag
-              k8s-logging.parser: true
-              k8s-logging.exclude: true
       - name: tail
         path: /var/log/audit/kube/*.log
         tag: audit.*
@@ -33,15 +21,25 @@ config:
         mem_buf_limit: 5MB
         read_from_head: false
 
+    filters:
+      - name: lua
+        match: audit.*
+        call: set_message
+        script: /fluent-bit/scripts/audit.lua
+
     outputs:
       - name: http
         match: "*"
         host: victoria-logs-victoria-logs-single-server.monitoring.svc.cluster.local
         port: 9428
-        uri: /insert/jsonline?_stream_fields=stream&_msg_field=log
+        uri: /insert/jsonline
         format: json_lines
         json_date_key: time
         json_date_format: iso8601
+        header:
+          - VL-Stream-Fields stream
+          - VL-Msg-Field log
+          - VL-Time-Field time
 
 serviceMonitor:
   enabled: true
