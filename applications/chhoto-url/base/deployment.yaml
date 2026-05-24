@@ -17,18 +17,80 @@ spec:
     spec:
       imagePullSecrets:
         - name: harbor-credentials
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: chhoto-url
           image: harbor.okwilkins.dev/docker-hub-cache/sintan1729/chhoto-url:7.1.2
           imagePullPolicy: IfNotPresent
+          # Read more here: https://github.com/SinTan1729/chhoto-url/blob/main/INSTALLATION.md
+          env:
+            - name: CHHOTO_DB_URL
+              value: /data/urls.sqlite
+            # - name: CHHOTO_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: chhoto-url-secret
+            #       key: password
+            # - name: CHHOTO_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: chhoto-url-secret
+            #       key: api-key
+            - name: CHHOTO_SITE_URL
+              value: "https://link.okwilkins.dev"
+            - name: CHHOTO_SQLITE_USE_WAL_MODE
+              value: "True"
+            - name: CHHOTO_REDIRECT_METHOD
+              value: "PERMANENT"
+            - name: CHHOTO_HASH_ALGORITHM
+              value: "Argon2"
+            - name: CHHOTO_SLUG_STYLE
+              value: "Pair"
+            # - name: CHHOTO_SLUG_LENGTH   # Only relevant if SLUG_STYLE=UID
+            #   value: "16"
+            # - name: CHHOTO_TRY_LONGER_SLUG
+            #   value: "True"
+            - name: CHHOTO_LISTEN_PORT
+              value: "4567"
+              # - name: CHHOTO_LISTEN_ADDRESS  # Not recommended to change in containers
+              #   value: "0.0.0.0"
+
+              # --- Optional behaviour ---
+              # - name: CHHOTO_ALLOW_CAPITAL_LETTERS
+              #   value: "True"
+              # - name: CHHOTO_SQLITE_ENSURE_ACID  # Set to False to trade durability for throughput
+              #   value: "True"
+              # - name: CHHOTO_PUBLIC_MODE          # Anyone can add links; admin needed to list/delete
+              #   value: "Enable"
+              # - name: CHHOTO_PUBLIC_MODE_EXPIRY_DELAY  # Seconds; only applies in public mode
+              #   value: "86400"
+              # - name: CHHOTO_DISABLE_FRONTEND
+              #   value: "True"
+              # - name: CHHOTO_CUSTOM_LANDING_DIRECTORY  # Requires an extra volume mount
+              #   value: "/landing"
+              # - name: CHHOTO_CACHE_CONTROL_HEADER  # Useful when behind a reverse proxy
+              #   value: "no-cache, private"
+              # - name: CHHOTO_FRONTEND_PAGE_SIZE
+              #   value: "10"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          ports:
+            - name: http
+              containerPort: 4567
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            seccompProfile:
-              type: RuntimeDefault
             capabilities:
               drop:
                 - "ALL"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: chhoto-url-pvc
