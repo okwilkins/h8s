@@ -1,0 +1,91 @@
+# https://artifacthub.io/packages/helm/fluent/fluent-bit-collector/1.0.6?modal=values
+
+config:
+  pipeline:
+    inputs:
+      - name: tail
+        alias: k8s-logs
+        path: /var/log/containers/*.log
+        tag_regex: (?<pod_name>[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?<namespace_name>[^_]+)_(?<container_name>.+)-
+        tag: kube.<namespace_name>.<pod_name>.<container_name>
+        read_from_head: true
+        multiline.parser: cri
+        skip_long_lines: true
+        skip_empty_lines: true
+        storage.type: ${STORAGE_TYPE_PREFER_FS}
+        db: ${STORAGE_PATH}/tail.db
+        processors:
+          logs:
+            - name: kubernetes
+              use_kubelet: ${KUBELET_ENDPOINT}
+              kubelet_host: ${NODE_IP}
+              kubelet_port: 10250
+              kube_tag_prefix: kube.
+              regex_parser: kubernetes-tag
+              k8s-logging.parser: true
+              k8s-logging.exclude: true
+      - name: tail
+        path: /var/log/audit/kube/*.log
+        tag: audit.*
+        parser: json
+        skip_long_lines: true
+        refresh_interval: 5
+        mem_buf_limit: 5MB
+        read_from_head: false
+
+    outputs:
+      - name: loki
+        match: "*"
+        host: loki.monitoring.svc.cluster.local
+        uri: /loki/api/v1/push
+        port: 3100
+
+serviceMonitor:
+  enabled: true
+
+podSecurityContext:
+  runAsNonRoot: false
+  fsGroup: 0
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  runAsUser: 0
+  runAsGroup: 0
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: false
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - DAC_READ_SEARCH
+
+hostVolumes:
+  - name: machine-id
+    hostPath:
+      path: /etc/machine-id
+      type: File
+    mountPath: /etc/machine-id
+  - name: logs
+    hostPath:
+      path: /var/log
+      type: Directory
+    mountPath: /var/log
+  - name: audit-logs
+    hostPath:
+      path: /var/log/audit/kube
+      type: DirectoryOrCreate
+    mountPath: /var/log/audit/kube
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 1Gi
+
+dashboards:
+  enabled: true
