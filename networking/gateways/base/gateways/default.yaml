@@ -131,6 +131,18 @@ spec:
         certificateRefs:
           - name: convert-okwilkins-dev-tls
             namespace: mazanoke
+    - protocol: HTTPS
+      name: home-lan-chhoto-url
+      hostname: link.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: link-okwilkins-dev-tls
+            namespace: chhoto-url
     - protocol: TLS
       name: home-lan-pg-tf-backend
       hostname: pg-tf-backend.okwilkins.dev

@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: link-okwilkins-dev
+  namespace: chhoto-url
+spec:
+  secretName: link-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: link.okwilkins.dev
+  dnsNames:
+    - link.okwilkins.dev
