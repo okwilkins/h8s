@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: chhoto-url
+  namespace: chhoto-url
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+    - name: cloudflare-gateway
+      namespace: cloudflare
+  hostnames:
+    - link.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: chhoto-url
+          port: 8080

@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: chhoto-url-tls-access
+  namespace: chhoto-url
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      namespace: default
+  to:
+    - group: ""
+      kind: Secret
+      name: link-okwilkins-dev-tls
