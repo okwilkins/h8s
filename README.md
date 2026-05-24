@@ -37,7 +37,9 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 
 ```text
 ├── applications
+│   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
+│   ├── mazanoke                    | Browser-based image optimizer.
 │   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd
 │   ├── argo-workflows              | CI/CD pipelines (WIP).
@@ -45,9 +47,9 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   └── renovate                    | Automated dependency updates.
 ├── images
 │   ├── coredns
-│   ├── terraform
-│   └── image-buildah
-├── infrastructure                  | Complete bootstrapping of the cluster with Proxmox and Talos + platform configuration.
+│   ├── image-buildah
+│   └── terraform
+├── infrastructure                  | 8-stage Terraform pipeline for cluster bootstrapping from bare metal via Proxmox and Talos + platform configuration.
 ├── namespaces                      | Holds all namespaces for the cluster.
 ├── networking
 │   ├── cert-manager                | Certificate controller for the self-hosted certificate authority.
@@ -61,11 +63,12 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   ├── prometheus                  | Metrics collection.
 │   └── promtail                    | Log collection and shipping agent.
 ├── security
+│   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
-│   ├── external-secrets-operator   | Takes secrets hosted internally with Vault and manages them inside the cluster.
+│   ├── external-secrets-operator   | Syncs secrets from Vault into the cluster.
 │   └── vault                       | Secrets storage and certificate authority.
 └── storage
-    ├── cloudnative-pg              | PostrgreSQL database management for various Applications.
+    ├── cloudnative-pg              | PostgreSQL database management for applications.
     ├── harbor                      | Container and binary registry.
     └── longhorn                    | Cluster CSI.
 ```
