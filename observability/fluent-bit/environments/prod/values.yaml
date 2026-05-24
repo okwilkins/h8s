@@ -33,12 +33,15 @@ config:
         mem_buf_limit: 5MB
         read_from_head: false
 
-    # outputs:
-    #   - name: loki
-    #     match: "*"
-    #     host: loki.monitoring.svc.cluster.local
-    #     uri: /loki/api/v1/push
-    #     port: 3100
+    outputs:
+      - name: http
+        match: "*"
+        host: victoria-logs-victoria-logs-single-server.monitoring.svc.cluster.local
+        port: 9428
+        uri: /insert/jsonline?_stream_fields=stream&_msg_field=log
+        format: json_lines
+        json_date_key: time
+        json_date_format: iso8601
 
 serviceMonitor:
   enabled: true
