@@ -1,0 +1,9 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: fluent-bit-dashboard
+spec:
+  configMapRef:
+    name: fluent-bit-collector-dashboard
+    key: fluent-bit-collector.json
+  folderRef: fluent-bit

@@ -1,0 +1,9 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: victoria-logs-dashboard
+spec:
+  configMapRef:
+    name: victoria-logs-victoria-logs-single-victorialogs-single-node
+    key: victorialogs-single-node.json
+  folderRef: victoria-logs

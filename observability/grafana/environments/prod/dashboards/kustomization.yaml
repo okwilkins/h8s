@@ -10,6 +10,8 @@ resources:
   - ./vault/
   - ./cert-manager/
   - ./argo-workflows/
+  - ./fluent-bit/
+  - ./victoria-logs/
 patches:
   - target:
       group: grafana.integreatly.org
