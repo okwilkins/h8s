@@ -1,43 +1,42 @@
-# https://artifacthub.io/packages/helm/fluent/fluent-bit/0.57.6?modal=values
+# https://artifacthub.io/packages/helm/fluent/fluent-bit-collector/1.0.6?modal=values
 
 config:
-  inputs: |
-    [INPUT]
-        Name              kubernetes
-        Match             kube.*
-        Kube_URL          https://kubernetes.default.svc:443
-        Kube_CA_File      /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        Kube_Token_File   /var/run/secrets/kubernetes.io/serviceaccount/token
-        Merge_Log         On
-        Keep_Log          Off
-        Refresh_Interval  5
+  pipeline:
+    inputs:
+      - name: tail
+        path: /var/log/containers/*.log
+        tag: kube.*
+        skip_long_lines: true
+        refresh_interval: 5
 
-    [INPUT]
-        Name              tail
-        Match             audit.*
-        Path              /var/log/audit/kube/*.log
-        Tag               audit.*
-        Parser            json
-        Refresh_Interval  5
-        Skip_Long_Lines   On
-        Mem_Buf_Limit     5MB
+      - name: tail
+        path: /var/log/audit/kube/*.log
+        tag: audit.*
+        parser: json
+        skip_long_lines: true
+        refresh_interval: 5
+        mem_buf_limit: 5MB
 
-  filters: |
-    # Enrich pod logs with Kubernetes metadata (namespace, pod, container, labels, etc.)
-    [FILTER]
-        Name              kubernetes
-        Match             kube.*
+    filters:
+      - name: kubernetes
+        match: kube.*
 
-  outputs: |
-    [OUTPUT]
-        Name              loki
-        Match             *
-        Host              loki.monitoring.svc.cluster.local
-        Port              3100
-        Labels            job=fluent-bit
+    outputs:
+      - name: loki
+        match: "*"
+        host: loki.monitoring.svc.cluster.local
+        uri: /loki/api/v1/push
+        port: 3100
 
 serviceMonitor:
   enabled: true
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
 
 containerSecurityContext:
   capabilities:
@@ -60,3 +59,6 @@ resources:
     memory: 128Mi
   limits:
     memory: 256Mi
+
+dashboards:
+  enabled: true
