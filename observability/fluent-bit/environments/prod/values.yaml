@@ -1,0 +1,62 @@
+# https://artifacthub.io/packages/helm/fluent/fluent-bit/0.57.6?modal=values
+
+config:
+  inputs: |
+    [INPUT]
+        Name              kubernetes
+        Match             kube.*
+        Kube_URL          https://kubernetes.default.svc:443
+        Kube_CA_File      /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File   /var/run/secrets/kubernetes.io/serviceaccount/token
+        Merge_Log         On
+        Keep_Log          Off
+        Refresh_Interval  5
+
+    [INPUT]
+        Name              tail
+        Match             audit.*
+        Path              /var/log/audit/kube/*.log
+        Tag               audit.*
+        Parser            json
+        Refresh_Interval  5
+        Skip_Long_Lines   On
+        Mem_Buf_Limit     5MB
+
+  filters: |
+    # Enrich pod logs with Kubernetes metadata (namespace, pod, container, labels, etc.)
+    [FILTER]
+        Name              kubernetes
+        Match             kube.*
+
+  outputs: |
+    [OUTPUT]
+        Name              loki
+        Match             *
+        Host              loki.monitoring.svc.cluster.local
+        Port              3100
+        Labels            job=fluent-bit
+
+serviceMonitor:
+  enabled: true
+
+containerSecurityContext:
+  capabilities:
+    add:
+      - DAC_READ_SEARCH
+
+extraVolumes:
+  - name: audit-logs
+    hostPath:
+      path: /var/log/audit/kube
+
+extraVolumeMounts:
+  - name: audit-logs
+    mountPath: /var/log/audit/kube
+    readOnly: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
