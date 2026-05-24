@@ -1,0 +1,5 @@
+# https://artifacthub.io/packages/helm/victoriametrics/victoria-logs-single/0.12.4?modal=values
+server:
+  retentionPeriod: 30d
+  persistentVolume:
+    size: 100Gi
