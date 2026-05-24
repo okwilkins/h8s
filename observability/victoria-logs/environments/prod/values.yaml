@@ -3,6 +3,8 @@ server:
   retentionPeriod: 30d
   persistentVolume:
     size: 100Gi
+  serviceMonitor:
+    enabled: true
 
 dashboards:
   enabled: true
