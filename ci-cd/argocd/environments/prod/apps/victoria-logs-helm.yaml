@@ -8,8 +8,8 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://fluent.github.io/helm-charts/
-      chart: victoria-logs
+    - repoURL: https://victoriametrics.github.io/helm-charts/
+      chart: victoria-logs-single
       targetRevision: 0.12.4
       helm:
         valueFiles:
