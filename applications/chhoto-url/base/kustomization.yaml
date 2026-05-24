@@ -4,3 +4,4 @@ resources:
   - ./deployment.yaml
   - ./pvc.yaml
   - ./service.yaml
+  - ./chhoto-url-secret.yaml

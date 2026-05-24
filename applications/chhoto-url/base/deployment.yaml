@@ -32,16 +32,11 @@ spec:
           env:
             - name: CHHOTO_DB_URL
               value: /data/urls.sqlite
-            # - name: CHHOTO_PASSWORD
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: chhoto-url-secret
-            #       key: password
-            # - name: CHHOTO_API_KEY
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: chhoto-url-secret
-            #       key: api-key
+            - name: CHHOTO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chhoto-url-secret
+                  key: password
             - name: CHHOTO_SITE_URL
               value: "https://link.okwilkins.dev"
             - name: CHHOTO_SQLITE_USE_WAL_MODE
