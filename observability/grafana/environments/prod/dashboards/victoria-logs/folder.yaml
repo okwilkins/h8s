@@ -1,0 +1,6 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: victoria-logs
+spec:
+  title: Victoria Logs
