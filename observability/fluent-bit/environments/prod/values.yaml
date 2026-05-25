@@ -1,5 +1,8 @@
 # https://artifacthub.io/packages/helm/fluent/fluent-bit-collector/1.0.6?modal=values
 
+storage:
+  enabled: true
+
 luaScripts:
   audit.lua: |
     function set_message(tag, timestamp, record)
@@ -10,8 +13,35 @@ luaScripts:
     end
 
 config:
+  parsers:
+    - name: kubernetes-tag
+      format: regex
+      regex: ^(?<namespace_name>[^.]+)\.(?<pod_name>[^.]+)\.(?<container_name>[^.]+)
+
   pipeline:
     inputs:
+      - name: tail
+        alias: k8s-logs
+        path: /var/log/containers/*.log
+        tag_regex: (?<pod_name>[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?<namespace_name>[^_]+)_(?<container_name>.+)-
+        tag: kube.<namespace_name>.<pod_name>.<container_name>
+        read_from_head: true
+        multiline.parser: cri
+        skip_long_lines: true
+        skip_empty_lines: true
+        storage.type: filesystem
+        db: /fluent-bit/data/tail.db
+        processors:
+          logs:
+            - name: kubernetes
+              use_kubelet: false
+              kubelet_host: ${NODE_IP}
+              kubelet_port: 10250
+              kube_tag_prefix: kube.
+              regex_parser: kubernetes-tag
+              k8s-logging.parser: true
+              k8s-logging.exclude: true
+
       - name: tail
         path: /var/log/audit/kube/*.log
         tag: audit.*
@@ -22,6 +52,12 @@ config:
         read_from_head: false
 
     filters:
+      - name: parser
+        match: kube.*
+        key_name: log
+        parser: logfmt
+        reserve_data: on
+        preserve_key: on
       - name: lua
         match: audit.*
         call: set_message
