@@ -10,3 +10,5 @@ resources:
   - ./redis-configmap.yaml
   - ./cache-pvc.yaml
   - ./searxng-secret.yaml
+  - ./searxng-oidc-secret.yaml
+  - ./oauth2-cookie-secret.yaml
