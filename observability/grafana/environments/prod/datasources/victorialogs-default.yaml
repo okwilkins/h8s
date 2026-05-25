@@ -11,8 +11,35 @@ spec:
     type: victoriametrics-logs-datasource
     access: proxy
     url: http://victoria-logs-victoria-logs-single-server.monitoring.svc.cluster.local:9428
+    isDefault: true
     jsonData:
       tlsSkipVerify: true
+      logLevelRules:
+        - field: level
+          value: error
+          level: error
+          operator: equals
+          enabled: true
+        - field: level
+          value: info
+          level: info
+          operator: equals
+          enabled: true
+        - field: level
+          value: warn
+          level: warning
+          operator: equals
+          enabled: true
+        - field: level
+          value: debug
+          level: debug
+          operator: equals
+          enabled: true
+        - field: level
+          value: warning
+          level: warning
+          operator: equals
+          enabled: true
   plugins:
     - name: victoriametrics-logs-datasource
       version: 0.26.3
