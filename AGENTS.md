@@ -133,8 +133,10 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   ├── coredns                     | Home-wide DNS services and ad-blocking.
 │   └── gateways                    | Ingress and networking routing management.
 ├── observability
+│   ├── fluent-bit                  | Metrics/logs/traces collection, processing and forwarding.
 │   ├── grafana                     | Metrics and log observability.
 │   ├── prometheus                  | Metrics collection.
+│   └── victoria-logs               | Log storage and query engine.
 ├── security
 │   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
