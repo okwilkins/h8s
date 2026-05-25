@@ -83,6 +83,9 @@ config:
           - VL-Msg-Field log
           - VL-Time-Field time
 
+service:
+  enabled: true
+
 serviceMonitor:
   enabled: true
 
