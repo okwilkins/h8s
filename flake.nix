@@ -30,6 +30,11 @@
           sshpass
           netcat
           authelia
+          sops
+          openssl
+          sops
+          age-plugin-fido2-hmac
+          pam_u2f
         ];
       in
       {
