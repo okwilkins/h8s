@@ -23,6 +23,11 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: authelia
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data
   syncPolicy:
     automated:
       prune: true
