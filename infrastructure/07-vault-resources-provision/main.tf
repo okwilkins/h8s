@@ -116,7 +116,7 @@ resource "random_password" "authelia_searxng_oidc_client_secret" {
 
 
 resource "random_password" "oauth2_proxy_searxng_cookie_secret" {
-  length  = 64
+  length  = 32
   special = false
 }
 
