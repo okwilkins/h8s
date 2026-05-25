@@ -58,8 +58,10 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   ├── coredns                     | Home-wide DNS services and ad-blocking.
 │   └── gateways                    | Ingress and networking routing management.
 ├── observability
+│   ├── fluent-bit                  | Metrics/logs/traces collection, processing and forwarding.
 │   ├── grafana                     | Metrics and log observability.
 │   ├── prometheus                  | Metrics collection.
+│   └── victoria-logs               | Log storage and query engine.
 ├── security
 │   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
