@@ -18,9 +18,12 @@ spec:
       imagePullSecrets:
         - name: harbor-credentials
       securityContext:
+        runAsNonRoot: true
         runAsUser: 999
         runAsGroup: 999
         fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: redis
           image: harbor.okwilkins.dev/docker-hub-cache/redis:8.6.3-alpine3.23

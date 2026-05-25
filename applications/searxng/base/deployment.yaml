@@ -18,12 +18,20 @@ spec:
       imagePullSecrets:
         - name: harbor-credentials
       securityContext:
+        runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 3000
         fsGroup: 3000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: init-config
           image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.37.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           command:
             - "sh"
             - "-c"
@@ -82,10 +90,16 @@ spec:
             limits:
               memory: 1Gi
         - name: oauth2-proxy
-          image: harbor.okwilkins.dev/docker-hub-cache/oauth2-proxy/oauth2-proxy:v7.8.2
+          image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.2
+          imagePullPolicy: IfNotPresent
           ports:
             - name: proxy
               containerPort: 4180
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           env:
             - name: OAUTH2_PROXY_CLIENT_SECRET
               valueFrom:
