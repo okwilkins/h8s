@@ -10,6 +10,7 @@ secret:
     authelia-session-secret: {}
     authelia-hmac-secret: {}
     authelia-oidc-rsa-key: {}
+    authelia-searxng-client-secret: {}
 
 pod:
   kind: Deployment
@@ -61,6 +62,9 @@ pod:
     - name: argocd-client-secret
       secret:
         secretName: authelia-argocd-client-secret
+    - name: searxng-client-secret
+      secret:
+        secretName: authelia-searxng-client-secret
   extraVolumeMounts:
     - name: users-config
       mountPath: /config
@@ -72,6 +76,9 @@ pod:
       readOnly: true
     - name: argocd-client-secret
       mountPath: /secrets/argocd-client-secret
+      readOnly: true
+    - name: searxng-client-secret
+      mountPath: /secrets/searxng-client-secret
       readOnly: true
 
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
@@ -185,6 +192,22 @@ configMap:
             - groups
             - email
           token_endpoint_auth_method: none
+        - client_id: searxng
+          client_name: SearXNG
+          client_secret:
+            path: /secrets/searxng-client-secret/client-secret-hash
+          public: false
+          authorization_policy: two_factor
+          token_endpoint_auth_method: client_secret_post
+          require_pkce: true
+          pkce_challenge_method: S256
+          redirect_uris:
+            - https://search.okwilkins.dev/oauth2/callback
+          scopes:
+            - openid
+            - profile
+            - email
+            - groups
 
   storage:
     local:
