@@ -116,6 +116,7 @@ spec:
             - --oidc-issuer-url=https://auth.okwilkins.dev
             - --client-id=searxng
             - --scope=openid profile email groups
+            - --code-challenge-method=S256
             - --upstream=http://localhost:8080
             - --http-address=0.0.0.0:4180
             - --email-domain=*
