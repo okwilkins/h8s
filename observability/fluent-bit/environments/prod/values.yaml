@@ -55,9 +55,15 @@ config:
       - name: parser
         match: kube.*
         key_name: log
-        parser: logfmt
+        parser:
+          - json
+          - logfmt
         reserve_data: on
         preserve_key: on
+      - name: modify
+        match: kube.*
+        Hard_copy:
+          - msg log
       - name: lua
         match: audit.*
         call: set_message
