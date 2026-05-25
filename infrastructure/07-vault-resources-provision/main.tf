@@ -109,6 +109,17 @@ resource "random_password" "authelia_argocd_oidc_client_secret" {
   special = false
 }
 
+resource "random_password" "authelia_searxng_oidc_client_secret" {
+  length  = 64
+  special = false
+}
+
+
+resource "random_password" "oauth2_proxy_searxng_cookie_secret" {
+  length  = 64
+  special = false
+}
+
 # ============================================================
 # Cosign Key Pair Generation
 # ============================================================
@@ -642,6 +653,75 @@ resource "null_resource" "vault_secret_authelia_argocd_oidc" {
         rm /tmp/vault_argocd_hash.txt /tmp/vault_argocd_plaintext.txt
       "
       rm /tmp/argocd_hash_b64.txt /tmp/argocd_plaintext_b64.txt
+    EOT
+  }
+
+  depends_on = [data.terraform_remote_state.vault_init]
+}
+
+resource "null_resource" "vault_secret_authelia_searxng_oidc" {
+  triggers = {
+    secret_hash = md5("client-secret=${random_password.authelia_searxng_oidc_client_secret.result}")
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      source ${var.infra_root}/scripts/common.sh
+      load_tf_kube_env
+      create_cert_dir
+
+      printf '%s' '${bcrypt(random_password.authelia_searxng_oidc_client_secret.result)}' \
+        | tr -d '[:space:]' \
+        | base64 > /tmp/searxng_hash_b64.txt
+      printf '%s' '${random_password.authelia_searxng_oidc_client_secret.result}' \
+        | base64 > /tmp/searxng_plaintext_b64.txt
+
+      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
+
+      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
+        export VAULT_TOKEN=\"$VAULT_TOKEN\"
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
+
+        printf '%s' \"$(cat /tmp/searxng_hash_b64.txt)\" | base64 -d > /tmp/vault_searxng_hash.txt
+        printf '%s' \"$(cat /tmp/searxng_plaintext_b64.txt)\" | base64 -d > /tmp/vault_searxng_plaintext.txt
+
+        vault kv put kubernetes-homelab/authelia/searxng-oidc \
+          client-secret-hash=@/tmp/vault_searxng_hash.txt \
+          client-secret-plaintext=@/tmp/vault_searxng_plaintext.txt || exit 1
+
+        rm /tmp/vault_searxng_hash.txt /tmp/vault_searxng_plaintext.txt
+      "
+      rm /tmp/searxng_hash_b64.txt /tmp/searxng_plaintext_b64.txt
+    EOT
+  }
+
+  depends_on = [data.terraform_remote_state.vault_init]
+}
+
+# ============================================================
+# oauth2-proxy
+# ============================================================
+
+resource "null_resource" "vault_secret_oauth2_proxy_searxng_cookie" {
+  triggers = {
+    secret_hash = md5("cookie-secret=${random_password.oauth2_proxy_searxng_cookie_secret.result}")
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      source ${var.infra_root}/scripts/common.sh
+      load_tf_kube_env
+      create_cert_dir
+
+      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
+      export VAULT_TOKEN
+
+      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
+        export VAULT_TOKEN=\"$VAULT_TOKEN\"
+        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
+        vault kv put kubernetes-homelab/oauth2-proxy/searxng-cookie-secret \\
+          cookie-secret='${random_password.oauth2_proxy_searxng_cookie_secret.result}' || exit 1
+      "
     EOT
   }
 
