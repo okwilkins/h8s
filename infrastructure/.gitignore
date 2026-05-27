@@ -8,6 +8,7 @@ states/**
 .terraform/
 
 # Actual variable values (IPs, credentials)
+!common.auto.tfvars
 terraform.tfvars
 
 # Shared secrets
