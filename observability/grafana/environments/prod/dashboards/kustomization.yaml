@@ -4,6 +4,7 @@ resources:
   - ./grafana-operator/
   - ./argocd/
   - ./kubernetes/
+  - ./cloudflared/
   - ./cloudnative-pg/
   - ./harbor/
   - ./external-secrets-operator/

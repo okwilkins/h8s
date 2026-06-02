@@ -1,0 +1,862 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cloudflared-dashboard
+spec:
+  folderRef: cloudflared
+  json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "default",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(cloudflared_tunnel_ha_connections)",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "HA Connections",
+          "type": "stat"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
+          "id": 2,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(cloudflared_tunnel_total_requests[5m]))",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Requests/s",
+          "type": "stat"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.01
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.1
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "id": 3,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(cloudflared_tunnel_request_errors[5m]))",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Origin Errors/s",
+          "type": "stat"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 50
+                  },
+                  {
+                    "color": "red",
+                    "value": 150
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "id": 4,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
+          },
+          "targets": [
+            {
+              "expr": "avg(quic_client_smoothed_rtt)",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Average QUIC RTT",
+          "type": "stat"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 4
+          },
+          "id": 5,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(cloudflared_tunnel_total_requests[5m]))",
+              "legendFormat": "requests",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(cloudflared_tunnel_request_errors[5m]))",
+              "legendFormat": "origin errors",
+              "refId": "B"
+            }
+          ],
+          "title": "Traffic And Errors",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "bars",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 4
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (status_code) (rate(cloudflared_tunnel_response_by_code[5m]))",
+              "legendFormat": "{{status_code}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Response Codes",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 12
+          },
+          "id": 7,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(cloudflared_tunnel_concurrent_requests_per_tunnel)",
+              "legendFormat": "concurrent requests",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(cloudflared_tunnel_active_streams)",
+              "legendFormat": "active streams",
+              "refId": "B"
+            }
+          ],
+          "title": "Tunnel Concurrency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 12
+          },
+          "id": 8,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(cloudflared_tcp_active_sessions)",
+              "legendFormat": "tcp active",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(cloudflared_udp_active_sessions)",
+              "legendFormat": "udp active",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(rate(cloudflared_tcp_total_sessions[5m]))",
+              "legendFormat": "tcp sessions/s",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(rate(cloudflared_udp_total_sessions[5m]))",
+              "legendFormat": "udp sessions/s",
+              "refId": "D"
+            }
+          ],
+          "title": "TCP And UDP Sessions",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 12
+          },
+          "id": 9,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "avg(quic_client_smoothed_rtt)",
+              "legendFormat": "smoothed rtt",
+              "refId": "A"
+            },
+            {
+              "expr": "avg(quic_client_latest_rtt)",
+              "legendFormat": "latest rtt",
+              "refId": "B"
+            },
+            {
+              "expr": "avg(quic_client_min_rtt)",
+              "legendFormat": "min rtt",
+              "refId": "C"
+            }
+          ],
+          "title": "QUIC RTT",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 20
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (handler, method) (rate(cloudflared_rpc_client_operations[5m]))",
+              "legendFormat": "{{handler}} {{method}}",
+              "refId": "A"
+            }
+          ],
+          "title": "RPC Client Operations",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 20
+          },
+          "id": 11,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum by (le) (rate(cloudflared_proxy_connect_latency_bucket[5m])))",
+              "legendFormat": "p50",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum by (le) (rate(cloudflared_proxy_connect_latency_bucket[5m])))",
+              "legendFormat": "p95",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (le) (rate(cloudflared_proxy_connect_latency_bucket[5m])))",
+              "legendFormat": "p99",
+              "refId": "C"
+            }
+          ],
+          "title": "Proxy Connect Latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 28
+          },
+          "id": 12,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "cloudflared_tunnel_server_locations",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Connected Edge Locations",
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "job": true,
+                  "instance": true,
+                  "namespace": true,
+                  "service": true,
+                  "endpoint": true,
+                  "pod": true,
+                  "container": true
+                },
+                "indexByName": {},
+                "renameByName": {
+                  "Value": "active",
+                  "connection_id": "connection",
+                  "edge_location": "edge"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "default",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "Bps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 28
+          },
+          "id": 13,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(quic_client_sent_bytes[5m]))",
+              "legendFormat": "sent",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(quic_client_receive_bytes[5m]))",
+              "legendFormat": "received",
+              "refId": "B"
+            }
+          ],
+          "title": "QUIC Throughput",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "style": "dark",
+      "tags": [
+        "cloudflared",
+        "cloudflare",
+        "prometheus"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Cloudflared",
+      "version": 1,
+      "weekStart": ""
+    }
