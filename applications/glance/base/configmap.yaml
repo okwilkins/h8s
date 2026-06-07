@@ -7,28 +7,110 @@ metadata:
     app: glance
     kubernetes.io/name: glance
 data:
-  glance.yml: |
+  glance.yml: |-
     server:
       proxied: true
 
     branding:
       app-name: Feed
 
+    theme:
+      background-color: 232 23 18
+      contrast-multiplier: 1.2
+      primary-color: 220 83 75
+      positive-color: 105 48 72
+      negative-color: 351 74 73
+
     pages:
       - name: Home
-        hide-desktop-navigation: true
+        width: wide
         columns:
           - size: full
             widgets:
-              - type: search
-                search-engine: https://search.okwilkins.dev/search?q={QUERY}
-                new-tab: true
-                autofocus: true
-                placeholder: Search...
-
               - type: rss
-                title: selfh.st
-                limit: 10
+                title: Reading List
+                style: horizontal-cards
+                limit: 12
                 collapse-after: 5
                 feeds:
+                  - url: https://kill-the-newsletter.com/feeds/jiid7eubescyofau8s9d.xml
+                    title: Email Inbox Feed
+
+              - type: split-column
+                widgets:
+                  - type: group
+                    widgets:
+                      - type: hacker-news
+                        title: HN Top
+                        sort-by: top
+                        limit: 16
+                        collapse-after: 6
+                      - type: hacker-news
+                        title: HN Best
+                        sort-by: best
+                        limit: 16
+                        collapse-after: 6
+                      - type: hacker-news
+                        title: HN New
+                        sort-by: new
+                        limit: 16
+                        collapse-after: 6
+
+                  - type: group
+                    widgets:
+                      - type: reddit
+                        title: /r/technology
+                        subreddit: technology
+                        show-thumbnails: true
+                        limit: 16
+                        collapse-after: 6
+                      - type: reddit
+                        title: /r/homelab
+                        subreddit: homelab
+                        show-thumbnails: true
+                        limit: 16
+                        collapse-after: 6
+
+              - type: videos
+                title: Channels
+                style: grid-cards
+                collapse-after-rows: 2
+                channels:
+                  - UCXuqSBlHAE6Xw-yeJA0Tunw
+                  - UCR-DXc1voovS8nhAvccRZhg
+                  - UCsBjURrPoezykLs9EqgamOA
+                  - UCBJycsmduvYEL83R_U4JriQ
+                  - UCHnyfMqiRRG1u-2MsSQLbXA
+
+          - size: small
+            widgets:
+              - type: group
+                widgets:
+                  - type: reddit
+                    title: /r/programming
+                    subreddit: programming
+                    limit: 12
+                    collapse-after: 5
+                  - type: reddit
+                    title: /r/sysadmin
+                    subreddit: sysadmin
+                    limit: 12
+                    collapse-after: 5
+                  - type: reddit
+                    title: /r/devops
+                    subreddit: devops
+                    limit: 12
+                    collapse-after: 5
+
+              - type: rss
+                title: Quick Reads
+                limit: 20
+                collapse-after: 8
+                feeds:
                   - url: https://selfh.st/rss/
+                    title: selfh.st
+                    limit: 5
+                  - url: https://www.joshwcomeau.com/rss.xml
+                    title: Josh Comeau
+                  - url: https://samwho.dev/rss.xml
+                    title: Sam Who
