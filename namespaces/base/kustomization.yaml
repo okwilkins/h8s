@@ -10,6 +10,7 @@ resources:
   - ./cosign-namespace.yaml
   - ./excalidraw-namespace.yaml
   - ./external-secrets-namespace.yaml
+  - ./glance-namespace.yaml
   - ./harbor-namespace.yaml
   - ./longhorn-system-namespace.yaml
   - ./mazanoke-namespace.yaml

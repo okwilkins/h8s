@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: glance
+  labels:
+    name: glance
+    harbor-image-pulls: "true"
