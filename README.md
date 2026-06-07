@@ -39,6 +39,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 ├── applications
 │   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
+│   ├── glance                      | Lightweight dashboard for feeds and widgets.
 │   ├── mazanoke                    | Browser-based image optimizer.
 │   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd

@@ -114,6 +114,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 ├── applications
 │   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
+│   ├── glance                      | Lightweight dashboard for feeds and widgets.
 │   ├── mazanoke                    | Browser-based image optimizer.
 │   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd
