@@ -143,6 +143,18 @@ spec:
         certificateRefs:
           - name: link-okwilkins-dev-tls
             namespace: chhoto-url
+    - protocol: HTTPS
+      name: home-lan-glance
+      hostname: feed.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: feed-okwilkins-dev-tls
+            namespace: glance
     - protocol: TLS
       name: home-lan-pg-tf-backend
       hostname: pg-tf-backend.okwilkins.dev

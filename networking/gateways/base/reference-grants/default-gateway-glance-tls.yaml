@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: glance-tls-access
+  namespace: glance
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      namespace: default
+  to:
+    - group: ""
+      kind: Secret
+      name: feed-okwilkins-dev-tls
