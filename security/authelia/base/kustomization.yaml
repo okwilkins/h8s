@@ -9,4 +9,5 @@ resources:
   - ./oidc-rsa-key.yaml
   - ./grafana-client-secret.yaml
   - ./argocd-client-secret.yaml
+  - ./glance-client-secret.yaml
   - ./searxng-client-secret.yaml
