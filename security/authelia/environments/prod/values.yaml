@@ -10,6 +10,7 @@ secret:
     authelia-session-secret: {}
     authelia-hmac-secret: {}
     authelia-oidc-rsa-key: {}
+    authelia-glance-client-secret: {}
     authelia-searxng-client-secret: {}
 
 pod:
@@ -62,6 +63,9 @@ pod:
     - name: argocd-client-secret
       secret:
         secretName: authelia-argocd-client-secret
+    - name: glance-client-secret
+      secret:
+        secretName: authelia-glance-client-secret
     - name: searxng-client-secret
       secret:
         secretName: authelia-searxng-client-secret
@@ -76,6 +80,9 @@ pod:
       readOnly: true
     - name: argocd-client-secret
       mountPath: /secrets/argocd-client-secret
+      readOnly: true
+    - name: glance-client-secret
+      mountPath: /secrets/glance-client-secret
       readOnly: true
     - name: searxng-client-secret
       mountPath: /secrets/searxng-client-secret
@@ -203,6 +210,22 @@ configMap:
           pkce_challenge_method: S256
           redirect_uris:
             - https://search.okwilkins.dev/oauth2/callback
+          scopes:
+            - openid
+            - profile
+            - email
+            - groups
+        - client_id: glance
+          client_name: Glance
+          client_secret:
+            path: /secrets/glance-client-secret/client-secret-hash
+          public: false
+          authorization_policy: two_factor
+          token_endpoint_auth_method: client_secret_post
+          require_pkce: true
+          pkce_challenge_method: S256
+          redirect_uris:
+            - https://feed.okwilkins.dev/oauth2/callback
           scopes:
             - openid
             - profile
