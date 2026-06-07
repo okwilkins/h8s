@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: feed-okwilkins-dev
+  namespace: glance
+spec:
+  secretName: feed-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: feed.okwilkins.dev
+  dnsNames:
+    - feed.okwilkins.dev

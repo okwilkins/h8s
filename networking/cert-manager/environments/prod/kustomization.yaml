@@ -16,4 +16,5 @@ resources:
   - ./certificates/hubble-okwilkins-dev.yaml
   - ./certificates/auth-okwilkins-dev.yaml
   - ./certificates/convert-okwilkins-dev.yaml
+  - ./certificates/feed-okwilkins-dev.yaml
   - ./certificates/link-okwilkins-dev.yaml
