@@ -2,48 +2,32 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: searxng
-  name: searxng
-  namespace: searxng
+    app: glance
+  name: glance
+  namespace: glance
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: searxng
+      app: glance
   template:
     metadata:
       labels:
-        app: searxng
+        app: glance
     spec:
       imagePullSecrets:
         - name: harbor-credentials
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
-        runAsGroup: 3000
-        fsGroup: 3000
+        runAsGroup: 1000
+        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      initContainers:
-        - name: init-config
-          image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.37.0
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-          command:
-            - "sh"
-            - "-c"
-            - "cp /tmp/config/settings.yml /etc/searxng/settings.yml"
-          volumeMounts:
-            - name: config-source
-              mountPath: /tmp/config
-            - name: config-writable
-              mountPath: /etc/searxng
       containers:
-        - name: searxng
-          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.3.1-162c04a1c
+        - name: glance
+          image: harbor.okwilkins.dev/docker-hub-cache/glanceapp/glance:v0.8.5
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
@@ -54,23 +38,11 @@ spec:
               drop:
                 - ALL
           volumeMounts:
-            - name: config-writable
-              mountPath: /etc/searxng
-            - name: limiter-config
-              mountPath: /etc/searxng/limiter.toml
-              subPath: limiter.toml
-            - name: cache
-              mountPath: /var/cache/searxng
+            - name: config
+              mountPath: /app/config
+              readOnly: true
             - name: tmp
               mountPath: /tmp
-          env:
-            - name: SEARXNG_BASE_URL
-              value: "https://search.okwilkins.dev"
-            - name: SEARXNG_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: searxng-secret
-                  key: SECRET
           livenessProbe:
             httpGet:
               path: /
@@ -85,10 +57,10 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              cpu: 100m
-              memory: 512Mi
+              cpu: 50m
+              memory: 128Mi
             limits:
-              memory: 1Gi
+              memory: 256Mi
         - name: oauth2-proxy
           image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.3
           imagePullPolicy: IfNotPresent
@@ -104,7 +76,7 @@ spec:
             - name: OAUTH2_PROXY_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: searxng-oidc-secret
+                  name: glance-oidc-secret
                   key: client-secret-plaintext
             - name: OAUTH2_PROXY_COOKIE_SECRET
               valueFrom:
@@ -114,13 +86,13 @@ spec:
           args:
             - --provider=oidc
             - --oidc-issuer-url=https://auth.okwilkins.dev
-            - --client-id=searxng
+            - --client-id=glance
             - --scope=openid profile email groups
             - --code-challenge-method=S256
             - --upstream=http://localhost:8080
             - --http-address=0.0.0.0:4180
             - --email-domain=*
-            - --redirect-url=https://search.okwilkins.dev/oauth2/callback
+            - --redirect-url=https://feed.okwilkins.dev/oauth2/callback
             - --cookie-domain=.okwilkins.dev
             - --set-xauthrequest=true
           livenessProbe:
@@ -138,16 +110,8 @@ spec:
             limits:
               memory: 128Mi
       volumes:
-        - name: config-source
+        - name: config
           configMap:
-            name: searxng-settings
-        - name: config-writable
-          emptyDir: {}
-        - name: limiter-config
-          configMap:
-            name: searxng-limiter
-        - name: cache
-          persistentVolumeClaim:
-            claimName: searxng-cache-pvc
+            name: glance-config
         - name: tmp
           emptyDir: {}
