@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://victoriametrics.github.io/helm-charts/
       chart: victoria-logs-single
-      targetRevision: 0.13.5
+      targetRevision: 0.13.7
       helm:
         valueFiles:
           - $h8s/observability/victoria-logs/environments/prod/values.yaml
