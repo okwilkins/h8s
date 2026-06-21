@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: init-config
-          image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.37.0
+          image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.38.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
