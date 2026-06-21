@@ -23,7 +23,7 @@ pod:
       runAsGroup: 1000
   initContainers:
     - name: setup-users-database
-      image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.37.0
+      image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.38.0
       securityContext:
         runAsUser: 0
       command:
