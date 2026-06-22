@@ -81,13 +81,8 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   }
 
   lifecycle {
-    # Prevent accidental VM destruction on Talos version/schematic upgrades -
-    # upgrades are handled by Talos itself via talosctl upgrade, not by
-    # recreating VMs. Remove this ignore if you intentionally want to rebuild.
     ignore_changes = [
-      cdrom,
       boot_order,
     ]
   }
 }
-
