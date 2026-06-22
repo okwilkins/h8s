@@ -2,8 +2,7 @@
 # Talos
 # ============================================================
 
-# WARN: Do not change this version! Upgrades are handled by talosctl!
-talos_version      = "v1.12.4"
+talos_version      = "v1.13.4"
 talos_cluster_name = "talos-homelab"
 
 # ============================================================
