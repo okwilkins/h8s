@@ -36,6 +36,16 @@ locals {
     for name, node in var.nodes :
     name => regex("(\\d+)$", name)[0]
   }
+
+  tailscale_authkeys = {
+    for name, node in var.nodes :
+    name => trimspace(try(node.tailscale_authkey, ""))
+  }
+
+  tailscale_routes = {
+    for name, node in var.nodes :
+    name => try(node.tailscale_routes, [])
+  }
 }
 
 data "talos_machine_configuration" "nodes" {
@@ -48,7 +58,7 @@ data "talos_machine_configuration" "nodes" {
   talos_version      = var.talos_version
   kubernetes_version = null # use the version bundled with talos_version
 
-  config_patches = [
+  config_patches = concat([
     # Hostname per node
     yamlencode({
       apiVersion = "v1alpha1"
@@ -122,7 +132,22 @@ data "talos_machine_configuration" "nodes" {
         }
       }
     }),
-  ]
+    ], lookup(local.tailscale_authkeys, each.key, "") != "" ? [
+    # Configure the optional Tailscale system extension when an auth key is supplied.
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "ExtensionServiceConfig"
+      name       = "tailscale"
+      environment = concat([
+        "TS_AUTHKEY=${local.tailscale_authkeys[each.key]}",
+        "TS_HOSTNAME=${each.key}",
+        "TS_AUTH_ONCE=true",
+        "TS_ACCEPT_DNS=${lower(tostring(var.tailscale_accept_dns))}",
+      ], length(local.tailscale_routes[each.key]) > 0 ? [
+        "TS_ROUTES=${join(",", local.tailscale_routes[each.key])}",
+      ] : [])
+    })
+  ] : [])
 }
 
 # ============================================================
