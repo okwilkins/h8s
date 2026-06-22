@@ -188,6 +188,17 @@ Once `task cluster:bootstrap` completes successfully:
 
 > **Note:** The `platform:configure` task requires ArgoCD to have deployed the Postgres database first. This happens automatically via the GitOps applications deployed during bootstrap.
 
+### Tailscale LAN Access
+
+If enabling the Talos Tailscale extension config, there are two extra manual steps required before devices on your tailnet can reach LAN-only services such as `https://argocd.okwilkins.dev` or LAN IPs.
+
+1. Configure one Talos node to advertise your LAN subnet, for example `tailscale_routes = ["192.168.100.0/24"]`.
+2. Apply the Talos config changes by re-running the `03-talos-configure` Terraform apply.
+3. In the Tailscale admin console, approve the advertised subnet route.
+4. In Tailscale DNS settings, add split DNS for `okwilkins.dev` pointing at the in-cluster CoreDNS listener.
+
+Without route approval, tailnet clients will not use the subnet router. Without split DNS, hostnames like `argocd.okwilkins.dev` will not resolve correctly on tailnet clients even if the route is approved.
+
 ## Retrieve Credentials
 
 After `task cluster:bootstrap` completes, credentials are written to the `03-talos-configure/secrets/` directory:
@@ -325,4 +336,3 @@ kubectl exec -n vault vault-0 -- /bin/sh -c \
   "VAULT_TOKEN='$VAULT_TOKEN' vault read -field=certificate pki/cert/ca" \
   > vault-ca-cert.pem
 ```
-
