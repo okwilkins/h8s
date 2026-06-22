@@ -10,6 +10,7 @@
 #   - siderolabs/qemu-guest-agent   (Proxmox VM integration)
 #   - siderolabs/iscsi-tools        (Longhorn iSCSI support)
 #   - siderolabs/util-linux-tools   (Longhorn util-linux support)
+#   - siderolabs/tailscale          (Tailscale access)
 
 resource "talos_image_factory_schematic" "this" {
   schematic = yamlencode({
@@ -19,6 +20,7 @@ resource "talos_image_factory_schematic" "this" {
           "siderolabs/qemu-guest-agent",
           "siderolabs/iscsi-tools",
           "siderolabs/util-linux-tools",
+          "siderolabs/tailscale",
         ]
       }
     }
