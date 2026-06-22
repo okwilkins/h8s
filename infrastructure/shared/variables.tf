@@ -109,6 +109,13 @@ variable "nodes" {
     # is a safe choice.
     ip_address  = string
     mac_address = string
+
+    # Optional Tailscale auth key for this Talos node. Leave empty to keep the
+    # Tailscale extension installed but unconfigured on this node.
+    tailscale_authkey = optional(string, "")
+
+    # Optional subnet routes for this Talos node to advertise into Tailscale,
+    tailscale_routes = optional(list(string), [])
   }))
 }
 
@@ -140,3 +147,8 @@ variable "github_app_private_key" {
   sensitive   = true
 }
 
+variable "tailscale_accept_dns" {
+  description = "Whether Talos node Tailscale should accept DNS settings from the tailnet."
+  type        = bool
+  default     = false
+}
