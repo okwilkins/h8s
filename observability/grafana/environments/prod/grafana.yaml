@@ -23,12 +23,24 @@ spec:
       role_attribute_path: contains(groups[*], 'admins') && 'Admin' || 'Viewer'
       allow_sign_up: "true"
       use_pkce: "true"
+      tls_client_ca: /etc/grafana/vault-ca.crt
   deployment:
     spec:
       template:
         spec:
+          volumes:
+            - name: vault-ca
+              secret:
+                secretName: grafana-okwilkins-dev-tls
+                items:
+                  - key: ca.crt
+                    path: ca.crt
           containers:
             - name: grafana
+              volumeMounts:
+                - name: vault-ca
+                  mountPath: /etc/grafana/vault-ca.crt
+                  subPath: ca.crt
               env:
                 - name: GF_SECURITY_ADMIN_USER
                   valueFrom:
