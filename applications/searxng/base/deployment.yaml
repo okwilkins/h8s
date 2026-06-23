@@ -111,9 +111,14 @@ spec:
                 secretKeyRef:
                   name: oauth2-cookie-secret
                   key: cookie-secret
+          volumeMounts:
+            - name: oidc-provider-ca
+              mountPath: /etc/ssl/certs/oidc-provider
+              readOnly: true
           args:
             - --provider=oidc
             - --oidc-issuer-url=https://auth.okwilkins.dev
+            - --provider-ca-file=/etc/ssl/certs/oidc-provider/ca.crt
             - --client-id=searxng
             - --scope=openid profile email groups
             - --code-challenge-method=S256
@@ -151,3 +156,9 @@ spec:
             claimName: searxng-cache-pvc
         - name: tmp
           emptyDir: {}
+        - name: oidc-provider-ca
+          secret:
+            secretName: search-okwilkins-dev-tls
+            items:
+              - key: ca.crt
+                path: ca.crt

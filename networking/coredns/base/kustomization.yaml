@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ./service.yaml
   - ./corefile-configmap.yaml
+  - ./kube-system-corefile-configmap.yaml
   - ./deployment.yaml
   - ./blocklist-cron-job.yaml
   - ./blocklist-persistent-volume-claim.yaml

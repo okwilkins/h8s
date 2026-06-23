@@ -2,6 +2,20 @@
 
 global:
   domain: argocd.okwilkins.dev
+  env:
+    - name: SSL_CERT_DIR
+      value: /etc/ssl/certs:/etc/argocd-oidc-ca
+  extraVolumes:
+    - name: oidc-provider-ca
+      secret:
+        secretName: argocd-okwilkins-dev-tls
+        items:
+          - key: ca.crt
+            path: okwilkins-dev-ca.crt
+  extraVolumeMounts:
+    - name: oidc-provider-ca
+      mountPath: /etc/argocd-oidc-ca
+      readOnly: true
 # Terminate SSL at ingress and let Cilium handle it past there
 configs:
   params:
