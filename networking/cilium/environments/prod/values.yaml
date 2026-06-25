@@ -13,10 +13,15 @@ ipam:
   # -- Configure IP Address Management mode.
   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
   mode: kubernetes
+# Native routing, no VXLAN tunnel.
+# Both nodes are on the same L2 LAN, so pods are routed directly via ens18
+# This avoids VXLAN encapsulation overhead and prevents Cilium from using Tailscale IPs as tunnel endpoints
+routingMode: native
+autoDirectNodeRoutes: true
 # Explicit MTU to prevent auto-detection from picking up tailscale0's MTU of 1280
 # 1450 = 1500 (ens18), 50 (VXLAN overhead)
 # VXLAN traverses the LAN, not Tailscale
-MTU: 1450
+MTU: 1500
 # -- resources & limits for the agent init containers
 securityContext:
   capabilities:
