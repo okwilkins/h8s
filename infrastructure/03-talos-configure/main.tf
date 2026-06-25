@@ -101,7 +101,7 @@ data "talos_machine_configuration" "nodes" {
         }
         kubelet = {
           nodeIP = {
-            validSubnets = [var.node_ip_valid_subnet]
+            validSubnets = var.node_ip_valid_subnets
           }
           extraMounts = [
             {
