@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/cilium/cilium/1.17.2?modal=values 
+# https://artifacthub.io/packages/helm/cilium/cilium/1.17.2?modal=values
 
 # -- (string) Kubernetes service host - use "auto" for automatic lookup from the cluster-info ConfigMap
 k8sServiceHost: localhost
@@ -13,6 +13,10 @@ ipam:
   # -- Configure IP Address Management mode.
   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
   mode: kubernetes
+# Explicit MTU to prevent auto-detection from picking up tailscale0's MTU of 1280
+# 1450 = 1500 (ens18), 50 (VXLAN overhead)
+# VXLAN traverses the LAN, not Tailscale
+MTU: 1450
 # -- resources & limits for the agent init containers
 securityContext:
   capabilities:
