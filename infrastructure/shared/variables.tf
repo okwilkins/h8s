@@ -152,3 +152,8 @@ variable "tailscale_accept_dns" {
   type        = bool
   default     = false
 }
+
+variable "node_ip_valid_subnet" {
+  description = "LAN subnet (CIDR) that kubelet should use for nodeIP selection. Ensures the Kubernetes node InternalIP is the LAN IP, not the Tailscale IP."
+  type        = string
+}
