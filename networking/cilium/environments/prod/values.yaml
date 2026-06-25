@@ -22,6 +22,12 @@ autoDirectNodeRoutes: true
 ipv4NativeRoutingCIDR: 10.244.0.0/16
 # Full physical MTU, no encapsulation overhead
 MTU: 1500
+# PMTUD sends ICMP "fragmentation needed" to pods when a route's MTU
+# is smaller than the packet (e.g. cross-node via tailscale at 1280)
+# safe for LAN-only clusters, only triggers on MTU mismatch
+pmtuDiscovery:
+  enabled: true
+  packetizationLayerPMTUDMode: always
 # -- resources & limits for the agent init containers
 securityContext:
   capabilities:
