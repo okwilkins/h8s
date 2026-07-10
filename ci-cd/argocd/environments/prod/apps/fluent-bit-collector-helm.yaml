@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://fluent.github.io/helm-charts/
       chart: fluent-bit-collector
-      targetRevision: 1.0.7
+      targetRevision: 1.0.9
       helm:
         valueFiles:
           - $h8s/observability/fluent-bit/environments/prod/values.yaml
