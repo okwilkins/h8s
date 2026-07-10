@@ -40,7 +40,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: coredns
-          image: coredns/coredns:1.14.4
+          image: coredns/coredns:1.14.6
           imagePullPolicy: IfNotPresent
           resources:
             limits:
