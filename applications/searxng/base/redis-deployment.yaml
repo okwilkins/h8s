@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: redis
-          image: harbor.okwilkins.dev/docker-hub-cache/redis:8.8.0-alpine3.23
+          image: harbor.okwilkins.dev/docker-hub-cache/redis:8.8.1-alpine3.23
           imagePullPolicy: IfNotPresent
           ports:
             - name: redis
