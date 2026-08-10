@@ -114,6 +114,17 @@
             ],
             "overrideDepName": "{{replace 'harbor\\.okwilkins\\.dev/ghcr-cache/' '' depName}}",
             "enabled": true
+        },
+        {
+            "description": "searxng tags are date+commit-hash (2026.8.10-0a118066d), docker versioning's isCompatible rejects every candidate because each tag has a unique hash suffix",
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "harbor.okwilkins.dev/docker-hub-cache/searxng/searxng"
+            ],
+            "versioning": "semver",
+            "minimumReleaseAge": "7 days"
         }
     ]
 }
