@@ -5,9 +5,17 @@ metadata:
   namespace: searxng
 data:
   # Go here for full list of settings:
-  # https://github.com/searxng/searxng/blob/162c04a1c48333680a76d147f8ae770450d223b8/searx/settings.yml
+  # https://github.com/searxng/searxng/blob/0a118066d/searx/settings.yml
   settings.yml: |-
-    use_default_settings: true
+    use_default_settings:
+      engines:
+        keep_only:
+          - wikipedia
+          - wikidata
+          - github
+          - hackernews
+          - mwmbl
+          - google cse
 
     general:
       debug: false
@@ -42,24 +50,9 @@ data:
       url: "redis://searxng-redis:6379/0"
 
     engines:
-      # Disabled by default (privacy concerns)
-      - name: google
+      - name: hackernews
         disabled: false
-      # CAPTCHA requests too often do disabled
-      - name: duckduckgo
-        disabled: true
-      - name: reddit
+      - name: mwmbl
         disabled: false
-      - name: github
+      - name: resulthunter
         disabled: false
-      # Recommended to enable
-      - name: startpage
-      - name: qwant
-      - name: searx
-      - name: wikipedia
-      - name: archlinux
-      - name: github
-
-      - name: wikidata
-        disabled: true
-
