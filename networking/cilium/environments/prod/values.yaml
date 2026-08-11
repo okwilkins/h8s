@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/cilium/cilium/1.17.2?modal=values
+# https://artifacthub.io/packages/helm/cilium/cilium/1.20.0?modal=values
 
 # -- (string) Kubernetes service host - use "auto" for automatic lookup from the cluster-info ConfigMap
 k8sServiceHost: localhost
@@ -116,10 +116,24 @@ cgroup:
     enabled: false
   # -- Configure cgroup root where cgroup2 filesystem is mounted on the host (see also: `cgroup.autoMount`)
   hostRoot: /sys/fs/cgroup
+
+dashboards:
+  enabled: true
+  namespace: monitoring
+
 hubble:
   relay:
     enabled: true
   ui:
     enabled: true
+  metrics:
+    dashboards:
+      enabled: true
+      namespace: monitoring
+operator:
+  dashboards:
+    enabled: true
+    namespace: monitoring
+
 hostFirewall:
   enabled: false
