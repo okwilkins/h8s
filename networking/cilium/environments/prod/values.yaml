@@ -120,20 +120,35 @@ cgroup:
 dashboards:
   enabled: true
   namespace: monitoring
-
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
 hubble:
   relay:
     enabled: true
   ui:
     enabled: true
   metrics:
+    enabled:
+      - dns:query;ignoreAAAA
+      - drop
+      - tcp
+      - flow
+      - icmp
+      - http
+    serviceMonitor:
+      enabled: true
     dashboards:
       enabled: true
       namespace: monitoring
 operator:
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   dashboards:
     enabled: true
     namespace: monitoring
-
 hostFirewall:
   enabled: false
