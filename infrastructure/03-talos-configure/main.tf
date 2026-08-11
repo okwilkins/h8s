@@ -46,6 +46,11 @@ locals {
     for name, node in var.nodes :
     name => try(node.tailscale_routes, [])
   }
+
+  tailscale_exit_nodes = {
+    for name, node in var.nodes :
+    name => try(node.tailscale_exit_node, false)
+  }
 }
 
 data "talos_machine_configuration" "nodes" {
@@ -146,8 +151,10 @@ data "talos_machine_configuration" "nodes" {
         "TS_HOSTNAME=${each.key}",
         "TS_AUTH_ONCE=true",
         "TS_ACCEPT_DNS=${lower(tostring(var.tailscale_accept_dns))}",
-      ], length(local.tailscale_routes[each.key]) > 0 ? [
+        ], length(local.tailscale_routes[each.key]) > 0 ? [
         "TS_ROUTES=${join(",", local.tailscale_routes[each.key])}",
+        ] : [], local.tailscale_exit_nodes[each.key] ? [
+        "TS_EXTRA_ARGS=--advertise-exit-node",
       ] : [])
     })
   ] : [])
