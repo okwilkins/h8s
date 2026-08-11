@@ -104,6 +104,10 @@ data "talos_machine_configuration" "nodes" {
             port    = 7445
           }
         }
+        # IPv6 forwarding for the Tailscale exit node (IPv4 forwarding is on by default in Talos).
+        sysctls = {
+          "net.ipv6.conf.all.forwarding" = "1"
+        }
         kubelet = {
           nodeIP = {
             validSubnets = var.node_ip_valid_subnets
@@ -149,7 +153,11 @@ data "talos_machine_configuration" "nodes" {
       environment = concat([
         "TS_AUTHKEY=${local.tailscale_authkeys[each.key]}",
         "TS_HOSTNAME=${each.key}",
-        "TS_AUTH_ONCE=true",
+        # TS_AUTH_ONCE=false: re-run `tailscale up` on every container start so
+        # changes to TS_ROUTES/TS_EXTRA_ARGS apply without re-provisioning.
+        # Requires a reusable Tailscale auth key (single-use keys would fail
+        # after the first login).
+        "TS_AUTH_ONCE=false",
         "TS_ACCEPT_DNS=${lower(tostring(var.tailscale_accept_dns))}",
         ], length(local.tailscale_routes[each.key]) > 0 ? [
         "TS_ROUTES=${join(",", local.tailscale_routes[each.key])}",
