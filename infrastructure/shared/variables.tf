@@ -116,6 +116,9 @@ variable "nodes" {
 
     # Optional subnet routes for this Talos node to advertise into Tailscale,
     tailscale_routes = optional(list(string), [])
+
+    # Whether this node should advertise itself as a Tailscale exit node.
+    tailscale_exit_node = optional(bool, false)
   }))
 }
 
