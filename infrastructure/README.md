@@ -188,16 +188,55 @@ Once `task cluster:bootstrap` completes successfully:
 
 > **Note:** The `platform:configure` task requires ArgoCD to have deployed the Postgres database first. This happens automatically via the GitOps applications deployed during bootstrap.
 
-### Tailscale LAN Access
+### Tailscale
 
-If enabling the Talos Tailscale extension config, there are two extra manual steps required before devices on your tailnet can reach LAN-only services such as `https://argocd.okwilkins.dev` or LAN IPs.
+#### Tailscale LAN Access
 
-1. Configure one Talos node to advertise your LAN subnet, for example `tailscale_routes = ["192.168.100.0/24"]`.
-2. Apply the Talos config changes by re-running the `03-talos-configure` Terraform apply.
+If enabling the Talos Tailscale extension config, there are two extra manual steps required before devices on the tailnet can reach LAN-only services such as `https://argocd.okwilkins.dev` or LAN IPs.
+
+1. Configure one Talos node to advertise the LAN subnet, for example `tailscale_routes = ["192.168.100.0/24"]`.
+2. Apply the Talos config changes by re-running the `03-talos-configure` Terraform apply, then restart the extension.
 3. In the Tailscale admin console, approve the advertised subnet route.
-4. In Tailscale DNS settings, add a DNS pointing at the in-cluster CoreDNS listener.
+4. In Tailscale DNS settings, add the in-cluster CoreDNS listener (`192.168.1.120`) as a **global nameserver** and enable **Override DNS servers** (this replaces the old split-DNS approach. It makes CoreDNS resolve every tailnet query, including ad-blocking.
 
-Without route approval, tailnet clients will not use the subnet router. Without split DNS, hostnames like `argocd.okwilkins.dev` will not resolve correctly on tailnet clients even if the route is approved.
+> **Note:** If clients use the exit nodes, also enable **Use with exit node** on the nameserver (DNS page → ⋯ → Edit nameserver), otherwise exit-node clients fall back to the exit node's own resolvers and internal hostnames fail to resolve.
+
+#### Tailscale Exit Nodes
+
+Control plane nodes can advertise themselves as Tailscale exit nodes, letting tailnet clients route all their internet traffic through the cluster's LAN.
+
+1. Set `tailscale_exit_node = true` on the control plane nodes in `secrets.auto.tfvars`.
+2. Apply the Talos config changes by re-running the `03-talos-configure` Terraform apply.
+3. In the Tailscale admin console, approve "Use as exit node" on each advertised node.
+4. Keep the default allow-all grant in the tailnet policy file (`src: ["*"]`, `dst: ["*"]`) - this also grants exit node use to every tailnet device. To track which clients may use exit nodes, tag them and add the grant below (note: with allow-all present the tag is informational, not enforced):
+   ```json
+   {
+     "grants": [
+       { "src": ["*"], "dst": ["*"], "ip": ["*"] },
+       { "src": ["tag:exitnode-client"], "dst": ["autogroup:internet"], "ip": ["*"] }
+     ],
+     "tagOwners": { "tag:exitnode-client": ["autogroup:admin"] }
+   }
+   ```
+   Tag the devices that should use exit nodes with `tag:exitnode-client`.
+   To strictly enforce tagged-only exit node use, replace `dst: ["*"]` with explicit ranges (`192.168.1.0/24`, `10.244.0.0/16`, `100.64.0.0/10`) - grants have no "except internet" form, so allow-all and restriction are mutually exclusive.
+
+Exit node traffic exits from the cluster's public IP. Tailnet clients have no access to the cluter LAN by default (unless they enable "Allow Local Network Access" client-side), and Talos enables IPv4 forwarding out of the box, so no sysctl changes are required.
+
+#### Applying Tailscale Configuration Changes
+
+Tailscale settings are split across two files:
+
+- `shared/secrets.auto.tfvars` - per-node `tailscale_authkey`, `tailscale_routes`, `tailscale_exit_node`
+- `shared/variables.tf` - `tailscale_accept_dns` (cluster-wide, default `false`)
+
+When you change any of these values:
+
+1. Re-apply the Talos config: `nix develop -c task talos:configure:install`. Talos automatically restarts the `ext-tailscale` extension service when the `ExtensionServiceConfig` changes, and containerboot re-runs `tailscale up` on every start (this requires the auth key to be **reusable** — a single-use key will fail after the first login).
+2. Verify the change was applied:
+   - `talosctl ... get extensionserviceconfig tailscale -n runtime -o yaml` - shows the env vars on the node
+   - `talosctl ... logs ext-tailscale` - shows the `tailscale up` invocation with the new flags
+   - Tailscale admin console - approve new subnet routes or exit nodes
 
 ## Retrieve Credentials
 
