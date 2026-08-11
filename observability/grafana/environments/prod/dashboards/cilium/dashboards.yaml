@@ -1,0 +1,59 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cilium-dashboard
+spec:
+  configMapRef:
+    name: cilium-dashboard
+    key: cilium-dashboard.json
+  folderRef: cilium
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cilium-operator-dashboard
+spec:
+  configMapRef:
+    name: cilium-operator-dashboard
+    key: cilium-operator-dashboard.json
+  folderRef: cilium
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: hubble-dashboard
+spec:
+  configMapRef:
+    name: hubble-dashboard
+    key: hubble-dashboard.json
+  folderRef: cilium
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: hubble-dns-namespace-dashboard
+spec:
+  configMapRef:
+    name: hubble-dns-namespace
+    key: hubble-dns-namespace.json
+  folderRef: cilium
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: hubble-l7-http-metrics-by-workload-dashboard
+spec:
+  configMapRef:
+    name: hubble-l7-http-metrics-by-workload
+    key: hubble-l7-http-metrics-by-workload.json
+  folderRef: cilium
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: hubble-network-overview-namespace-dashboard
+spec:
+  configMapRef:
+    name: hubble-network-overview-namespace
+    key: hubble-network-overview-namespace.json
+  folderRef: cilium
