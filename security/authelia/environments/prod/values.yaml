@@ -208,6 +208,7 @@ configMap:
             - profile
             - email
             - groups
+            - offline_access
 
   storage:
     local:
