@@ -1,4 +1,4 @@
-apiVersion: gateway.networking.k8s.io/v1alpha2
+apiVersion: gateway.networking.k8s.io/v1
 kind: TLSRoute
 metadata:
   name: cnpg-terraform-backend-prod
@@ -11,8 +11,7 @@ spec:
   hostnames:
     - pg-tf-backend.okwilkins.dev
   rules:
-    - matches:
-      backendRefs:
+    - backendRefs:
         - name: cnpg-terraform-backend-prod-rw
           kind: Service
           group: ""
