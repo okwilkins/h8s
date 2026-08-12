@@ -120,7 +120,7 @@ spec:
             - --oidc-issuer-url=https://auth.okwilkins.dev
             - --provider-ca-file=/etc/ssl/certs/oidc-provider/ca.crt
             - --client-id=searxng
-            - --scope=openid profile email groups
+            - --scope=openid profile email groups offline_access
             - --code-challenge-method=S256
             - --upstream=http://localhost:8080
             - --http-address=0.0.0.0:4180
