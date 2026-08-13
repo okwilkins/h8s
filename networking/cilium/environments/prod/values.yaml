@@ -19,6 +19,17 @@ ipam:
 # routes on them and drops all pod traffic. VXLAN only needs node-to-node
 # connectivity: controlplanes tunnel over the LAN, workers over the tailnet.
 routingMode: tunnel
+# BPF masquerading: iptables-based masquerade cannot reverse-NAT replies that
+# arrive raw at tailscale0 for tunneled flows, silently breaking pod traffic
+# to node-IP backends (e.g. the API server). BPF masquerade keeps the conntrack
+# state in the datapath so replies reach their pod.
+bpf:
+  masquerade: true
+# Cluster pod CIDR, used as the no-masquerade range in tunnel mode: pod-to-pod
+# traffic keeps its source IP inside the tunnel, while node-IP destinations
+# (API server) are masqueraded. Without it everything is masqueraded and the
+# pod-to-pod reply path breaks.
+ipv4NativeRoutingCIDR: 10.244.0.0/16
 # Explicit MTU to prevent auto-detection from picking up tailscale0's MTU of 1280
 # 1450 = 1500 (ens18), 50 (VXLAN overhead)
 # Workers tunnel over the tailnet (1280), PMTU discovery below handles that
