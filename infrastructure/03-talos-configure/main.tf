@@ -190,11 +190,14 @@ resource "talos_machine_configuration_apply" "nodes" {
   node     = each.value.ip_address
   endpoint = each.value.ip_address
 
-  # On destroy, reset the node to maintenance mode so it can be re-bootstrapped
+  # `reset = false`: the provider's destroy is a no-op unless reset is set,
+  # and resetting a node wipes its ephemeral partition (taking any
+  # node-local data with it).  Destroying this resource must never touch
+  # the node itself.
   on_destroy = {
     graceful = true
-    reset    = true
-    reboot   = true
+    reset    = false
+    reboot   = false
   }
 
   depends_on = [terraform_data.wait_for_nodes]
