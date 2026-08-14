@@ -166,8 +166,8 @@ tasks:
         fi
 
         echo "Running Terraform..."
-        terraform init
-        terraform apply -auto-approve
+        tofu init
+        tofu apply -auto-approve
 
         echo "Platform configuration complete!"
 
