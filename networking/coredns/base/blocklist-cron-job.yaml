@@ -3,14 +3,25 @@ kind: CronJob
 metadata:
   name: blocklist-updater
   namespace: coredns-lan
+  labels:
+    app.kubernetes.io/name: blocklist-updater
+    app.kubernetes.io/part-of: coredns-lan
 spec:
   # Runs daily at 2 AM
   schedule: 0 2 * * *
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 300
+      backoffLimit: 2
       template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: blocklist-updater
+            app.kubernetes.io/part-of: coredns-lan
         spec:
-          restartPolicy: OnFailure
+          automountServiceAccountToken: false
+          restartPolicy: Never
           volumes:
             - name: blocklist-storage
               persistentVolumeClaim:
@@ -20,35 +31,57 @@ spec:
             runAsGroup: 1000
             fsGroup: 1000
             runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: updater
-              image: curlimages/curl
+              image: curlimages/curl:8.22.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: BLOCKLIST_PATH
+                  value: /blocklist/hosts
+                - name: BLOCKLIST_URL
+                  value: https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro.txt
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 128Mi
               securityContext:
                 allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
               command:
                 - /bin/sh
                 - -c
               args:
                 - |
-                  BLOCKLIST_PATH="/blocklist/hosts"
-                  TEMP_HOSTS_FILE="/tmp/hosts.tmp"
-                  BLOCKLIST_URL="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro.txt"
+                  set -eu
+
+                  # Keep the temporary file on the PVC so replacement is atomic
+                  TEMP_HOSTS_FILE="$(mktemp "$(dirname "$BLOCKLIST_PATH")/.hosts.XXXXXX")"
+                  trap 'rm -f "$TEMP_HOSTS_FILE"' EXIT
+                  trap 'exit 1' HUP INT TERM
+
                   echo "Attempting to download blocklist from $BLOCKLIST_URL"
-                  curl -fsSL "$BLOCKLIST_URL" -o "$TEMP_HOSTS_FILE"
+                  curl -fsSL --proto '=https' --proto-redir '=https' \
+                    --connect-timeout 10 --max-time 60 \
+                    --retry 2 --retry-delay 5 --retry-max-time 180 \
+                    "$BLOCKLIST_URL" -o "$TEMP_HOSTS_FILE"
+
                   if [ -s "$TEMP_HOSTS_FILE" ]; then
                     if ! cmp -s "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"; then
-                        echo "New blocklist downloaded, updating..."
-                        mv "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"
-                        echo "Blocklist updated at $BLOCKLIST_PATH."
+                      echo "New blocklist downloaded, updating..."
+                      chmod 0644 "$TEMP_HOSTS_FILE"
+                      mv "$TEMP_HOSTS_FILE" "$BLOCKLIST_PATH"
                     else
-                        echo "Blocklist is already up-to-date."
-                        rm "$TEMP_HOSTS_FILE"
+                      echo "Blocklist is already up-to-date."
                     fi
                   else
                     echo "Failed to download or downloaded an empty blocklist. No changes made."
-                    if [ -f "$TEMP_HOSTS_FILE" ]; then
-                        rm "$TEMP_HOSTS_FILE"
-                    fi
                     exit 1
                   fi
               volumeMounts:
