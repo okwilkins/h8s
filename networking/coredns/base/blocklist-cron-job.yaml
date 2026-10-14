@@ -43,7 +43,7 @@ spec:
                 - name: BLOCKLIST_PATH
                   value: /blocklist/hosts
                 - name: BLOCKLIST_URL
-                  value: https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro.txt
+                  value: https://raw.githubusercontent.com/hagezi/dns-blocklists-legacy/main/hosts/pro.txt
               resources:
                 requests:
                   cpu: 10m
