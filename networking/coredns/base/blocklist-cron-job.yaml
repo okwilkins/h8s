@@ -49,6 +49,7 @@ spec:
                     if [ -f "$TEMP_HOSTS_FILE" ]; then
                         rm "$TEMP_HOSTS_FILE"
                     fi
+                    exit 1
                   fi
               volumeMounts:
                 - name: blocklist-storage
