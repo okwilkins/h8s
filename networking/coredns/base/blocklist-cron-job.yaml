@@ -21,6 +21,8 @@ spec:
             app.kubernetes.io/part-of: coredns-lan
         spec:
           automountServiceAccountToken: false
+          imagePullSecrets:
+            - name: harbor-credentials
           restartPolicy: Never
           volumes:
             - name: blocklist-storage
@@ -35,7 +37,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: updater
-              image: curlimages/curl:8.22.0
+              image: harbor.okwilkins.dev/docker-hub-cache/curlimages/curl:8.22.0
               imagePullPolicy: IfNotPresent
               env:
                 - name: BLOCKLIST_PATH

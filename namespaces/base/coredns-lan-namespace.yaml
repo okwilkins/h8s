@@ -4,3 +4,4 @@ metadata:
   name: coredns-lan
   labels:
     name: coredns-lan
+    harbor-image-pulls: "true"
