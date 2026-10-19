@@ -1,0 +1,40 @@
+# Cilium GatewayClass configuration, including telemetry.accessLogs and gateway formatters:
+# https://github.com/cilium/cilium/blob/v1.20.3/Documentation/network/servicemesh/gateway-api/parameterized-gatewayclass.rst
+# Envoy log field operators, including PATH(NQ:ORIG_OR_PATH) to omit query strings:
+# https://www.envoyproxy.io/docs/envoy/v1.38.5/configuration/advanced/substitution_formatter
+apiVersion: cilium.io/v2alpha1
+kind: CiliumGatewayClassConfig
+metadata:
+  name: gateway-access-logs
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: gateway-access-logs
+    app.kubernetes.io/part-of: gateways
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  telemetry:
+    accessLogs:
+      - format: JSON
+        targets:
+          - HTTP
+        json:
+          log_type: gateway-access
+          log: "%REQUEST_HEADER(:METHOD)% %REQUEST_HEADER(:AUTHORITY)% %PATH(NQ:ORIG_OR_PATH)% %RESPONSE_CODE%"
+          gateway_name: "%CILIUM_GATEWAY_NAME%"
+          gateway_namespace: "%CILIUM_GATEWAY_NAMESPACE%"
+          start_time: "%START_TIME%"
+          authority: "%REQUEST_HEADER(:AUTHORITY)%"
+          method: "%REQUEST_HEADER(:METHOD)%"
+          path: "%PATH(NQ:ORIG_OR_PATH)%"
+          protocol: "%PROTOCOL%"
+          response_code: "%RESPONSE_CODE%"
+          response_flags: "%RESPONSE_FLAGS%"
+          duration_ms: "%DURATION%"
+          bytes_received: "%BYTES_RECEIVED%"
+          bytes_sent: "%BYTES_SENT%"
+          upstream_host: "%UPSTREAM_HOST%"
+          request_id: "%REQUEST_HEADER(X-REQUEST-ID)%"
+          downstream_remote_address: "%DOWNSTREAM_REMOTE_ADDRESS%"
+          cf_connecting_ip_reported: "%REQUEST_HEADER(CF-CONNECTING-IP)%"
+          x_forwarded_for_reported: "%REQUEST_HEADER(X-FORWARDED-FOR)%"

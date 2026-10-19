@@ -13,6 +13,8 @@ resources:
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.6.1/config/crd/standard/gateway.networking.k8s.io_tcproutes.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/tags/v1.6.1/config/crd/standard/gateway.networking.k8s.io_udproutes.yaml
   # Gateways and routes
+  - ./gateways/gateway-access-logs.yaml
+  - ./gateways/cilium-default-class.yaml
   - ./gateways/default.yaml
   - ./gateways/cloudflare.yaml
   - ./http-routes/grafana.yaml
