@@ -4,4 +4,4 @@ metadata:
   name: grafana-operator-dashboard
 spec:
   url: https://grafana.com/api/dashboards/22785/revisions/2/download
-  folderRef: grafana-operator
+  folder: General

@@ -7,4 +7,4 @@ spec:
   configMapRef:
     name: fluent-bit-collector-dashboard
     key: fluent-bit-collector.json
-  folderRef: fluent-bit
+  folder: General
