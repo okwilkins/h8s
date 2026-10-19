@@ -4,4 +4,4 @@ metadata:
   name: argocd-dashboard
 spec:
   url: https://grafana.com/api/dashboards/14584/revisions/1/download
-  folderRef: argocd
+  folder: General
