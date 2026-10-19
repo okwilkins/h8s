@@ -23,7 +23,7 @@ kubectl apply -k environments/$CLUSTER_ENV
 
 There are two important pieces of information to take into consideration when [deploying new gateways](https://gateway-api.sigs.k8s.io/api-types/gateway/):
 
-1. When referencing a `spec.gatewayClassName`, as the cluster uses Cilium and its Gateway API implementation, use `cilium` as your value.
+1. Use `cilium-default` for `spec.gatewayClassName`, the cluster's default Cilium GatewayClass with structured HTTP access logs.
 2. When referencing IP addresses to assign, firstly check that other gateways don't have the same IP and also check the [deployed Cilium IP pools](../cilium/base/ip-pools/) for availble IP addresses to assign.
 
 ## Creating New Routes
@@ -36,4 +36,15 @@ There are several steps to take when creating new routes:
     - The path can be kept as `/`, or make it the same as the `spec.rules.matches.path.value`.
     - For the service, reference `spec.listeners.port` and `spec.listeners.protocol` values in the `spec.listeners` within your Gateway.
         - The URL for this will be the IP address assigned to the Gateway, for example `http://1.0.0.0:8080`.
+
+## HTTP Access Logs
+
+The `cilium-default` GatewayClass enables JSON HTTP access logs through [gateway-access-logs.yaml](base/gateways/gateway-access-logs.yaml).
+Logs are emitted by `cilium-envoy` pods and collected by Fluent Bit into VictoriaLogs for 30 days.
+
+In Grafana Explore, select `victorialogs-default` and search:
+
+```text
+log_type:="gateway-access"
+```
 
