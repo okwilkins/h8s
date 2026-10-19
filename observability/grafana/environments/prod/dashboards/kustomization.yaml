@@ -6,6 +6,7 @@ resources:
   - ./argocd-dashboard.yaml
   - ./kubernetes/
   - ./cloudflared-dashboard.yaml
+  - ./http-traffic-dashboard.yaml
   - ./cloudnative-pg-dashboard.yaml
   - ./harbor-dashboard.yaml
   - ./external-secrets-operator-dashboard.yaml
