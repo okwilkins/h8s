@@ -4,7 +4,7 @@ metadata:
   name: cloudflare-gateway
   namespace: cloudflare
 spec:
-  gatewayClassName: cilium
+  gatewayClassName: cilium-default
   infrastructure:
     annotations:
       io.cilium/lb-ipam-ips: 20.0.0.0
