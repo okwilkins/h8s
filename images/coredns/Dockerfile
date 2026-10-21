@@ -1,4 +1,4 @@
-ARG GO_IMAGE_TAG=1.24-alpine
+ARG GO_IMAGE_TAG=1.27-alpine
 
 FROM golang:${GO_IMAGE_TAG} AS common
 
