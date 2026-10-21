@@ -1,4 +1,4 @@
-# https://github.com/grafana/grafana-operator/blob/v5.17.1/deploy/helm/grafana-operator/values.yaml
+# https://github.com/grafana/grafana-operator/blob/v5.25.0/deploy/helm/grafana-operator/values.yaml
 
 namespaceOverride: monitoring
 serviceMonitor:

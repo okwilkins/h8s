@@ -1,6 +1,6 @@
 # Query types and raw-log frame fields match the installed VictoriaLogs plugin:
-# https://github.com/VictoriaMetrics/victorialogs-datasource/blob/v0.26.3/src/types.ts
-# https://github.com/VictoriaMetrics/victorialogs-datasource/blob/v0.26.3/pkg/plugin/response.go
+# https://github.com/VictoriaMetrics/victorialogs-datasource/blob/v0.33.1/src/types.ts
+# https://github.com/VictoriaMetrics/victorialogs-datasource/blob/v0.33.1/pkg/plugin/response_logs.go
 # Client breakdowns use numeric stats and rowsToFields to name each category.
 # Bar gauges need a nonempty default displayName to keep single-category labels;
 # the empty displayName override lets each generated field supply its own name.

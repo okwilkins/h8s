@@ -3,5 +3,5 @@ kind: GrafanaDashboard
 metadata:
   name: argo-workflows-dashboard
 spec:
-  url: https://raw.githubusercontent.com/argoproj/argo-workflows/refs/tags/v3.6.8/examples/grafana-dashboard.json
+  url: https://raw.githubusercontent.com/argoproj/argo-workflows/refs/tags/v4.1.5/examples/grafana-dashboard.json
   folderRef: ci-cd

@@ -42,4 +42,4 @@ spec:
           enabled: true
   plugins:
     - name: victoriametrics-logs-datasource
-      version: 0.26.3
+      version: 0.33.1

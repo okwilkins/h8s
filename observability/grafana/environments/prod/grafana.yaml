@@ -5,7 +5,7 @@ metadata:
   labels:
     dashboards: grafana
 spec:
-  version: 13.0.1
+  version: 13.2.4
   config:
     server:
       domain: "grafana.okwilkins.dev"
