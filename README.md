@@ -24,6 +24,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 - Internal certificate authority.
 - Routing to private services only accessible at home.
 - Secrets management.
+- Kubernetes vulnerability and configuration scanning with Trivy Operator.
 - Metric and log observability.
 - Full CI/CD capabilities.
 - Internet access to services via Cloudflare. Give these a try:
@@ -66,6 +67,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
 │   ├── external-secrets-operator   | Syncs secrets from Vault into the cluster.
+│   ├── trivy-operator              | Kubernetes vulnerability and configuration scanning.
 │   └── vault                       | Secrets storage and certificate authority.
 └── storage
     ├── cloudnative-pg              | PostgreSQL database management for applications.
