@@ -1,6 +1,6 @@
-ARG GO_VERSION=1.24
+ARG GO_IMAGE_TAG=1.24-alpine
 
-FROM golang:${GO_VERSION}-alpine AS common
+FROM golang:${GO_IMAGE_TAG} AS common
 
 RUN apk add --no-cache git
 
