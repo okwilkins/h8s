@@ -1,4 +1,4 @@
-# https://github.com/mend/renovate-ce-ee/blob/mend-renovate-ce-14.0.0/helm-charts/mend-renovate-ce/values.yaml
+# https://github.com/mend/renovate-ce-ee/blob/15.8.0/helm-charts/mend-renovate-ce/values.yaml
 
 image:
   repository: harbor.okwilkins.dev/ghcr-cache/mend/renovate-ce
@@ -8,6 +8,14 @@ image:
 imagePullSecrets: harbor-credentials
 
 renovate:
+  # Permit only the Nix lock refresh needed after a stable channel update.
+  config: |
+    module.exports = {
+      allowedCommands: [
+        "^nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs$",
+      ],
+    };
+
   mendRnvAcceptTos: "y"
   # Free 10-repo Community Edition key
   mendRnvLicenseKey: "eyJsaW1pdCI6IjEwIn0=.30440220457941b71ea8eb345c729031718b692169f0ce2cf020095fd328812f4d7d5bc1022022648d1a29e71d486f89f27bdc8754dfd6df0ddda64a23155000a61a105da2a1"
