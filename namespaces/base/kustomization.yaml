@@ -18,3 +18,4 @@ resources:
   - ./vault-namespace.yaml
   - ./searxng-namespace.yaml
   - ./terraform-namespace.yaml
+  - ./trivy-system-namespace.yaml

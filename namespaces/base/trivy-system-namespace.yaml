@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trivy-system
+  labels:
+    name: trivy-system
+    app.kubernetes.io/name: trivy-operator
+    app.kubernetes.io/part-of: trivy-operator
+    # Node collector jobs need hostPID and read-only hostPath mounts.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/warn-version: latest
