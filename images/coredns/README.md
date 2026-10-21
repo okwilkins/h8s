@@ -6,7 +6,7 @@ This Dockerfile builds CoreDNS with the [coredns-blocklist plugin](https://githu
 
 |       Argument      | Default Value |                   Description                   |
 |:-------------------:|:-------------:|:-----------------------------------------------:|
-|     `GO_VERSION`    |     `1.24`    |       Go language version for compilation       |
+|   `GO_IMAGE_TAG`    | `1.24-alpine` |       Full Go image tag for compilation         |
 |  `COREDNS_VERSION`  |    `1.12.1`   |             CoreDNS version to build            |
 | `BLOCKLIST_VERSION` |    `1.12.1`   |         coredns-blocklist plugin version        |
 | `GOOS`              | `linux`       | Target OS to build the binary for               |
