@@ -4,7 +4,7 @@ metadata:
   name: cloudflared-dashboard
 spec:
   url: https://grafana.com/api/dashboards/24874/revisions/4/download
-  folder: General
+  folderRef: networking
   datasources:
     - inputName: DS_PROMETHEUS
       datasourceName: prom-default

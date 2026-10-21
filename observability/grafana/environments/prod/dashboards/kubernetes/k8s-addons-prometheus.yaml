@@ -4,4 +4,4 @@ metadata:
   name: k8s-addons-prometheus
 spec:
   url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/tags/v2.7.4/dashboards/k8s-addons-prometheus.json
-  folderRef: kubernetes
+  folderRef: observability
