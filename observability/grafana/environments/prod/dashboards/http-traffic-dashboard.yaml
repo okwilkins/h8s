@@ -9,7 +9,7 @@ kind: GrafanaDashboard
 metadata:
   name: http-traffic-dashboard
 spec:
-  folder: General
+  folderRef: networking
   datasources:
     - inputName: DS_VICTORIALOGS
       datasourceName: victorialogs-default

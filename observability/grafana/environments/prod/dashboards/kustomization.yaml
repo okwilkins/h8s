@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ./folders.yaml
   - ./grafana-operator-dashboard.yaml
   - ./cilium/
   - ./argocd-dashboard.yaml

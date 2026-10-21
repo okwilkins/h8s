@@ -4,4 +4,4 @@ metadata:
   name: cert-manager-dashboard
 spec:
   url: https://grafana.com/api/dashboards/20842/revisions/3/download
-  folder: General
+  folderRef: networking

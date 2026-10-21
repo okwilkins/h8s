@@ -3,7 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: vault-dashboard
 spec:
-  folder: General
+  folderRef: security
   # https://grafana.com/api/dashboards/12904/revisions/2/download
   json: |
     {
