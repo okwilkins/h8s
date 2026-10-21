@@ -15,7 +15,7 @@ tasks:
     desc: "Generate Talos schematic with custom extensions"
     dir: '$INFRA_ROOT/00-talos-factory'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   talos:factory:destroy:
@@ -29,7 +29,7 @@ tasks:
     desc: "Download Talos ISO to Proxmox nodes"
     dir: '$INFRA_ROOT/01-proxmox-iso-upload'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   proxmox:iso:destroy:
@@ -43,7 +43,7 @@ tasks:
     desc: "Create VMs on Proxmox"
     dir: '$INFRA_ROOT/02-proxmox-provision'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   proxmox:provision:destroy:
@@ -57,7 +57,7 @@ tasks:
     desc: "Configure Talos nodes, bootstrap etcd, retrieve kubeconfig"
     dir: '$INFRA_ROOT/03-talos-configure'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   talos:configure:destroy:
@@ -71,7 +71,7 @@ tasks:
     desc: "Install Cilium CNI"
     dir: '$INFRA_ROOT/04-cilium'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   cilium:destroy:
@@ -85,7 +85,7 @@ tasks:
     desc: "Install ArgoCD for GitOps"
     dir: '$INFRA_ROOT/05-argocd'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   argocd:destroy:
@@ -99,7 +99,7 @@ tasks:
     desc: "Initialise Vault (create outputs and run bootstrap)"
     dir: '$INFRA_ROOT/06-vault-init'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   vault:destroy:
@@ -113,7 +113,7 @@ tasks:
     desc: "Provision all secrets in Vault (passwords, keys, external secrets)"
     dir: '$INFRA_ROOT/07-vault-resources-provision'
     cmds:
-      - tofu init
+      - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
   vault:secrets:destroy:
