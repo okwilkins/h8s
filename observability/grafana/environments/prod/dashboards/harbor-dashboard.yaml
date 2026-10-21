@@ -3,5 +3,5 @@ kind: GrafanaDashboard
 metadata:
   name: harbor-dashboard
 spec:
-  url: https://raw.githubusercontent.com/goharbor/harbor/refs/tags/v2.13.0/contrib/grafana-dashboard/metrics-example.json
+  url: https://raw.githubusercontent.com/goharbor/harbor/refs/tags/v2.15.4/contrib/grafana-dashboard/metrics-example.json
   folderRef: storage

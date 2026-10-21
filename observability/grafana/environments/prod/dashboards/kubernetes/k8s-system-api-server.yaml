@@ -3,5 +3,5 @@ kind: GrafanaDashboard
 metadata:
   name: k8s-system-api-server
 spec:
-  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/tags/v2.7.4/dashboards/k8s-system-api-server.json
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/tags/v3.0.8/dashboards/k8s-system-api-server.json
   folderRef: kubernetes
