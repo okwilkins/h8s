@@ -155,6 +155,8 @@ configMap:
           public: false
           authorization_policy: two_factor
           claims_policy: grafana
+          consent_mode: pre-configured
+          pre_configured_consent_duration: '30 days'
           token_endpoint_auth_method: client_secret_post
           require_pkce: true
           pkce_challenge_method: S256
@@ -171,7 +173,9 @@ configMap:
             path: /secrets/argocd-client-secret/client-secret-hash
           public: false
           authorization_policy: two_factor
-          token_endpoint_auth_method: client_secret_post
+          consent_mode: pre-configured
+          pre_configured_consent_duration: '7 days'
+          token_endpoint_auth_method: client_secret_basic
           redirect_uris:
             - https://argocd.okwilkins.dev/auth/callback
           scopes:
@@ -198,6 +202,8 @@ configMap:
             path: /secrets/searxng-client-secret/client-secret-hash
           public: false
           authorization_policy: two_factor
+          consent_mode: pre-configured
+          pre_configured_consent_duration: '30 days'
           token_endpoint_auth_method: client_secret_post
           require_pkce: true
           pkce_challenge_method: S256
@@ -208,7 +214,6 @@ configMap:
             - profile
             - email
             - groups
-            - offline_access
 
   storage:
     local:
