@@ -1,6 +1,9 @@
 # https://github.com/grafana/grafana-operator/blob/v5.25.0/deploy/helm/grafana-operator/values.yaml
 
 namespaceOverride: monitoring
+namespaceScope: true
+rbac:
+  useClusterRole: false
 serviceMonitor:
   enabled: true
   namespace: monitoring
