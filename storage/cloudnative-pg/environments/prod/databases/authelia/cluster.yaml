@@ -20,7 +20,6 @@ spec:
         superuser: false
         passwordSecret:
           name: cnpg-authelia-prod-app-user-credentials
-          key: password
   enableSuperuserAccess: false
   monitoring:
     enablePodMonitor: true
