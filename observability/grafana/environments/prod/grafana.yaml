@@ -15,6 +15,9 @@ spec:
         requests:
           storage: 5Gi
   config:
+    plugins:
+      # Failed updates unload bundled plugins on the read-only filesystem.
+      preinstall_auto_update: "false"
     server:
       domain: "grafana.okwilkins.dev"
       root_url: "https://%(domain)s/"
