@@ -81,6 +81,21 @@
             "depNameTemplate": "docker.io/grafana/grafana",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "description": "Update the VictoriaLogs Grafana plugin",
+            "managerFilePatterns": [
+                "/^observability/grafana/environments/prod/datasources/victorialogs-default\\.yaml$/"
+            ],
+            "matchStrings": [
+                "- name:\\s+victoriametrics-logs-datasource\\s+version:\\s*[\"']?(?<currentValue>[^\\s\"']+)"
+            ],
+            "depNameTemplate": "victoriametrics-logs-datasource",
+            "packageNameTemplate": "VictoriaMetrics/victorialogs-datasource",
+            "datasourceTemplate": "github-releases",
+            "extractVersionTemplate": "^v(?<version>.*)$",
+            "versioningTemplate": "semver"
         }
     ],
     "packageRules": [
