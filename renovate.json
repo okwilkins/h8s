@@ -50,7 +50,19 @@
                 "/storage/cloudnative-pg/.*\\.yaml$/"
             ],
             "matchStrings": [
-                "imageName:\\s+(?<depName>[^\\s]+):(?<currentValue>[^\\s]+)"
+                "imageName:\\s+(?<depName>[^\\s:]+):(?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+            ],
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "description": "Update the Talos-managed CoreDNS image",
+            "managerFilePatterns": [
+                "/^infrastructure/03-talos-configure/main\\.tf$/"
+            ],
+            "matchStrings": [
+                "image\\s*=\\s*\"(?<depName>docker\\.io/coredns/coredns):(?<currentValue>[^\\s\"@]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?\""
             ],
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
@@ -110,14 +122,25 @@
             ]
         },
         {
-            "description": "Keep PostgreSQL images on stable numeric tags",
+            "description": "Keep PostgreSQL images minimal with digest pins; review Debian migrations separately",
             "matchDatasources": [
                 "docker"
             ],
             "matchPackageNames": [
                 "ghcr.io/cloudnative-pg/postgresql"
             ],
-            "allowedVersions": "/^[0-9]+(?:\\.[0-9]+)*$/"
+            "allowedVersions": "/^[0-9]+\\.[0-9]+-minimal-[a-z]+$/",
+            "pinDigests": true
+        },
+        {
+            "description": "Retain digest pins for the Talos-managed CoreDNS image",
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "docker.io/coredns/coredns"
+            ],
+            "pinDigests": true
         },
         {
             "description": "Require approval before proposing PostgreSQL major upgrades",
