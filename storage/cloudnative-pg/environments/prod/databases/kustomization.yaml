@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - ./authelia/
   - ./harbor/
-  - ./terraform-backend/
 patches:
   # Ensure the secret exists before servers
   - patch: |-
