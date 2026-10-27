@@ -64,7 +64,11 @@ resource "null_resource" "app_of_apps" {
     infra_root    = var.infra_root
   }
 
-  depends_on = [helm_release.argocd]
+  depends_on = [
+    helm_release.argocd,
+    kubernetes_secret_v1.longhorn_crypto,
+    kubernetes_secret_v1.longhorn_b2,
+  ]
 
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
