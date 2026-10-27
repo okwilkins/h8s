@@ -4,48 +4,45 @@ Vault is a tool for securely accessing secrets. A secret is anything that you wa
 
 ## Installation
 
-[ArgoCD](../../ci-cd/argocd/README.md) handles the installation of Vault. The [bootstrap Terraform](../../infrastructure/bootstrap/README.md) automatically initializes, unseals, and configures Vault during cluster setup.
+[ArgoCD](../../ci-cd/argocd/README.md) installs Vault.
+Follow [Fresh Vault Initialisation](../../infrastructure/README.md#fresh-vault-initialisation) to initialise it manually and store the original recovery JSON in encrypted OpenTofu state and Bitwarden.
 
-### Automated Initialization (Bootstrap)
+### Bootstrap Configuration
 
-When you run `terraform apply` in the bootstrap directory, the following happens automatically:
+Stages `06` and `07` configure an initialised, unsealed Vault:
 
-1. **Vault Initialization**: Terraform runs `vault operator init` and saves the output to `vault-init.json`
-2. **Vault Unsealing**: Terraform unseals Vault using the unseal keys from the init output
-3. **Kubernetes Auth**: Terraform enables and configures the Kubernetes auth method
-4. **Secret Engines**: Terraform enables KV v2 and PKI secret engines
-5. **Policies & Roles**: Terraform creates policies and Kubernetes auth roles for ESO and cert-manager
-6. **Secrets**: Terraform generates and stores passwords, keys, and certificates
+1. **Kubernetes Auth**: Terraform enables and configures the Kubernetes auth method
+2. **Secret Engines**: Terraform enables KV v2 and PKI secret engines
+3. **Policies & Roles**: Terraform creates policies and Kubernetes auth roles for ESO and cert-manager
+4. **Secrets**: Terraform generates and stores passwords, keys, and certificates
 
-**IMPORTANT**: The `vault-init.json` file in `infrastructure/bootstrap/` contains the unseal keys and root token. It is gitignored and must be backed up securely alongside `terraform.tfstate`. Losing this file means losing access to Vault forever.
+Bootstrap does not initialise or unseal Vault, create a local recovery file or cache a login token.
+See [Recovery Credentials](../../infrastructure/README.md#2-recovery-credentials) for the state-backed outputs and [Extracting the Vault CA Certificate](../../infrastructure/README.md#extracting-the-vault-ca-certificate) for the public CA.
 
 ### Manual Operations
 
 The following sections document manual operations that may be needed in certain scenarios.
+Inside the [infrastructure Nix shell](../../infrastructure/README.md#configure), this example opens an authenticated Vault shell using credentials retrieved from encrypted state.
 
-#### First Time Installation (Manual Alternative)
-
-If you need to initialize Vault manually (e.g., if the automated process failed), run:
-
-```bash
-kubectl exec -ti vault-0 -n vault -- vault operator init
-```
-
-***BE SURE TO SAVE THE OUTPUT SOMEWHERE SAFE!***
-
-You will then need to unseal the server:
+You can use your existing user-managed kubeconfig instead by omitting the kubeconfig fetch and `--kubeconfig` flag.
 
 ```bash
-kubectl exec -ti vault-0 -n vault -- vault operator unseal
+(
+  kubeconfig="$(tofu -chdir="$INFRA_ROOT/03-talos-configure" output -raw kubeconfig)" || exit 1
+  credentials="$(tofu -chdir="$INFRA_ROOT/06-vault-init" output -json vault_credentials)" || exit 1
+  token="$(jq -er '.root_token' <<<"$credentials")" || exit 1
+  kubectl --kubeconfig <(printf '%s' "$kubeconfig") exec -it -n vault vault-0 -- \
+    env VAULT_TOKEN="$token" /bin/sh
+)
 ```
+
+Run the commands below inside that Vault shell, then type `exit` when finished.
 
 #### Kubernetes Service Accounts (Manual)
 
 If the automated setup didn't complete successfully, you can manually configure Kubernetes auth:
 
 ```bash
-kubectl exec -ti vault-0 -n vault -- /bin/sh
-vault login
 vault auth enable kubernetes
 vault secrets enable -path=kubernetes-homelab kv-v2
 vault write auth/kubernetes/config \
@@ -73,8 +70,6 @@ vault write auth/kubernetes/role/external-secrets-vault-auth \
 If PKI wasn't configured automatically:
 
 ```bash
-kubectl exec -ti vault-0 -n vault -- /bin/sh
-
 DOMAIN="okwilkins.dev"
 ROLE_NAME=$(echo $DOMAIN | sed 's/\./\-dot\-/')
 echo "Vault role name: $ROLE_NAME"
@@ -123,14 +118,6 @@ Read more here:
 
 ### Pod Rescheduling
 
-Whenever the pod(s) for Vault are rescheduled, they will need to be [unsealed](https://developer.hashicorp.com/vault/docs/concepts/seal) again. Use the unseal keys from `vault-init.json`:
-
-```bash
-# Extract unseal keys from vault-init.json and unseal Vault
-for key in $(cat infrastructure/06-vault-init/secrets/vault-init.json | jq -r '.unseal_keys_b64[]'); do
-  kubectl exec -ti vault-0 -n vault -- vault operator unseal "$key"
-done
-```
-
-Enter in 3 of the keys produced from the initialization.
+Whenever the pod(s) for Vault are rescheduled, they will need to be [unsealed](https://developer.hashicorp.com/vault/docs/concepts/seal) again.
+Use the [manual unseal command](../../infrastructure/README.md#ongoing-operations), which retrieves the required number of keys from encrypted state.
 
