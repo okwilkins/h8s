@@ -5,6 +5,7 @@ defaultBackupStore:
   backupTargetCredentialSecret: longhorn-b2
 
 persistence:
+  defaultClass: false
   reclaimPolicy: Retain
   defaultClassReplicaCount: 2
 preUpgradeChecker:
