@@ -1,0 +1,18 @@
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: encrypted-hourly
+  namespace: longhorn-system
+  labels:
+    app.kubernetes.io/name: encrypted-hourly
+    app.kubernetes.io/part-of: longhorn
+spec:
+  name: encrypted-hourly
+  cron: "0 * * * *"
+  task: backup
+  groups:
+    - encrypted-backup
+  retentionPolicy: age-based
+  retainAge: 720h
+  retain: 1
+  concurrency: 1
