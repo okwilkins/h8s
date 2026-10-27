@@ -3,9 +3,15 @@ kind: PersistentVolumeClaim
 metadata:
   name: chhoto-url-pvc
   namespace: chhoto-url
+  labels:
+    app.kubernetes.io/name: chhoto-url
+    app.kubernetes.io/part-of: chhoto-url
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: longhorn-encrypted
   resources:
     requests:
       storage: 1Gi
