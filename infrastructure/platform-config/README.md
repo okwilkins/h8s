@@ -24,8 +24,11 @@ It uses the same enforced state and plan encryption as the bootstrap stages.
 **IMPORTANT**: Run only one infrastructure operation at a time because B2 state locking is disabled.
 This was done as Backblaze B2 does not have locking built in.
 
+Kubernetes access comes directly from the sensitive stage `03` state outputs, so no local kubeconfig or home context is required.
+Harbor must be running, and External Secrets Operator must have created its login Secrets from Vault before applying this stage.
+
 ```bash
-task --dir infrastructure platform:configure
+task --dir "$INFRA_ROOT" platform:configure
 ```
 
 ### Using Harbor Pull-Through Caches
