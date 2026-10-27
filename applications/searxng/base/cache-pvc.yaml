@@ -3,7 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: searxng-cache-pvc
   namespace: searxng
+  labels:
+    app.kubernetes.io/name: searxng
+    app.kubernetes.io/part-of: searxng
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
 spec:
+  storageClassName: longhorn-encrypted
   accessModes:
     - ReadWriteOnce
   resources:
