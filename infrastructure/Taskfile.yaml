@@ -1,9 +1,6 @@
 version: "3"
 run: once
 
-vars:
-  STATES_DIR: "$INFRA_ROOT/states"
-
 tasks:
   default:
     desc: "List all available tasks"
@@ -190,16 +187,3 @@ tasks:
       - task: proxmox:provision:destroy
       - task: proxmox:iso:destroy
       - task: talos:factory:destroy
-
-  # Utility tasks
-  clean:states:
-    desc: "Remove all Terraform state files (DANGEROUS - destroys all state!)"
-    cmds:
-      - rm -rf {{.STATES_DIR}}
-      - echo "State files removed. You will need to re-run cluster:bootstrap to recreate the cluster."
-
-  clean:all:
-    desc: "Destroy all resources and remove state files (COMPLETE RESET)"
-    cmds:
-      - task: cluster:destroy
-      - task: clean:states
