@@ -32,7 +32,7 @@
           authelia
           sops
           openssl
-          sops
+          age
           age-plugin-fido2-hmac
           pam_u2f
         ];
@@ -45,6 +45,19 @@
             export TF_VAR_project_root=$PROJECT_ROOT
             export INFRA_ROOT=$PROJECT_ROOT/infrastructure
             export TF_VAR_infra_root=$INFRA_ROOT
+          '';
+        };
+
+        devShells.infra = pkgs.mkShell {
+          inputsFrom = [ self.devShells.${system}.default ];
+          SOPS_AGE_KEY_CMD = ''
+            bash -c 'grep -lZF -- "# public key: $SOPS_AGE_RECIPIENT" "$H8S_SECRETS_DIR"/keys/age/* | xargs -0r cat'
+          '';
+          shellHook = ''
+            export H8S_SECRETS_DIR="''${H8S_SECRETS_DIR:-$PROJECT_ROOT/../h8s-secrets}"
+            h8s_exports="$(sops exec-env --pristine "$H8S_SECRETS_DIR/secrets.yaml" 'export -p')" || exit 1
+            eval "$h8s_exports" 2>/dev/null || exit 1
+            unset h8s_exports
           '';
         };
 
