@@ -1,6 +1,6 @@
 data "terraform_remote_state" "proxmox_talos_iso_ids" {
-  backend = "local"
-  config = {
-    path = "${var.infra_root}/states/01-proxmox-iso-upload"
-  }
+  backend = "s3"
+  config = merge(local.bootstrap_backend, {
+    key = "h8s/bootstrap/01-proxmox-iso-upload/terraform.tfstate"
+  })
 }
