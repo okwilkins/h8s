@@ -7,8 +7,12 @@ metadata:
 spec:
   version: 13.3.0
   persistentVolumeClaim:
+    metadata:
+      labels:
+        recurring-job.longhorn.io/source: enabled
+        recurring-job-group.longhorn.io/encrypted-backup: enabled
     spec:
-      storageClassName: longhorn
+      storageClassName: longhorn-encrypted
       accessModes:
         - ReadWriteOnce
       resources:
