@@ -4,7 +4,6 @@ resources:
   - ./issuers/vault-issuer.yaml
   - ./issuers/vault-issuer-service-account.yaml
   - ./issuers/vault-issuer-service-account-secret.yaml
-  - ./certificates/terraform-vault-root-ca.yaml
   - ./certificates/argocd-okwilkins-dev.yaml
   - ./certificates/grafana-okwilkins-dev.yaml
   - ./certificates/prometheus-okwilkins-dev.yaml
@@ -12,7 +11,6 @@ resources:
   - ./certificates/workflows-okwilkins-dev.yaml
   - ./certificates/harbor-okwilkins-dev.yaml
   - ./certificates/search-okwilkins-dev.yaml
-  - ./certificates/pg-tf-backend-okwilkins-dev.yaml
   - ./certificates/hubble-okwilkins-dev.yaml
   - ./certificates/auth-okwilkins-dev.yaml
   - ./certificates/convert-okwilkins-dev.yaml
