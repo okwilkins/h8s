@@ -1,10 +1,5 @@
 terraform {
-  required_version = ">= 1.5"
-
-  # Local state backend - this root exists to bootstrap the cluster from scratch,
-  # before the in-cluster PostgreSQL backend is available. State is stored locally
-  # and gitignored because it contains cluster PKI secrets (treat like secret.yaml).
-  # Back it up somewhere safe (encrypted storage, password manager, etc.).
+  required_version = ">= 1.10"
 
   required_providers {
     # https://registry.terraform.io/providers/bpg/proxmox

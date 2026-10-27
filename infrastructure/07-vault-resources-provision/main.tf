@@ -2,7 +2,7 @@
 # Vault Secrets Provisioning
 # ============================================================
 # Provisions all secret values in Vault using kubectl exec commands.
-# These values are NOT stored in Terraform state.
+# Generated passwords are also stored in the encrypted OpenTofu state.
 #
 # Generated secrets:
 # - Random passwords for Harbor accounts

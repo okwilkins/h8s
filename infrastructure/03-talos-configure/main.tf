@@ -14,7 +14,7 @@ resource "terraform_data" "wait_for_nodes" {
 # Cluster Secrets
 # ============================================================
 # Generates the cluster PKI (CA certs, keys, tokens) once and persists them
-# in local state. This replaces the `talosctl gen secrets` call in gen_configs.sh.
+# in encrypted remote state. This replaces `talosctl gen secrets` in gen_configs.sh.
 #
 # WARNING: terraform.tfstate contains these secrets. Treat it like secret.yaml -
 # back it up to encrypted storage and never commit it to git.
