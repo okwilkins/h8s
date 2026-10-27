@@ -3,11 +3,12 @@
 # ============================================================
 
 output "vault_initialised" {
-  description = "Whether Vault initialisation has been attempted"
+  description = "Whether Vault readiness has been verified"
   value       = length(null_resource.vault_bootstrap) > 0
 }
 
-output "vault_init_file" {
-  description = "Path to the Vault initialisation output file"
-  value       = "${var.infra_root}/06-vault-init/secrets/vault-init.json"
+output "vault_credentials" {
+  description = "Vault unseal keys, root token and initialisation metadata retained in encrypted state"
+  value       = sensitive(terraform_data.vault_credentials.output)
+  sensitive   = true
 }

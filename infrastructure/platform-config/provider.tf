@@ -11,9 +11,27 @@ terraform {
   }
 }
 
+data "terraform_remote_state" "talos_configure" {
+  backend = "s3"
+  config = {
+    bucket                      = "h8s-terraform-backend"
+    key                         = "h8s/bootstrap/03-talos-configure/terraform.tfstate"
+    region                      = "eu-central-003"
+    endpoints                   = { s3 = "https://s3.eu-central-003.backblazeb2.com" }
+    use_path_style              = true
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    skip_s3_checksum            = true
+  }
+}
+
 provider "kubernetes" {
-  config_path    = "~/.kube/config"
-  config_context = "admin@talos-homelab"
+  host                   = "https://${data.terraform_remote_state.talos_configure.outputs.first_node_ip}:6443"
+  client_certificate     = base64decode(data.terraform_remote_state.talos_configure.outputs.kubernetes_client_configuration.client_certificate)
+  client_key             = base64decode(data.terraform_remote_state.talos_configure.outputs.kubernetes_client_configuration.client_key)
+  cluster_ca_certificate = base64decode(data.terraform_remote_state.talos_configure.outputs.kubernetes_client_configuration.ca_certificate)
 }
 
 provider "harbor" {

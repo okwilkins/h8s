@@ -1,3 +1,15 @@
+output "kubeconfig" {
+  description = "Kubernetes client configuration for temporary command access"
+  value       = talos_cluster_kubeconfig.this.kubeconfig_raw
+  sensitive   = true
+}
+
+output "talosconfig" {
+  description = "Talos client configuration for temporary command access"
+  value       = data.talos_client_configuration.this.talos_config
+  sensitive   = true
+}
+
 output "kubernetes_client_configuration" {
   description = "Kubernetes client configuration from Talos"
   value       = talos_cluster_kubeconfig.this.kubernetes_client_configuration

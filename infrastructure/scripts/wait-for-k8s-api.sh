@@ -10,7 +10,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 load_tf_kube_env
-create_cert_dir
 
 echo "Waiting for Kubernetes API to be ready at https://${SERVER}:6443..."
 

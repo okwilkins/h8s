@@ -139,17 +139,17 @@ resource "null_resource" "vault_secret_harbor_admin" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/harbor-admin-credentials \\
           HARBOR_ADMIN_USERNAME=admin \\
           HARBOR_ADMIN_PASSWORD='${random_password.harbor_admin_password.result}' || exit 1
@@ -166,17 +166,17 @@ resource "null_resource" "vault_secret_harbor_main_user" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/main-user-secret \\
           PASSWORD='${random_password.harbor_main_user_password.result}' || exit 1
       "
@@ -192,17 +192,17 @@ resource "null_resource" "vault_secret_harbor_dagger" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/dagger-robot-secret \\
           SECRET='${random_password.harbor_dagger_robot_secret.result}' || exit 1
       "
@@ -218,17 +218,17 @@ resource "null_resource" "vault_secret_harbor_image_pull" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/harbor/image-pull \\
           ROBOT_PASSWORD='${random_password.harbor_image_pull_robot_password.result}' || exit 1
       "
@@ -248,17 +248,17 @@ resource "null_resource" "vault_secret_grafana" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/grafana/grafana-admin-credentials \\
           GF_SECURITY_ADMIN_USER=admin \\
           GF_SECURITY_ADMIN_PASSWORD='${random_password.grafana_admin_password.result}' || exit 1
@@ -279,13 +279,14 @@ resource "null_resource" "vault_secret_cosign" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       # Write the key files temporarily
       echo '${tls_private_key.cosign_key.private_key_pem}' > /tmp/cosign.key
@@ -298,7 +299,6 @@ resource "null_resource" "vault_secret_cosign" {
       # Store in Vault
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cosign/key-pair \\
           COSIGN_PASSWORD='${random_password.cosign_password.result}' \\
           cosign.key=@/tmp/cosign.key \\
@@ -324,17 +324,17 @@ resource "null_resource" "vault_secret_searxng" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/searxng/searxng-secret \\
           SECRET='${random_password.searxng_secret.result}' || exit 1
       "
@@ -354,17 +354,17 @@ resource "null_resource" "vault_secret_cnpg_harbor" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cnpg/cnpg-harbor-prod-app-user-credentials \\
           username=harbor \\
           password='${random_password.cnpg_harbor_password.result}' || exit 1
@@ -381,17 +381,17 @@ resource "null_resource" "vault_secret_cnpg_authelia" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cnpg/cnpg-authelia-prod-app-user-credentials \\
           username=authelia \\
           password='${random_password.cnpg_authelia_password.result}' || exit 1
@@ -413,17 +413,17 @@ resource "null_resource" "vault_secret_authelia_encryption" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/authelia/encryption-key \\
           encryption-key='${random_password.authelia_encryption_key.result}' || exit 1
       "
@@ -439,19 +439,19 @@ resource "null_resource" "vault_secret_authelia_user_password" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
+
     command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
+      source "${var.infra_root}/scripts/common.sh"
       load_tf_kube_env
-      create_cert_dir
 
       HASH=$(authelia crypto hash generate --password '${random_password.authelia_user_password.result}' 2>/dev/null | cut -d ' ' -f2-)
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
-
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/authelia/user-okwilkins-password-hash \\
           hash='$HASH' || exit 1
       "
@@ -467,17 +467,17 @@ resource "null_resource" "vault_secret_authelia_session" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/authelia/session-secret \\
           session-secret='${random_password.authelia_session_secret.result}' || exit 1
       "
@@ -493,17 +493,17 @@ resource "null_resource" "vault_secret_authelia_hmac" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/authelia/hmac-secret \\
           hmac-secret='${random_password.authelia_hmac_secret.result}' || exit 1
       "
@@ -524,20 +524,21 @@ resource "null_resource" "vault_secret_authelia_rsa" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
+
     command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
+      source "${var.infra_root}/scripts/common.sh"
       load_tf_kube_env
-      create_cert_dir
 
       cat << 'EOF' > /tmp/authelia_rsa.pem
       ${tls_private_key.authelia_oidc_rsa.private_key_pem}
       EOF
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
 
         echo \"$(cat /tmp/authelia_rsa.pem)\" > /tmp/vault_rsa.pem
         vault kv put kubernetes-homelab/authelia/oidc-rsa-key rsa-private-key=@/tmp/vault_rsa.pem || exit 1
@@ -554,10 +555,14 @@ resource "null_resource" "vault_secret_authelia_grafana_oidc" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
+
     command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
+      source "${var.infra_root}/scripts/common.sh"
       load_tf_kube_env
-      create_cert_dir
 
       printf '%s' '${bcrypt(random_password.authelia_grafana_oidc_client_secret.result)}' \
         | tr -d '[:space:]' \
@@ -565,11 +570,8 @@ resource "null_resource" "vault_secret_authelia_grafana_oidc" {
       printf '%s' '${random_password.authelia_grafana_oidc_client_secret.result}' \
         | base64 > /tmp/grafana_plaintext_b64.txt
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
 
         printf '%s' \"$(cat /tmp/grafana_hash_b64.txt)\" | base64 -d > /tmp/vault_grafana_hash.txt
         printf '%s' \"$(cat /tmp/grafana_plaintext_b64.txt)\" | base64 -d > /tmp/vault_grafana_plaintext.txt
@@ -593,10 +595,14 @@ resource "null_resource" "vault_secret_authelia_argocd_oidc" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
+
     command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
+      source "${var.infra_root}/scripts/common.sh"
       load_tf_kube_env
-      create_cert_dir
 
       printf '%s' '${bcrypt(random_password.authelia_argocd_oidc_client_secret.result)}' \
         | tr -d '[:space:]' \
@@ -604,11 +610,8 @@ resource "null_resource" "vault_secret_authelia_argocd_oidc" {
       printf '%s' '${random_password.authelia_argocd_oidc_client_secret.result}' \
         | base64 > /tmp/argocd_plaintext_b64.txt
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
 
         printf '%s' \"$(cat /tmp/argocd_hash_b64.txt)\" | base64 -d > /tmp/vault_argocd_hash.txt
         printf '%s' \"$(cat /tmp/argocd_plaintext_b64.txt)\" | base64 -d > /tmp/vault_argocd_plaintext.txt
@@ -632,10 +635,14 @@ resource "null_resource" "vault_secret_authelia_searxng_oidc" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
+
     command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
+      source "${var.infra_root}/scripts/common.sh"
       load_tf_kube_env
-      create_cert_dir
 
       printf '%s' '${bcrypt(random_password.authelia_searxng_oidc_client_secret.result)}' \
         | tr -d '[:space:]' \
@@ -643,11 +650,8 @@ resource "null_resource" "vault_secret_authelia_searxng_oidc" {
       printf '%s' '${random_password.authelia_searxng_oidc_client_secret.result}' \
         | base64 > /tmp/searxng_plaintext_b64.txt
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
 
         printf '%s' \"$(cat /tmp/searxng_hash_b64.txt)\" | base64 -d > /tmp/vault_searxng_hash.txt
         printf '%s' \"$(cat /tmp/searxng_plaintext_b64.txt)\" | base64 -d > /tmp/vault_searxng_plaintext.txt
@@ -675,17 +679,17 @@ resource "null_resource" "vault_secret_oauth2_proxy_searxng_cookie" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/oauth2-proxy/searxng-cookie-secret \\
           cookie-secret='${random_password.oauth2_proxy_searxng_cookie_secret.result}' || exit 1
       "
@@ -712,17 +716,17 @@ resource "null_resource" "vault_secret_cloudflare" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/cloudflare/cloudflared-token \\
           token='${var.cloudflare_tunnel_token}' || exit 1
       "
@@ -738,17 +742,17 @@ resource "null_resource" "vault_secret_renovate" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/renovate/github-app \\
           private-key='${var.github_app_private_key}' || exit 1
       "
@@ -774,17 +778,17 @@ resource "null_resource" "vault_secret_chhoto_url" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${data.terraform_remote_state.vault_init.outputs.vault_init_file})
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login -no-store \"\$VAULT_TOKEN\" || exit 1
         vault kv put kubernetes-homelab/chhoto-url/chhoto-url-secret \\
           password='${random_password.chhoto_url_password.result}' || exit 1
       "
@@ -793,4 +797,3 @@ resource "null_resource" "vault_secret_chhoto_url" {
 
   depends_on = [data.terraform_remote_state.vault_init]
 }
-
