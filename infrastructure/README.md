@@ -37,8 +37,7 @@ Two GMKtec G3 mini-PCs, each with:
 
 ## Proxmox Setup
 
-Proxmox VE is the bare-metal Type-1 hypervisor running on each physical machine. It hosts VMs
-running Talos Linux, which form the Kubernetes cluster.
+Proxmox VE is the bare-metal Type-1 hypervisor running on each physical machine. It hosts VMs running Talos Linux, which form the Kubernetes cluster.
 
 ### Initial Installation
 
@@ -54,8 +53,8 @@ Password: saved in password manager
 
 ### Talos Image
 
-Terraform automatically registers the customisation schematic with the [Talos image factory](https://factory.talos.dev)
-and downloads the resulting ISO into each Proxmox node's local storage. The following extensions are baked in:
+Terraform automatically registers the customisation schematic with the [Talos image factory](https://factory.talos.dev) and downloads the resulting ISO into each Proxmox node's local storage.
+The following extensions are baked in:
 
 | Extension                       | Purpose                                                      |
 |---------------------------------|--------------------------------------------------------------|
@@ -72,7 +71,7 @@ VMs are created and configured entirely by Terraform. For reference, the setting
 - **Disk**: VirtIO (`virtio0`), raw format, discard + SSD emulation enabled
 - **Network**: LAN bridge (`vmbr0`), VirtIO model
 - **QEMU guest agent**: enabled (VirtIO channel)
-- **Boot order**: disk first, CDROM second (boots from ISO when disk is blank; boots from disk thereafter)
+- **Boot order**: disk first, CDROM second (boots from ISO when disk is blank and from disk thereafter)
 
 ## Prerequisites
 
@@ -82,17 +81,17 @@ VMs are created and configured entirely by Terraform. For reference, the setting
 
 ## Configure
 
-Copy the example secrets file and fill in your values:
+Clone the private `h8s-secrets` repo alongside this repo.
+Edit `secrets.yaml` in the sibling secrets repo's Nix shell, following its README.
+From the H8s repo root, all infrastructure tools and secrets can be accessed with:
 
 ```bash
-cp shared/secrets.auto.tfvars.example shared/secrets.auto.tfvars
+nix develop .#infra --command "$SHELL"
 ```
-
-`shared/secrets.auto.tfvars` is gitignored. See [Saving your vars](#saving-your-vars).
 
 ### Example Configuration
 
-The `secrets.auto.tfvars` file contains all sensitive configuration including:
+The encrypted `TF_VAR_*` entries supply sensitive configuration including:
 - Proxmox endpoint and credentials
 - Talos cluster virtual IP
 - Node definitions (VM IDs, IPs, MAC addresses)
@@ -104,7 +103,7 @@ The `secrets.auto.tfvars` file contains all sensitive configuration including:
 - Generate MAC addresses using: `printf "BC:24:11:%02X:%02X:%02X\n" $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256))`
 - Configure static DHCP leases in your router for each node's MAC address
 
-**Node names are the Kubernetes hostnames.** Keep them stable across rebuilds — renaming or swapping node entries will cause Longhorn to detect a disk UUID mismatch and refuse to start. Add new nodes by adding new keys; never reorder or rename existing ones.
+**Node names are the Kubernetes hostnames.** Keep them stable across rebuilds, renaming or swapping node entries will cause Longhorn to detect a disk UUID mismatch and refuse to start. Add new nodes by adding new keys. Never reorder or rename existing ones.
 
 ### Generating MAC Addresses
 
@@ -114,53 +113,53 @@ To generate a random MAC address with the Proxmox OUI prefix:
 printf "BC:24:11:%02X:%02X:%02X\n" $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256))
 ```
 
-Copy the output into your `terraform.tfvars` file and configure a static DHCP lease in your router for that MAC address.
+Set the MAC address in the encrypted `TF_VAR_nodes` value and configure a static DHCP lease in your router.
 
-## Saving Your State
+## Saving State
 
-The bootstrap process generates critical files that must be backed up securely. Losing these files will require a complete cluster rebuild:
+Encrypted OpenTofu state holds the generated cluster credentials and Vault recovery material.
+Preserve access to the B2 bucket and the state encryption passphrase in the private secrets repo.
 
-### 1. OpenTofu State Files (`states/` directory)
+### 1. OpenTofu State in B2
 
-All OpenTofu state is stored in the `states/` directory, with separate files for each stage:
-- `00-talos-factory.tfstate` - Talos image factory registration
-- `01-proxmox-iso-upload` - ISO upload state
-- `02-proxmox-provision` - VM provisioning state
-- `03-talos-configure` - Talos configuration and cluster PKI (CA certs, keys, join tokens)
-- `04-cilium` - Cilium CNI installation state
-- `05-argocd` - ArgoCD installation state
-- `06-vault-init` - Vault initialisation state
-- `07-vault-resources-provision` - Vault secrets provisioning state
+Bootstrap stages `00`–`07` are configured to use bucket `h8s-terraform-backend` at `https://s3.eu-central-003.backblazeb2.com`, each under `h8s/bootstrap/<stage>/terraform.tfstate`.
+
+OpenTofu encrypts state and saved plans with AES-GCM before storage. State and plan encryption is enforced.
+B2 also has server-side encryption and keeps versions.
+
+**IMPORTANT**: Native locking is disabled because B2 does not support the conditional writes it requires.
+Run only one infrastructure operation at a time across your laptop and pipelines.
+When Argo workflows are added, give them a shared mutex to serialise runs.
+
+The `platform-config` backend uses the same encrypted B2 bucket at `h8s/platform-config/terraform.tfstate`.
+
+Inside the infrastructure shell, run OpenTofu directly:
+
+```bash
+tofu -chdir="$INFRA_ROOT/02-proxmox-provision" plan
+```
 
 **The `03-talos-configure` state file is particularly critical** as it contains the cluster's PKI (Certificate Authority certificates, keys, and join tokens).
 
-### 2. Credential Files (`03-talos-configure/secrets/` directory)
+### 2. Recovery Credentials
 
-After bootstrap completes, credentials are written to:
-- `03-talos-configure/secrets/talosconfig.yaml` - Talos configuration file
-- `03-talos-configure/secrets/kubeconfig.yaml` - Kubernetes configuration file
-
-### 3. Vault Initialisation File
-
-During the Vault initialisation stage, a `vault-init.json` file is generated containing:
-- Vault unseal keys
-- Vault root token
-
-### Backup Strategy
-
-Store all files from `states/`, `03-talos-configure/secrets/`, and `vault-init.json` in your password manager or encrypted storage. These files are all gitignored and must be preserved for cluster recovery.
-
+Stage `03` exposes sensitive `kubeconfig` and `talosconfig` outputs.
+Stage `06` exposes the complete original Vault initialisation JSON as the sensitive `vault_credentials` output, including its unseal keys and root token.
+Keep an independent copy of the Vault recovery JSON.
 
 ## Bootstrap
 
-> **Important:** All `task` commands in this guide must be run within the Nix development shell using `nix develop -c`. This ensures all required tools and environment variables (including `INFRA_ROOT`) are available.
+> **Important:** Run bootstrap commands inside the shell opened by `nix develop .#infra --command "$SHELL"`.
+> This provides the tools, secrets and environment variables required by the commands below.
 
-> **Note:** If you have a saved backup of your cluster state, restore the files from your backup into the `states/` directory before running the commands below. This preserves your cluster PKI (CA certs, keys, join tokens) and allows you to restore without a full rebuild.
+> **Note:** Connect to the existing B2 state before running bootstrap.
+> Restoring the existing state preserves cluster PKI and resource identities.
+> Starting with empty state can attempt to recreate existing infrastructure.
 
 Run the complete bootstrap sequence:
 
 ```bash
-nix develop -c task cluster:bootstrap
+task --dir "$INFRA_ROOT" cluster:bootstrap
 ```
 
 This command executes all 7 stages in sequence:
@@ -170,23 +169,26 @@ This command executes all 7 stages in sequence:
 4. Configures Talos nodes, bootstraps etcd, and retrieves credentials
 5. Installs Cilium CNI
 6. Installs ArgoCD for GitOps
-7. Initialises Vault and provisions secrets
+7. Configures Vault and provisions secrets, after manual initialisation and unsealing if required
 
 Apply takes several minutes. The slow steps are the ISO download to Proxmox (~500 MB) and waiting for Talos to install to disk and reboot before the ISO detachment and config apply can proceed.
+
+On a fresh installation, stage `06` stops until Vault has been initialised and unsealed.
+Follow [Fresh Vault Initialisation](#fresh-vault-initialisation), then rerun bootstrap.
 
 ### Complete the Setup
 
 Once `task cluster:bootstrap` completes successfully:
 
 1. **Configure kubectl** - Follow the instructions in [Retrieve Credentials](#retrieve-credentials) to configure kubectl for normal use
-2. **Wait for ArgoCD sync** - Allow ArgoCD time to deploy the applications, including the Postgres database required for the platform configuration backend
+2. **Wait for ArgoCD sync** - Allow ArgoCD time to deploy Harbor and its credentials
 3. **Configure platform resources** - Run the platform configuration to set up Harbor:
 
    ```bash
-   nix develop -c task platform:configure
+   task --dir "$INFRA_ROOT" platform:configure
    ```
 
-> **Note:** The `platform:configure` task requires ArgoCD to have deployed the Postgres database first. This happens automatically via the GitOps applications deployed during bootstrap.
+> **Note:** The `platform:configure` task requires Harbor and its credentials to be available.
 
 ### Tailscale
 
@@ -197,7 +199,7 @@ If enabling the Talos Tailscale extension config, there are two extra manual ste
 1. Configure one Talos node to advertise the LAN subnet, for example `tailscale_routes = ["192.168.100.0/24"]`.
 2. Apply the Talos config changes by re-running the `03-talos-configure` Terraform apply, then restart the extension.
 3. In the Tailscale admin console, approve the advertised subnet route.
-4. In Tailscale DNS settings, add the in-cluster CoreDNS listener (`192.168.1.120`) as a **global nameserver** and enable **Override DNS servers** (this replaces the old split-DNS approach. It makes CoreDNS resolve every tailnet query, including ad-blocking.
+4. In Tailscale DNS settings, add the in-cluster CoreDNS listener (`192.168.1.120`) as a **global nameserver** and enable **Override DNS servers**. This replaces the old split-DNS approach. It makes CoreDNS resolve every tailnet query, including ad-blocking.
 
 > **Note:** If clients use the exit nodes, also enable **Use with exit node** on the nameserver (DNS page → ⋯ → Edit nameserver), otherwise exit-node clients fall back to the exit node's own resolvers and internal hostnames fail to resolve.
 
@@ -205,7 +207,7 @@ If enabling the Talos Tailscale extension config, there are two extra manual ste
 
 Control plane nodes can advertise themselves as Tailscale exit nodes, letting tailnet clients route all their internet traffic through the cluster's LAN.
 
-1. Set `tailscale_exit_node = true` on the control plane nodes in `secrets.auto.tfvars`.
+1. Set `tailscale_exit_node = true` on the control plane nodes in the encrypted `TF_VAR_nodes` value.
 2. Apply the Talos config changes by re-running the `03-talos-configure` Terraform apply.
 3. In the Tailscale admin console, approve "Use as exit node" on each advertised node.
 4. Keep the default allow-all grant in the tailnet policy file (`src: ["*"]`, `dst: ["*"]`) - this also grants exit node use to every tailnet device. To track which clients may use exit nodes, tag them and add the grant below (note: with allow-all present the tag is informational, not enforced):
@@ -221,18 +223,18 @@ Control plane nodes can advertise themselves as Tailscale exit nodes, letting ta
    Tag the devices that should use exit nodes with `tag:exitnode-client`.
    To strictly enforce tagged-only exit node use, replace `dst: ["*"]` with explicit ranges (`192.168.1.0/24`, `10.244.0.0/16`, `100.64.0.0/10`) - grants have no "except internet" form, so allow-all and restriction are mutually exclusive.
 
-Exit node traffic exits from the cluster's public IP. Tailnet clients have no access to the cluter LAN by default (unless they enable "Allow Local Network Access" client-side), and Talos enables IPv4 forwarding out of the box, so no sysctl changes are required.
+Exit node traffic exits from the cluster's public IP. Tailnet clients have no access to the cluster LAN by default (unless they enable "Allow Local Network Access" client-side), and Talos enables IPv4 forwarding out of the box, so no sysctl changes are required.
 
 #### Applying Tailscale Configuration Changes
 
 Tailscale settings are split across two files:
 
-- `shared/secrets.auto.tfvars` - per-node `tailscale_authkey`, `tailscale_routes`, `tailscale_exit_node`
-- `shared/variables.tf` - `tailscale_accept_dns` (cluster-wide, default `false`)
+- The encrypted `TF_VAR_nodes` value in `h8s-secrets` - per-node `tailscale_authkey`, `tailscale_routes`, `tailscale_exit_node`.
+- `shared/variables.tf` - `tailscale_accept_dns` (cluster-wide, default `false`).
 
 When you change any of these values:
 
-1. Re-apply the Talos config: `nix develop -c task talos:configure:install`. Talos automatically restarts the `ext-tailscale` extension service when the `ExtensionServiceConfig` changes, and containerboot re-runs `tailscale up` on every start (this requires the auth key to be **reusable** — a single-use key will fail after the first login).
+1. Re-apply the Talos config: `task talos:configure:install`. Talos automatically restarts the `ext-tailscale` extension service when the `ExtensionServiceConfig` changes, and containerboot re-runs `tailscale up` on every start (this requires the auth key to be **reusable** — a single-use key will fail after the first login).
 2. Verify the change was applied:
    - `talosctl ... get extensionserviceconfig tailscale -n runtime -o yaml` - shows the env vars on the node
    - `talosctl ... logs ext-tailscale` - shows the `tailscale up` invocation with the new flags
@@ -240,40 +242,32 @@ When you change any of these values:
 
 ## Retrieve Credentials
 
-After `task cluster:bootstrap` completes, credentials are written to the `03-talos-configure/secrets/` directory:
-
-- **Talos config**: `03-talos-configure/secrets/talosconfig.yaml`
-- **Kubeconfig**: `03-talos-configure/secrets/kubeconfig.yaml`
-
-```bash
-# Use talosconfig from the secrets directory
-talosctl --talosconfig 03-talos-configure/secrets/talosconfig.yaml version
-
-# Use kubeconfig from the secrets directory
-kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml get nodes
-```
-
-To use these credentials as your default configurations:
+Keep using your existing user-managed configurations for normal `kubectl` and `talosctl` commands.
+For optional temporary access or recovery, fetch a client configuration from state into a subshell variable and pass it through a process substitution.
+Each configuration disappears when its command finishes, and standard input remains available for interactive commands.
 
 ```bash
-# Copy kubeconfig to default location (merges with existing contexts)
-cp 03-talos-configure/secrets/kubeconfig.yaml ~/.kube/config
+(
+  talosconfig="$(tofu -chdir="$INFRA_ROOT/03-talos-configure" output -raw talosconfig)" || exit 1
+  talosctl --talosconfig <(printf '%s' "$talosconfig") version
+)
 
-# Or set environment variables
-export KUBECONFIG=$(pwd)/03-talos-configure/secrets/kubeconfig.yaml
-export TALOSCONFIG=$(pwd)/03-talos-configure/secrets/talosconfig.yaml
+(
+  kubeconfig="$(tofu -chdir="$INFRA_ROOT/03-talos-configure" output -raw kubeconfig)" || exit 1
+  kubectl --kubeconfig <(printf '%s' "$kubeconfig") get nodes
+)
 ```
-
-**Note:** The kubeconfig merge preserves any existing contexts/clusters you have. The new cluster context will be added alongside them.
 
 ### Troubleshooting
 
 #### Bootstrap fails at Cilium installation
 
-If the bootstrap fails during the Cilium stage with errors about the Kubernetes API not being ready, this is normal. Talos restarts the node after etcd bootstrap, which can cause transient API unavailability. Simply run the bootstrap again:
+If the bootstrap fails during the Cilium stage with errors about the Kubernetes API not being ready, this is normal.
+Talos restarts the node after etcd bootstrap, which can cause transient API unavailability.
+Simply run the bootstrap again:
 
 ```bash
-nix develop -c task cluster:bootstrap
+task --dir "$INFRA_ROOT" cluster:bootstrap
 ```
 
 The process is idempotent and will skip already-completed stages.
@@ -297,15 +291,15 @@ The `bpg/proxmox` provider requires SSH access to upload the ISO. Ensure:
 If nodes fail to join after configuration:
 1. Check node network connectivity: `ping <node-ip>`
 2. Verify static DHCP leases are correctly configured in your router
-3. Check Talos logs: `talosctl --talosconfig 03-talos-configure/secrets/talosconfig.yaml logs --nodes <node-ip>`
+3. Use the state-backed Talos command above with `logs --nodes <node-ip> kubelet` in place of `version`
 4. Ensure MAC addresses in your configuration match the router's static leases
 
 #### Vault fails to initialise
 
 If Vault initialisation fails:
-1. Check that the Kubernetes API is accessible: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml get nodes`
-2. Verify Cilium is running: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml get pods -n kube-system`
-3. Check Vault pod logs: `kubectl --kubeconfig 03-talos-configure/secrets/kubeconfig.yaml logs -n vault vault-0`
+1. Check that the Kubernetes API is accessible using the state-backed `kubectl get nodes` command above
+2. Repeat that command with `get pods -n kube-system` to verify Cilium
+3. Repeat it with `logs -n vault vault-0` to inspect Vault
 
 #### Cilium GatewayClass fails on initial cluster setup
 
@@ -313,15 +307,21 @@ The Cilium GatewayClass resource often fails to be created properly during the i
 
 1. Delete the existing GatewayClass:
    ```bash
-   kubectl delete gatewayclass cilium
+   (
+     kubeconfig="$(tofu -chdir="$INFRA_ROOT/03-talos-configure" output -raw kubeconfig)" || exit 1
+     kubectl --kubeconfig <(printf '%s' "$kubeconfig") delete gatewayclass cilium
+   )
    ```
 
 2. Let ArgoCD recreate it by syncing the application
 
 3. For added reliability, restart the Cilium pods:
    ```bash
-   kubectl rollout restart deployment -n kube-system cilium-operator
-   kubectl rollout restart daemonset -n kube-system cilium
+   (
+     kubeconfig="$(tofu -chdir="$INFRA_ROOT/03-talos-configure" output -raw kubeconfig)" || exit 1
+     kubectl --kubeconfig <(printf '%s' "$kubeconfig") rollout restart deployment -n kube-system cilium-operator
+     kubectl --kubeconfig <(printf '%s' "$kubeconfig") rollout restart daemonset -n kube-system cilium
+   )
    ```
 
 ### Set External Secrets
@@ -336,7 +336,8 @@ These environment variables are required. Terraform will fail if they are not se
 
 ArgoCD is accessible at `https://argocd.okwilkins.dev`. Login is via Authelia SSO only — the local `admin` account is disabled.
 
-If OIDC is unavailable (e.g. Authelia is down), use core mode to bypass the API server entirely:
+If OIDC is unavailable (e.g. Authelia is down), use [core mode](https://argo-cd.readthedocs.io/en/stable/operator-manual/core/#using) to bypass the ArgoCD API server.
+The first command sets your current kubeconfig context's default namespace to `argocd`.
 
 ```bash
 argocd login --core
@@ -346,13 +347,19 @@ argocd app sync <app-name>
 
 ### Ongoing Operations
 
-**Vault Unsealing**: After pod rescheduling, Vault will need to be unsealed using the keys from `vault-init.json`:
+**Vault Unsealing**: Run this manually when Vault is sealed, using the required number of distinct keys from encrypted state.
+Normal bootstrap and scheduled operations do not initialise or unseal Vault.
 
 ```bash
-# Extract unseal keys from vault-init.json and unseal
-for key in $(cat vault-init.json | jq -r '.unseal_keys_b64[]'); do
-  kubectl exec -ti vault-0 -n vault -- vault operator unseal "$key"
-done
+(
+  kubeconfig="$(tofu -chdir="$INFRA_ROOT/03-talos-configure" output -raw kubeconfig)" || exit 1
+  credentials="$(tofu -chdir="$INFRA_ROOT/06-vault-init" output -json vault_credentials)" || exit 1
+
+  for index in $(jq -er 'range(.unseal_threshold)' <<<"$credentials"); do
+    key="$(jq -er --argjson index "$index" '.unseal_keys_b64[$index]' <<<"$credentials")" || exit 1
+    kubectl --kubeconfig <(printf '%s' "$kubeconfig") exec -n vault vault-0 -- vault operator unseal "$key" >/dev/null || exit 1
+  done
+)
 ```
 
 **Secret Rotation**: Update Vault secrets as needed. ESO will automatically sync changes to Kubernetes.
@@ -362,7 +369,7 @@ done
 Change `talos_version` in `shared/common.auto.tfvars` and run the pipeline:
 
 ```bash
-task cluster:bootstrap
+task --dir "$INFRA_ROOT" cluster:bootstrap
 ```
 
 ## Extracting the Vault CA Certificate
@@ -370,8 +377,12 @@ task cluster:bootstrap
 Vault acts as the cluster's internal Certificate Authority. To trust certificates issued by Vault in your browser, you need to extract the CA certificate:
 
 ```bash
-VAULT_TOKEN=$(jq -r '.root_token' 06-vault-init/secrets/vault-init.json)
-kubectl exec -n vault vault-0 -- /bin/sh -c \
-  "VAULT_TOKEN='$VAULT_TOKEN' vault read -field=certificate pki/cert/ca" \
-  > vault-ca-cert.pem
+(
+  credentials="$(tofu -chdir="$INFRA_ROOT/06-vault-init" output -json vault_credentials)" || exit 1
+  token="$(jq -er '.root_token' <<<"$credentials")" || exit 1
+  kubectl exec -n vault vault-0 -- \
+    env VAULT_TOKEN="$token" vault read -field=certificate pki/cert/ca > vault-ca-cert.pem
+)
 ```
+
+`vault-ca-cert.pem` contains the public CA certificate and can be installed in your trust store.
