@@ -143,16 +143,3 @@ spec:
         certificateRefs:
           - name: link-okwilkins-dev-tls
             namespace: chhoto-url
-    - protocol: TLS
-      name: home-lan-pg-tf-backend
-      hostname: pg-tf-backend.okwilkins.dev
-      port: 5432
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Passthrough
-        #   mode: Terminate
-        #   certificateRefs:
-        #     - name: pg-tf-backend-okwilkins-dev-tls
-        #       namespace: terraform
