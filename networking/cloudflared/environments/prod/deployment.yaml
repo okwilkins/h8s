@@ -36,7 +36,7 @@ spec:
                 secretKeyRef:
                   name: cloudflared-token
                   key: token
-          image: cloudflare/cloudflared:2026.10.4
+          image: cloudflare/cloudflared:2026.10.5
           name: cloudflared
           livenessProbe:
             httpGet:
