@@ -26,6 +26,11 @@ nix shell
 task
 ```
 
+Always run infrastructure tooling inside this repository's Nix environment (`nix develop` also sets `INFRA_ROOT`).
+Bootstrap secrets are SOPS-encrypted in the separate private `h8s-secrets` repo.
+Never copy their decrypted values into this public repo.
+That repo has its own Nix shell for editing secrets.
+
 ### Kubernetes Operations
 
 ```bash
