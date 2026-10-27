@@ -6,7 +6,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 load_tf_kube_env
-create_cert_dir
 
 echo "Waiting for Vault pod to be created..."
 kubectl_wrapper wait \
@@ -28,31 +27,20 @@ STATUS_JSON="$(
     vault status -format=json 2>/dev/null || true
 )"
 
-if jq -e '.initialized == true' >/dev/null 2>&1 <<<"$STATUS_JSON"; then
-  echo "Vault is already initialised; skipping bootstrap."
-  exit 0
+if ! jq -e 'type == "object" and (.initialized | type == "boolean") and (.sealed | type == "boolean")' >/dev/null 2>&1 <<<"$STATUS_JSON"; then
+  echo "ERROR: Could not read a valid Vault status." >&2
+  exit 1
 fi
 
-mkdir -p "$(dirname "$OUT_FILE")"
-umask 077
+if ! jq -e '.initialized == true' >/dev/null <<<"$STATUS_JSON"; then
+  echo "ERROR: Initialise Vault manually and preserve its original credentials before applying this stage." >&2
+  exit 1
+fi
 
-echo "Initialising Vault..."
-INIT_JSON="$(
-  kubectl_wrapper exec "$POD_NAME" -n "$NAMESPACE" -- \
-    vault operator init -format=json
-)"
+if ! jq -e '.sealed == false' >/dev/null <<<"$STATUS_JSON"; then
+  echo "ERROR: Unseal Vault manually with its existing unseal keys before applying this stage." >&2
+  exit 1
+fi
 
-printf '%s\n' "$INIT_JSON" > "$OUT_FILE"
-chmod 600 "$OUT_FILE"
-
-THRESHOLD="$(jq -r '.unseal_threshold' <<<"$INIT_JSON")"
-
-echo "Unsealing Vault..."
-jq -r '.unseal_keys_b64[]' <<<"$INIT_JSON" | head -n "$THRESHOLD" | while IFS= read -r KEY; do
-  kubectl_wrapper exec "$POD_NAME" -n "$NAMESPACE" -- \
-    vault operator unseal "$KEY" >/dev/null
-done
-
-echo "Vault initialised and unsealed."
-echo "Init JSON written to $OUT_FILE"
+echo "Vault is initialised and unsealed."
 

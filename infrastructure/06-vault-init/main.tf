@@ -1,17 +1,41 @@
 # ============================================================
-# Vault Bootstrap
+# Vault Credentials
 # ============================================================
-# Initialises and unseals Vault during cluster bootstrap.
-# Uses the external vault-bootstrap.sh script for maintainability.
-#
-# The script handles:
-# - Waiting for the Vault pod to be ready
-# - Initialising Vault (if not already initialised)
-# - Unsealing Vault with the threshold of unseal keys
-# - Saving credentials to vault-init.json
-#
-# IMPORTANT: vault-init.json contains unseal keys and root token.
-# Back it up securely alongside terraform.tfstate!
+# Retains the original Vault initialisation JSON in encrypted OpenTofu state.
+# Later runs use the stored credentials without requiring this input again.
+
+variable "vault_credentials" {
+  description = "Vault initialisation JSON for first-time setup. Leave unset to use the credentials already retained in encrypted state."
+  type        = any
+  default     = null
+  sensitive   = true
+}
+
+resource "terraform_data" "vault_credentials" {
+  input = var.vault_credentials
+
+  lifecycle {
+    ignore_changes  = [input]
+    prevent_destroy = true
+
+    postcondition {
+      condition = try(
+        length(trimspace(self.input.root_token)) > 0 &&
+        alltrue([for key in tolist(self.input.unseal_keys_b64) : length(trimspace(key)) > 0]) &&
+        self.input.unseal_threshold >= 1 &&
+        self.input.unseal_threshold == floor(self.input.unseal_threshold) &&
+        self.input.unseal_threshold <= length(self.input.unseal_keys_b64),
+        false
+      )
+      error_message = "Vault credentials must contain a root token, unseal keys and a valid unseal threshold."
+    }
+  }
+}
+
+moved {
+  from = terraform_data.vault_recovery
+  to   = terraform_data.vault_credentials
+}
 
 # ============================================================
 # Wait for Kubernetes API
@@ -31,28 +55,21 @@ resource "null_resource" "wait_for_kubernetes_api" {
 }
 
 # ============================================================
-# Vault Initialisation and Unseal
+# Vault Readiness
 # ============================================================
-# Runs the vault-bootstrap.sh script which handles all Vault
-# initialisation logic. The script saves credentials locally
-# rather than storing them in Kubernetes secrets.
+# Refuses to provision an uninitialised or sealed Vault.
+# Initialisation and unsealing are deliberate manual actions.
 
 resource "null_resource" "vault_bootstrap" {
-  triggers = {
-    # Always run on apply - the script handles idempotency
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     command = "bash ${var.infra_root}/scripts/vault-bootstrap.sh"
 
     environment = {
-      TF_DIR   = "${var.infra_root}/03-talos-configure"
-      OUT_FILE = "${var.infra_root}/06-vault-init/secrets/vault-init.json"
+      TF_DIR = "${var.infra_root}/03-talos-configure"
     }
   }
 
-  depends_on = [null_resource.wait_for_kubernetes_api]
+  depends_on = [null_resource.wait_for_kubernetes_api, terraform_data.vault_credentials]
 }
 
 # ============================================================
@@ -62,17 +79,17 @@ resource "null_resource" "vault_bootstrap" {
 
 resource "null_resource" "vault_k8s_auth" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         vault auth list | grep -q kubernetes || vault auth enable kubernetes || exit 1
         vault write auth/kubernetes/config \\
           kubernetes_host=\"https://\$KUBERNETES_PORT_443_TCP_ADDR:443\" \\
@@ -92,17 +109,17 @@ resource "null_resource" "vault_k8s_auth" {
 
 resource "null_resource" "vault_enable_kv" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         vault secrets list | grep -q kubernetes-homelab || vault secrets enable -path=kubernetes-homelab kv-v2 || exit 1
         echo 'KV v2 secrets engine enabled'
       "
@@ -119,17 +136,17 @@ resource "null_resource" "vault_enable_kv" {
 
 resource "null_resource" "vault_enable_pki" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         vault secrets list | grep -q pki || vault secrets enable pki || exit 1
         vault secrets tune -max-lease-ttl=8760h pki || exit 1
         echo 'PKI secrets engine enabled'
@@ -146,17 +163,17 @@ resource "null_resource" "vault_enable_pki" {
 
 resource "null_resource" "vault_policy_external_secrets" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         
         vault policy write external-secrets-reader - <<'POLICY'
 path \"kubernetes-homelab/data/*\" {
@@ -180,17 +197,17 @@ POLICY
 
 resource "null_resource" "vault_policy_pki" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         
         vault policy write pki - <<'POLICY'
 path \"pki*\"                   { capabilities = [\"read\", \"list\"] }
@@ -215,17 +232,17 @@ POLICY
 
 resource "null_resource" "vault_role_external_secrets" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         
         vault write auth/kubernetes/role/external-secrets-vault-auth \\
           bound_service_account_names=external-secrets-vault-auth \\
@@ -248,17 +265,17 @@ resource "null_resource" "vault_role_external_secrets" {
 
 resource "null_resource" "vault_role_vault_issuer" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         
         vault write auth/kubernetes/role/vault-issuer \\
           bound_service_account_names=vault-issuer \\
@@ -285,17 +302,17 @@ resource "null_resource" "vault_role_vault_issuer" {
 
 resource "null_resource" "vault_pki_root_ca" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         
         vault read pki/ca/pem > /dev/null 2>&1 && echo 'Root CA already exists' && exit 0
         
@@ -318,17 +335,17 @@ resource "null_resource" "vault_pki_root_ca" {
 
 resource "null_resource" "vault_pki_config_urls" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         
         vault write pki/config/urls \\
           issuing_certificates=\"http://127.0.0.1:8200/v1/pki/ca\" \\
@@ -349,17 +366,17 @@ resource "null_resource" "vault_pki_config_urls" {
 
 resource "null_resource" "vault_pki_role" {
   provisioner "local-exec" {
-    command = <<-EOT
-      source ${var.infra_root}/scripts/common.sh
-      load_tf_kube_env
-      create_cert_dir
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
 
-      VAULT_TOKEN=$(jq -r '.root_token' ${var.infra_root}/06-vault-init/secrets/vault-init.json)
-      export VAULT_TOKEN
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
 
       kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
         export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault login \"\$VAULT_TOKEN\" || exit 1
         
         vault write pki/roles/okwilkins-dot-dev \\
           allowed_domains=okwilkins.dev \\

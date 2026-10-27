@@ -67,10 +67,10 @@ resource "null_resource" "app_of_apps" {
   depends_on = [helm_release.argocd]
 
   provisioner "local-exec" {
-    command = <<-EOT
+    interpreter = ["bash", "-c"]
+    command     = <<-EOT
       source ${self.triggers.infra_root}/scripts/common.sh  # Change to self.triggers
       load_tf_kube_env
-      create_cert_dir
       kubectl_wrapper apply -f - \
         <<'MANIFEST'
       ${self.triggers.manifest}  # Change to self.triggers
@@ -78,11 +78,11 @@ resource "null_resource" "app_of_apps" {
     EOT
   }
   provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
+    when        = destroy
+    interpreter = ["bash", "-c"]
+    command     = <<-EOT
       source ${self.triggers.infra_root}/scripts/common.sh  # Change to self.triggers
       load_tf_kube_env
-      create_cert_dir
       kubectl_wrapper delete application --ignore-not-found -f - \
         <<'MANIFEST'
       ${self.triggers.manifest}  # Change to self.triggers

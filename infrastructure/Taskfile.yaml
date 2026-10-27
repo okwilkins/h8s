@@ -91,9 +91,9 @@ tasks:
     cmds:
       - tofu destroy -auto-approve
 
-  # Vault Init - Initialise Vault outputs for helper scripts
+  # Vault Init - Configure manually initialised and unsealed Vault
   vault:init:
-    desc: "Initialise Vault (create outputs and run bootstrap)"
+    desc: "Configure Vault using credentials from encrypted state"
     dir: '$INFRA_ROOT/06-vault-init'
     cmds:
       - tofu init -lockfile=readonly
