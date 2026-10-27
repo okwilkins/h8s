@@ -31,7 +31,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
     - [Excalidraw](https://draw.okwilkins.dev)
     - [Grafana](https://grafana.okwilkins.dev)
     - [Harbor](https://harbor.okwilkins.dev), you can pull from the `main` project here.
-- Postgres databases for internal services like Terraform and Harbor.
+- Postgres databases for Authelia and Harbor.
 - Full network encryption, observability, IPAM, kube-proxy replacement and L2 annoucements with Cilium.
 
 ## Repo Structure
