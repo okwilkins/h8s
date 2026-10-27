@@ -12,29 +12,20 @@ This manages Harbor container registry resources including:
 
 ## Getting Started
 
-Postgres is used as the [Terraform backend](https://developer.hashicorp.com/terraform/language/backend) for storing state. This database is [defined here](../../storage/cloudnative-pg/environments/prod/databases/terraform-backend/).
+From the repository root, open your infrastructure shell:
 
-### Connecting to the Backend
-
-Port-forward the database:
 ```bash
-kubectl -n terraform port-forward svc/cnpg-terraform-backend-prod-rw 5432:5432
+nix develop .#infra --command "$SHELL"
 ```
 
-Export connection details:
-```bash
-export PGUSER=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o json | jq -r '.data.username' | base64 -d)
-export PGPASSWORD=$(kubectl get secret cnpg-terraform-backend-prod-app-user-credentials -n terraform -o json | jq -r '.data.password' | base64 -d)
-export PGHOST=localhost
-export PGPORT=5432
-export PGDATABASE=terraform_backend
-```
+State is stored in B2 at `h8s-terraform-backend/h8s/platform-config/terraform.tfstate`.
+It uses the same enforced state and plan encryption as the bootstrap stages.
 
-### Initialising Terraform
+**IMPORTANT**: Run only one infrastructure operation at a time because B2 state locking is disabled.
+This was done as Backblaze B2 does not have locking built in.
 
 ```bash
-cd platform-config
-terraform init
+task --dir infrastructure platform:configure
 ```
 
 ### Using Harbor Pull-Through Caches
