@@ -5,7 +5,7 @@ metadata:
   labels:
     dashboards: grafana
 spec:
-  version: 13.2.4
+  version: 13.3.0
   persistentVolumeClaim:
     spec:
       storageClassName: longhorn
