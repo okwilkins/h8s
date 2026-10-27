@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: renovate-mend-renovate-ce-cache
+  namespace: renovate
+  labels:
+    app.kubernetes.io/name: renovate
+    app.kubernetes.io/part-of: renovate
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 5Gi

@@ -46,10 +46,7 @@ renovate:
 # The SQLite database and Renovate cache will be stored here
 cachePersistence:
   enabled: true
-  storageClass: "longhorn"
-  accessModes:
-    - ReadWriteOnce
-  size: 5Gi
+  existingClaim: renovate-mend-renovate-ce-cache
 
 resources:
   requests:
@@ -62,6 +59,7 @@ podSecurityContext:
   runAsNonRoot: true
   runAsUser: 12021
   fsGroup: 12021
+  fsGroupChangePolicy: OnRootMismatch
   seccompProfile:
     type: RuntimeDefault
 

@@ -20,7 +20,7 @@ spec:
       ref: h8s
     - repoURL: https://github.com/okwilkins/h8s
       targetRevision: HEAD
-      path: ci-cd/renovate/environments/prod/secrets
+      path: ci-cd/renovate/environments/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: renovate
