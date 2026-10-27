@@ -1,4 +1,8 @@
-# https://artifacthub.io/packages/helm/longhorn/longhorn/1.8.1?modal=values
+# https://longhorn.io/docs/1.13.0/references/helm-values/
+
+defaultBackupStore:
+  backupTarget: s3://h8s-longhorn-backups@eu-central-003/
+  backupTargetCredentialSecret: longhorn-b2
 
 persistence:
   reclaimPolicy: Retain
