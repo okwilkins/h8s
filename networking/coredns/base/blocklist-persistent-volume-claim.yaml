@@ -3,7 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: coredns-blocklist
   namespace: coredns-lan
+  labels:
+    app.kubernetes.io/name: coredns
+    app.kubernetes.io/part-of: coredns-lan
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
 spec:
+  storageClassName: longhorn-encrypted
   accessModes:
     - ReadWriteMany
   resources:
