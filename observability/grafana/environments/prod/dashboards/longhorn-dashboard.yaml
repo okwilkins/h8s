@@ -1,0 +1,14 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: longhorn-dashboard
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: longhorn
+    app.kubernetes.io/part-of: grafana
+spec:
+  url: https://grafana.com/api/dashboards/16888/revisions/14/download
+  folderRef: storage
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prom-default

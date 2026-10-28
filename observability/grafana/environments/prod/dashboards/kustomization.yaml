@@ -10,6 +10,7 @@ resources:
   - ./http-traffic-dashboard.yaml
   - ./cloudnative-pg-dashboard.yaml
   - ./harbor-dashboard.yaml
+  - ./longhorn-dashboard.yaml
   - ./external-secrets-operator-dashboard.yaml
   - ./vault-dashboard.yaml
   - ./cert-manager-dashboard.yaml
