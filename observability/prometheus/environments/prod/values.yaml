@@ -28,13 +28,19 @@ prometheus:
               storage: 20Gi
 alertmanager:
   alertmanagerSpec:
+    securityContext:
+      fsGroupChangePolicy: OnRootMismatch
     persistentVolumeClaimRetentionPolicy:
       whenDeleted: Retain
       whenScaled: Retain
     storage:
       volumeClaimTemplate:
+        metadata:
+          labels:
+            recurring-job.longhorn.io/source: enabled
+            recurring-job-group.longhorn.io/encrypted-backup: enabled
         spec:
-          storageClassName: longhorn
+          storageClassName: longhorn-encrypted
           accessModes:
             - ReadWriteOnce
           resources:
