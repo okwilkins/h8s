@@ -15,3 +15,15 @@ metrics:
   enabled: true
   serviceMonitor:
     enabled: true
+
+networkPolicies:
+  # TCP/9500 also exposes the Longhorn API.
+  # Allow only the Prometheus scraper.
+  metricsScrapeSources:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: prometheus
+          prometheus: prometheus-stack-kube-prom-prometheus
