@@ -7,8 +7,13 @@ spec:
   description: Postgres cluster for Authelia
   imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie@sha256:64abc98a4387361afd6821a3a99f975763bbd87bbdde9449e75ad6002528a318
   instances: 1
+  inheritedMetadata:
+    labels:
+      recurring-job.longhorn.io/source: enabled
+      recurring-job-group.longhorn.io/encrypted-backup: enabled
   storage:
     size: 1Gi
+    storageClass: longhorn-encrypted
   resources:
     requests:
       memory: 128Mi
