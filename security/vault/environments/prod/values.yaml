@@ -1,6 +1,11 @@
 # https://artifacthub.io/packages/helm/hashicorp/vault/0.30.0?modal=values
 
 server:
+  dataStorage:
+    storageClass: longhorn-encrypted
+    labels:
+      recurring-job.longhorn.io/source: enabled
+      recurring-job-group.longhorn.io/encrypted-backup: enabled
   standalone:
     enabled: true
     config: |-
