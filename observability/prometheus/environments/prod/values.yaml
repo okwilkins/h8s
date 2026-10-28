@@ -8,6 +8,8 @@ kube-state-metrics:
     - secrets
 prometheus:
   prometheusSpec:
+    securityContext:
+      fsGroupChangePolicy: OnRootMismatch
     # Stops the need to have to specify release tags
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
@@ -19,8 +21,12 @@ prometheus:
       whenScaled: Retain
     storageSpec:
       volumeClaimTemplate:
+        metadata:
+          labels:
+            recurring-job.longhorn.io/source: enabled
+            recurring-job-group.longhorn.io/encrypted-backup: enabled
         spec:
-          storageClassName: longhorn
+          storageClassName: longhorn-encrypted
           accessModes:
             - ReadWriteOnce
           resources:
