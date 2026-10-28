@@ -4,7 +4,14 @@ externalURL: https://harbor.okwilkins.dev
 persistence:
   persistentVolumeClaim:
     registry:
-      size: 100Gi
+      existingClaim: harbor-registry
+    jobservice:
+      jobLog:
+        existingClaim: harbor-jobservice
+    redis:
+      existingClaim: data-harbor-redis-0
+    trivy:
+      existingClaim: data-harbor-trivy-0
 expose:
   type: clusterIP
   tls:
