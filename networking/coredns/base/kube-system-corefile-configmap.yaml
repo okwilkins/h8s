@@ -4,7 +4,7 @@ metadata:
   name: coredns
   namespace: kube-system
 data:
-  Corefile: |
+  Corefile: |-
     okwilkins.dev:53 {
         errors
         cache 30
@@ -22,6 +22,11 @@ data:
             class error
         }
         prometheus :9153
+
+        # Longhorn's S3 client tries IPv6 even though this cluster has no IPv6 route.
+        template IN AAAA s3.eu-central-003.backblazeb2.com {
+            rcode NOERROR
+        }
 
         kubernetes cluster.local in-addr.arpa ip6.arpa {
             pods insecure
