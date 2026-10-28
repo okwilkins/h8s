@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-registry
+  namespace: harbor
+  labels:
+    app.kubernetes.io/name: harbor-registry
+    app.kubernetes.io/part-of: harbor
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-jobservice
+  namespace: harbor
+  labels:
+    app.kubernetes.io/name: harbor-jobservice
+    app.kubernetes.io/part-of: harbor
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-harbor-redis-0
+  namespace: harbor
+  labels:
+    app.kubernetes.io/name: harbor-redis
+    app.kubernetes.io/part-of: harbor
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-harbor-trivy-0
+  namespace: harbor
+  labels:
+    app.kubernetes.io/name: harbor-trivy
+    app.kubernetes.io/part-of: harbor
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 5Gi
