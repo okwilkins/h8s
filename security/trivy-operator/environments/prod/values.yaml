@@ -4,6 +4,8 @@ serviceMonitor:
 operator:
   infraAssessmentScannerEnabled: true
   metricsFindingsEnabled: true
+  # Required by the detailed CVE dashboard panel, increases Prometheus time series.
+  metricsVulnIdEnabled: true
   # INFO: Strict limits on CPU and concurrency to not make the cluster spin its fans up :)
   scanJobsConcurrentLimit: 1
   scanJobTimeout: 15m
