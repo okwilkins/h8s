@@ -1,0 +1,65 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backup-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: backup-alerts
+    app.kubernetes.io/part-of: prometheus
+    release: prometheus-stack
+spec:
+  groups:
+    - name: backups
+      rules:
+        # Failed Kubernetes Jobs are already covered by KubeJobFailed cluster-wide.
+        - alert: VaultBackupOverdue
+          expr: |
+            (time() - (
+              (kube_cronjob_status_last_successful_time{namespace="vault",cronjob="vault-raft-backup"} > 0)
+              or kube_cronjob_created{namespace="vault",cronjob="vault-raft-backup"}
+            ) > 10800)
+            and on (namespace, cronjob)
+              (kube_cronjob_spec_suspend{namespace="vault",cronjob="vault-raft-backup"} == 0)
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Vault has no successful backup in the last three hours.
+            description: Check the vault-raft-backup Jobs in namespace vault and access to B2.
+        - alert: LonghornBackupFailed
+          expr: max by (namespace, volume, backup) (longhorn_backup_state == 4) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Longhorn backup failed for volume {{ $labels.volume }}.
+            description: Check backup {{ $labels.backup }} in the Longhorn UI.
+        - alert: LonghornBackupTargetUnavailable
+          expr: max by (namespace, backup_target) (longhorn_backup_target_status{condition="unavailable"}) > 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: Longhorn backup target {{ $labels.backup_target }} is unavailable.
+            description: Check the B2 credentials and network connectivity in Longhorn.
+        - alert: LonghornBackupOverdue
+          expr: |
+            (time() - (
+              (longhorn_volume_last_backup_at > 0)
+              or on (pvc, pvc_namespace)
+              label_replace(label_replace(
+                kube_persistentvolumeclaim_created,
+                "pvc", "$1", "persistentvolumeclaim", "(.+)"
+              ), "pvc_namespace", "$1", "namespace", "(.+)")
+            ) > 10800)
+            and on (pvc, pvc_namespace)
+            label_replace(label_replace(
+              kube_persistentvolumeclaim_labels{label_recurring_job_group_longhorn_io_encrypted_backup="enabled"},
+              "pvc", "$1", "persistentvolumeclaim", "(.+)"
+            ), "pvc_namespace", "$1", "namespace", "(.+)")
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Longhorn claim {{ $labels.pvc_namespace }}/{{ $labels.pvc }} has no backup in the last three hours.
+            description: Check its recurring backup job in Longhorn. New claims have a three-hour grace period.
