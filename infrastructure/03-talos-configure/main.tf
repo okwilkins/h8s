@@ -143,6 +143,17 @@ data "talos_machine_configuration" "nodes" {
         controlPlane = {
           endpoint = "https://${var.talos_cluster_vip}:6443"
         }
+        # Allow Prometheus to reach the authenticated metrics endpoints.
+        controllerManager = {
+          extraArgs = {
+            "bind-address" = "0.0.0.0"
+          }
+        }
+        scheduler = {
+          extraArgs = {
+            "bind-address" = "0.0.0.0"
+          }
+        }
       }
     }),
     ], lookup(local.tailscale_authkeys, each.key, "") != "" ? [
