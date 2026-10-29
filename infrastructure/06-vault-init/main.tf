@@ -396,3 +396,46 @@ resource "null_resource" "vault_pki_role" {
 
   depends_on = [null_resource.vault_pki_config_urls]
 }
+
+# ============================================================
+# Vault Snapshot Authentication
+# ============================================================
+
+resource "null_resource" "vault_snapshot_auth" {
+  triggers = {
+    config_version = "1"
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    }
+    command = <<-EOT
+      set -euo pipefail
+      source "${var.infra_root}/scripts/common.sh"
+      load_tf_kube_env
+      printf '%s\n' "$VAULT_TOKEN" | kubectl_wrapper exec -i -n vault vault-0 -- sh -ec '
+        IFS= read -r VAULT_TOKEN
+        export VAULT_TOKEN
+        vault policy write vault-snapshot - <<POLICY
+      path "sys/storage/raft/snapshot" {
+        capabilities = ["read"]
+      }
+      path "auth/token/revoke-self" {
+        capabilities = ["update"]
+      }
+      POLICY
+        vault write auth/kubernetes/role/vault-snapshot \
+          bound_service_account_names=vault-snapshot \
+          bound_service_account_namespaces=vault \
+          audience=vault \
+          token_policies=vault-snapshot \
+          token_no_default_policy=true \
+          token_ttl=10m token_max_ttl=10m
+      '
+    EOT
+  }
+
+  depends_on = [null_resource.vault_k8s_auth]
+}
