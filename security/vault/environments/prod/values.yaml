@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/hashicorp/vault/0.30.0?modal=values
+# https://artifacthub.io/packages/helm/hashicorp/vault/0.34.1?modal=values
 
 server:
   dataStorage:
@@ -7,29 +7,37 @@ server:
       recurring-job.longhorn.io/source: enabled
       recurring-job-group.longhorn.io/encrypted-backup: enabled
   standalone:
-    enabled: true
-    config: |-
-      ui = true
-
-      listener "tcp" {
-        tls_disable = 1
-        address = "[::]:8200"
-        cluster_address = "[::]:8201"
-        # Enable unauthenticated metrics access (necessary for Prometheus Operator)
-        telemetry {
-          unauthenticated_metrics_access = "true"
-        }
-      }
-      storage "file" {
-        path = "/vault/data"
-      }
-
-      telemetry {
-        prometheus_retention_time = "30s"
-        disable_hostname = true
-      }
-  ha:
     enabled: false
+  ha:
+    enabled: true
+    replicas: 1
+    apiAddr: http://vault-0.vault-internal.vault.svc.cluster.local:8200
+    clusterAddr: https://vault-0.vault-internal.vault.svc.cluster.local:8201
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |-
+        ui = true
+        disable_mlock = true
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          telemetry {
+            unauthenticated_metrics_access = "true"
+          }
+        }
+        storage "raft" {
+          path = "/vault/data/raft"
+        }
+
+        service_registration "kubernetes" {}
+
+        telemetry {
+          prometheus_retention_time = "30s"
+          disable_hostname = true
+        }
   dev:
     enabled: false
   persistentVolumeClaimRetentionPolicy:
