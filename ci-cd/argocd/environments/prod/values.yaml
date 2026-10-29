@@ -67,10 +67,8 @@ redis:
     serviceMonitor:
       enabled: true
 dex:
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
+  # ArgoCD authenticates directly with Authelia.
+  enabled: false
 notifications:
   metrics:
     enabled: true
