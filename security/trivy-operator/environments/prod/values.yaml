@@ -17,6 +17,17 @@ resources:
   limits:
     memory: 1Gi
 
+trivyOperator:
+  scanJobCustomVolumes:
+    - name: registry-ca
+      secret:
+        secretName: trivy-registry-ca
+  scanJobCustomVolumesMount:
+    - name: registry-ca
+      mountPath: /etc/ssl/certs/vault-ca.crt
+      subPath: ca.crt
+      readOnly: true
+
 trivy:
   timeout: 10m0s
   resources:
