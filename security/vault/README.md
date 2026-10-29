@@ -121,3 +121,16 @@ Read more here:
 Whenever the pod(s) for Vault are rescheduled, they will need to be [unsealed](https://developer.hashicorp.com/vault/docs/concepts/seal) again.
 Use the [manual unseal command](../../infrastructure/README.md#ongoing-operations), which retrieves the required number of keys from encrypted state.
 
+### Raft Backups
+
+Hourly snapshots go to `h8s-vault/raft/` in B2.
+
+### Restore
+
+1. Pause Vault's Argo reconciliation and start the same Vault version on fresh encrypted storage.
+2. Download the B2 snapshot into the Pod, then initialise, unseal and authenticate the empty Vault with temporary credentials.
+3. Run `vault operator raft snapshot restore -force /path/to/backup.snap` inside the Pod.
+4. Restart the Pod and unseal with the original keys from Bitwarden or encrypted state.
+5. Authenticate with the original credentials, check a known secret, the CA and ESO, then resume Argo and remove temporary files and credentials.
+
+On a rebuilt cluster, update Vault's Kubernetes auth configuration with the new API server and CA.
