@@ -29,6 +29,10 @@ trivyOperator:
       readOnly: true
 
 trivy:
+  # Avoid filesystem-cache lock contention between containers in the same scan job.
+  configFile:
+    cache:
+      backend: memory
   timeout: 10m0s
   resources:
     limits:
