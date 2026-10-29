@@ -1,4 +1,4 @@
-# https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-92.14.0/charts/kube-prometheus-stack/values.yaml
+# https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-92.16.0/charts/kube-prometheus-stack/values.yaml
 
 namespaceOverride: monitoring
 # Cilium replaces kube-proxy.
@@ -19,9 +19,12 @@ prometheus:
     # Stops the need to have to specify release tags
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
     # Stops the need to be in the same namespace
     serviceMonitorNamespaceSelector: {}
     podMonitorNamespaceSelector: {}
+    ruleSelector: {}
+    ruleNamespaceSelector: {}
     persistentVolumeClaimRetentionPolicy:
       whenDeleted: Retain
       whenScaled: Retain
@@ -40,6 +43,8 @@ prometheus:
               storage: 20Gi
 alertmanager:
   alertmanagerSpec:
+    useExistingSecret: true
+    configSecret: alertmanager-telegram
     securityContext:
       fsGroupChangePolicy: OnRootMismatch
     persistentVolumeClaimRetentionPolicy:
