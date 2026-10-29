@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./harbor-ca-reader-role/harbor-ca-reader-service-account.yaml
+  - ./harbor-ca-reader-role/harbor-ca-reader-role.yaml
+  - ./harbor-ca-reader-role/harbor-ca-reader-role-binding.yaml
+  - ./secrets/harbor-ca-secretstore.yaml
+  - ./secrets/registry-ca-secret.yaml
