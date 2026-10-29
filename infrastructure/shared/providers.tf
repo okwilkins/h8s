@@ -6,7 +6,7 @@ terraform {
     # https://github.com/bpg/terraform-provider-proxmox
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.118"
+      version = "~> 0.119"
     }
 
     # https://registry.terraform.io/providers/siderolabs/talos
