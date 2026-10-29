@@ -9,6 +9,9 @@ kube-state-metrics:
   # This will mean that global/namespace dashboard panels omit Secret counts.
   collectorsExclude:
     - secrets
+  # Exclude Vault from Longhorn backup alerts, as it uses native Raft backups.
+  metricLabelsAllowlist:
+    - persistentvolumeclaims=[recurring-job-group.longhorn.io/encrypted-backup]
 prometheus:
   prometheusSpec:
     securityContext:
