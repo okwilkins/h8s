@@ -17,7 +17,6 @@ resources:
   - ./argo-workflows-dashboard.yaml
   - ./fluent-bit-dashboard.yaml
   - ./victoria-logs-dashboard.yaml
-  - ./trivy-operator-dashboard.yaml
 patches:
   - target:
       group: grafana.integreatly.org
