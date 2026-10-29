@@ -13,5 +13,6 @@ spec:
     url: http://prometheus-stack-kube-prom-prometheus.monitoring.svc.cluster.local:9090
     isDefault: true
     jsonData:
+      alertmanagerUid: alertmanager
       tlsSkipVerify: true
       timeInterval: 5s
