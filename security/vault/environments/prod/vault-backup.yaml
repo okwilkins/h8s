@@ -1,0 +1,121 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vault-raft-backup
+  namespace: vault
+  labels:
+    app.kubernetes.io/name: vault-raft-backup
+    app.kubernetes.io/part-of: vault
+spec:
+  # INFO: Run at half past each hour (UTC) to avoid Longhorn's backups on the hour.
+  schedule: "30 * * * *"
+  timeZone: Etc/UTC
+  suspend: false
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: vault-raft-backup
+            app.kubernetes.io/part-of: vault
+        spec:
+          serviceAccountName: vault-snapshot
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 100
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          # Save a Vault Raft snapshot before the main container uploads it to B2.
+          initContainers:
+            - name: snapshot
+              image: hashicorp/vault:2.0.4@sha256:5be49781ecf78bfe775c5309c6a4d9f4e9e040b6c885c99eb2b12fb69855e1a2
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  VAULT_TOKEN="$(vault write -field=token auth/kubernetes/login role=vault-snapshot jwt=@/var/run/secrets/vault/token)"
+                  export VAULT_TOKEN
+                  trap 'vault token revoke -self >/dev/null' EXIT
+                  vault operator raft snapshot save /snapshot/vault.snap
+              env:
+                - name: VAULT_ADDR
+                  value: http://vault-internal.vault.svc.cluster.local:8200
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: snapshot
+                  mountPath: /snapshot
+                - name: vault-token
+                  mountPath: /var/run/secrets/vault
+                  readOnly: true
+          containers:
+            - name: upload
+              image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  rclone --config /dev/null copyto /snapshot/vault.snap ":s3:h8s-vault/raft/$(date -u +%Y%m%dT%H%M%SZ).snap" --s3-no-check-bucket
+              envFrom:
+                - secretRef:
+                    name: vault-backup-b2
+              env:
+                - name: RCLONE_S3_PROVIDER
+                  value: Other
+                - name: RCLONE_S3_ENV_AUTH
+                  value: "true"
+                - name: RCLONE_S3_ENDPOINT
+                  value: https://s3.eu-central-003.backblazeb2.com
+                - name: RCLONE_S3_REGION
+                  value: eu-central-003
+                - name: RCLONE_S3_FORCE_PATH_STYLE
+                  value: "true"
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: snapshot
+                  mountPath: /snapshot
+                  readOnly: true
+          volumes:
+            - name: snapshot
+              emptyDir:
+                medium: Memory
+                sizeLimit: 128Mi
+            - name: vault-token
+              projected:
+                sources:
+                  - serviceAccountToken:
+                      path: token
+                      audience: vault
+                      expirationSeconds: 600
