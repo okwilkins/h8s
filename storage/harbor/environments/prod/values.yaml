@@ -1,6 +1,9 @@
 # https://github.com/goharbor/harbor-helm/blob/v1.18.0/values.yaml
 
 externalURL: https://harbor.okwilkins.dev
+# Stop the old pod before moving its ReadWriteOnce volume to another node.
+updateStrategy:
+  type: Recreate
 persistence:
   persistentVolumeClaim:
     registry:
