@@ -3,9 +3,6 @@
 server:
   dataStorage:
     storageClass: longhorn-encrypted
-    labels:
-      recurring-job.longhorn.io/source: enabled
-      recurring-job-group.longhorn.io/encrypted-backup: enabled
   standalone:
     enabled: false
   ha:
