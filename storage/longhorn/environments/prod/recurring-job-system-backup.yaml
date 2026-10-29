@@ -1,0 +1,19 @@
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: system-daily
+  namespace: longhorn-system
+  labels:
+    app.kubernetes.io/name: system-daily
+    app.kubernetes.io/part-of: longhorn
+spec:
+  name: system-daily
+  # INFO: Daily at 02:00 UTC.
+  cron: "0 2 * * *"
+  task: system-backup
+  retentionPolicy: count-based
+  retain: 30
+  concurrency: 1
+  parameters:
+    # Volume data is already backed up by the hourly job.
+    volume-backup-policy: disabled
