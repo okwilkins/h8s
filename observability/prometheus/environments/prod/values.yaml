@@ -1,6 +1,9 @@
 # https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-92.14.0/charts/kube-prometheus-stack/values.yaml
 
 namespaceOverride: monitoring
+# Cilium replaces kube-proxy.
+kubeProxy:
+  enabled: false
 kube-state-metrics:
   # Avoid cluster-wide Secret access
   # This will mean that global/namespace dashboard panels omit Secret counts.
