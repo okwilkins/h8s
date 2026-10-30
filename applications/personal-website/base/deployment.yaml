@@ -36,7 +36,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: personal-website
-          image: harbor.okwilkins.dev/main/personal-website:8d6875cd
+          image: harbor.okwilkins.dev/main/personal-website:8d6875c
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
