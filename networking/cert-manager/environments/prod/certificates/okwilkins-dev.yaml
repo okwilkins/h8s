@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: okwilkins-dev
+  namespace: personal-website
+  labels:
+    app.kubernetes.io/name: personal-website
+    app.kubernetes.io/part-of: personal-website
+spec:
+  secretName: okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: okwilkins.dev
+  dnsNames:
+    - okwilkins.dev
