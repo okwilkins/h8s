@@ -1,0 +1,577 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: personal-website-dashboard
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: personal-website
+    app.kubernetes.io/part-of: grafana
+spec:
+  folderRef: observability
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prom-default
+  json: |
+    {
+      "__inputs": [
+        {
+          "name": "DS_PROMETHEUS",
+          "label": "Prometheus",
+          "description": "",
+          "type": "datasource",
+          "pluginId": "prometheus",
+          "pluginName": "Prometheus"
+        }
+      ],
+      "uid": "personal-website",
+      "title": "Personal Website",
+      "description": "Node service metrics for okwilkins.dev. Request panels exclude /metrics, /healthz and assets; Cloudflare cache hits do not reach the service.",
+      "schemaVersion": 39,
+      "version": 1,
+      "editable": true,
+      "graphTooltip": 1,
+      "tags": [
+        "personal-website",
+        "nodejs"
+      ],
+      "timezone": "browser",
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "annotations": {
+        "list": []
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Scrape availability",
+          "description": "Percentage of discovered application targets Prometheus can scrape. This measures the Node service, not public or Cloudflare availability.",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 8,
+            "h": 4
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "color": {
+                "mode": "thresholds"
+              },
+              "noValue": "No data",
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 50
+                  },
+                  {
+                    "color": "green",
+                    "value": 100
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "100 * avg(up{namespace=\"personal-website\", service=\"personal-website\"}) or vector(0)",
+              "legendFormat": "",
+              "range": false,
+              "instant": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "auto"
+          }
+        },
+        {
+          "id": 2,
+          "title": "Page requests",
+          "description": "Completed application requests per second, excluding metrics, health checks and assets. Includes unmatched URLs.",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 8,
+            "y": 0,
+            "w": 8,
+            "h": 4
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "noValue": "No data"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(personal_website_http_requests_total{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\"}[$__rate_interval])) or vector(0)",
+              "legendFormat": "",
+              "range": false,
+              "instant": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "auto"
+          }
+        },
+        {
+          "id": 3,
+          "title": "Server errors",
+          "description": "Share of application requests returning HTTP 5xx. Zero when no page requests have completed.",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 0,
+            "w": 8,
+            "h": 4
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "color": {
+                "mode": "thresholds"
+              },
+              "noValue": "No data",
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "100 * (sum(rate(personal_website_http_requests_total{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\", status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / clamp_min((sum(rate(personal_website_http_requests_total{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\"}[$__rate_interval])) or vector(0)), 1e-12)",
+              "legendFormat": "",
+              "range": false,
+              "instant": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "auto"
+          }
+        },
+        {
+          "id": 4,
+          "title": "Requests by route",
+          "description": "Bounded routes reported by the application. Metrics, health checks and static assets are excluded.",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 4,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "noValue": "No data",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (route) (rate(personal_website_http_requests_total{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\"}[$__rate_interval]))",
+              "legendFormat": "{{route}}",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 5,
+          "title": "Requests by status",
+          "description": "HTTP status codes across application routes, excluding metrics, health checks and static assets.",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 4,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "noValue": "No data",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (status_code) (rate(personal_website_http_requests_total{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\"}[$__rate_interval]))",
+              "legendFormat": "{{status_code}}",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 6,
+          "title": "Request duration",
+          "description": "Server request duration across application routes and replicas. Excludes metrics, health checks and static assets. No percentile is reported without requests.",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 12,
+            "w": 24,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "noValue": "No traffic",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "histogram_quantile(0.5, sum by (le) (rate(personal_website_http_request_duration_seconds_bucket{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\"}[$__rate_interval])))",
+              "legendFormat": "p50",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            },
+            {
+              "refId": "B",
+              "expr": "histogram_quantile(0.95, sum by (le) (rate(personal_website_http_request_duration_seconds_bucket{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\"}[$__rate_interval])))",
+              "legendFormat": "p95",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            },
+            {
+              "refId": "C",
+              "expr": "histogram_quantile(0.99, sum by (le) (rate(personal_website_http_request_duration_seconds_bucket{namespace=\"personal-website\", service=\"personal-website\", route!~\"/metrics|/healthz|asset\"}[$__rate_interval])))",
+              "legendFormat": "p99",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 7,
+          "title": "Process CPU",
+          "description": "CPU cores used by each Node process (1 = one fully utilised core).",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 20,
+            "w": 8,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "cores",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "noValue": "No data",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "rate(personal_website_process_cpu_seconds_total{namespace=\"personal-website\", service=\"personal-website\"}[$__rate_interval])",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 8,
+          "title": "Resident memory",
+          "description": "Resident memory for each Node process.",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 8,
+            "y": 20,
+            "w": 8,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "noValue": "No data",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "personal_website_process_resident_memory_bytes{namespace=\"personal-website\", service=\"personal-website\"}",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 9,
+          "title": "Event-loop lag",
+          "description": "Node event-loop p99 delay observed since each target\u2019s previous scrape.",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 20,
+            "w": 8,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "noValue": "No data",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "personal_website_nodejs_eventloop_lag_p99_seconds{namespace=\"personal-website\", service=\"personal-website\"}",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "instant": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        }
+      ]
+    }
