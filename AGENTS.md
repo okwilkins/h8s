@@ -120,6 +120,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
 │   ├── mazanoke                    | Browser-based image optimizer.
+│   ├── personal-website            | My website at okwilkins.dev.
 │   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd
 │   ├── argo-workflows              | CI/CD pipelines (WIP).
