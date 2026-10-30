@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: personal-website
+  labels:
+    name: personal-website
+    harbor-image-pulls: "true"
+    app.kubernetes.io/name: personal-website
+    app.kubernetes.io/part-of: personal-website
