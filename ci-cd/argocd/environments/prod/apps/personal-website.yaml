@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: personal-website
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: personal-website
+    app.kubernetes.io/part-of: personal-website
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/okwilkins/h8s
+    targetRevision: HEAD
+    path: applications/personal-website/environments/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: personal-website
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - PruneLast=true
