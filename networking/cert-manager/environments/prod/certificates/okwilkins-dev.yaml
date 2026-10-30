@@ -14,3 +14,4 @@ spec:
   commonName: okwilkins.dev
   dnsNames:
     - okwilkins.dev
+    - www.okwilkins.dev

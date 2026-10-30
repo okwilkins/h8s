@@ -10,12 +10,12 @@ spec:
   parentRefs:
     - name: default-gateway
       namespace: default
-      sectionName: home-lan-personal-website
     - name: cloudflare-gateway
       namespace: cloudflare
       sectionName: web
   hostnames:
     - okwilkins.dev
+    - www.okwilkins.dev
   rules:
     - matches:
         - path:
