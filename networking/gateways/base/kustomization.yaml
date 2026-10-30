@@ -25,6 +25,7 @@ resources:
   - ./http-routes/harbor.yaml
   - ./http-routes/searxng.yaml
   - ./http-routes/mazanoke.yaml
+  - ./http-routes/personal-website.yaml
   - ./http-routes/hubble-ui.yaml
   - ./http-routes/authelia.yaml
   - ./http-routes/chhoto-url.yaml
@@ -38,5 +39,6 @@ resources:
   - ./reference-grants/default-gateway-search-tls.yaml
   - ./reference-grants/default-gateway-hubble-tls.yaml
   - ./reference-grants/default-gateway-mazanoke-tls.yaml
+  - ./reference-grants/default-gateway-personal-website-tls.yaml
   - ./reference-grants/default-gateway-authelia-tls.yaml
   - ./reference-grants/default-gateway-chhoto-url-tls.yaml

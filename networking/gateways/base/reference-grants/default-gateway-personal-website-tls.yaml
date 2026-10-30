@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: ReferenceGrant
+metadata:
+  name: personal-website-tls-access
+  namespace: personal-website
+  labels:
+    app.kubernetes.io/name: personal-website
+    app.kubernetes.io/part-of: personal-website
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      namespace: default
+  to:
+    - group: ""
+      kind: Secret
+      name: okwilkins-dev-tls

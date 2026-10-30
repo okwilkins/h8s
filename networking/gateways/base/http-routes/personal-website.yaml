@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: personal-website
+  namespace: personal-website
+  labels:
+    app.kubernetes.io/name: personal-website
+    app.kubernetes.io/part-of: personal-website
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+      sectionName: home-lan-personal-website
+    - name: cloudflare-gateway
+      namespace: cloudflare
+      sectionName: web
+  hostnames:
+    - okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: personal-website
+          port: 80
