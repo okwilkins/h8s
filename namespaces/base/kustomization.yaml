@@ -13,6 +13,7 @@ resources:
   - ./harbor-namespace.yaml
   - ./longhorn-system-namespace.yaml
   - ./mazanoke-namespace.yaml
+  - ./personal-website-namespace.yaml
   - ./monitoring-namespace.yaml
   - ./renovate-namespace.yaml
   - ./vault-namespace.yaml
