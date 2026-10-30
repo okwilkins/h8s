@@ -21,6 +21,18 @@ spec:
         certificateRefs:
           - name: okwilkins-dev-tls
             namespace: personal-website
+    - protocol: HTTPS
+      name: home-lan-personal-website-www
+      hostname: www.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: okwilkins-dev-tls
+            namespace: personal-website
     # https://cert-manager.io/docs/usage/gateway/#use-cases
     # For details on how to make these listeners for cert-manager
     - protocol: HTTPS
