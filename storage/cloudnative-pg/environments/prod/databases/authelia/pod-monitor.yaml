@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-authelia-prod
+  namespace: authelia
+  labels:
+    app.kubernetes.io/name: authelia
+    app.kubernetes.io/part-of: authelia
+    app.kubernetes.io/component: database
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: cnpg-authelia-prod
+      cnpg.io/podRole: instance
+  podMetricsEndpoints:
+    - port: metrics
