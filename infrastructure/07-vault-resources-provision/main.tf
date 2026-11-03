@@ -829,7 +829,10 @@ resource "null_resource" "vault_secret_bookorbit" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     environment = {
-      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+      INFRA_ROOT         = var.infra_root
+      KUBECONFIG_CONTENT = sensitive(data.terraform_remote_state.talos_configure.outputs.kubeconfig)
+      SERVER             = data.terraform_remote_state.talos_configure.outputs.first_node_ip
+      VAULT_TOKEN        = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
       BOOKORBIT_CREDENTIALS = sensitive(jsonencode({
         jwt-secret            = random_password.bookorbit_jwt_secret.result
         setup-bootstrap-token = random_password.bookorbit_setup_bootstrap_token.result
@@ -837,8 +840,7 @@ resource "null_resource" "vault_secret_bookorbit" {
     }
     command = <<-EOT
       set -euo pipefail
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
+      source "$INFRA_ROOT/scripts/common.sh"
       printf '%s\n%s' "$VAULT_TOKEN" "$BOOKORBIT_CREDENTIALS" | kubectl_wrapper exec -i -n vault vault-0 -- sh -ec '
         IFS= read -r VAULT_TOKEN
         export VAULT_TOKEN
@@ -861,7 +863,10 @@ resource "null_resource" "vault_secret_cnpg_bookorbit" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     environment = {
-      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+      INFRA_ROOT         = var.infra_root
+      KUBECONFIG_CONTENT = sensitive(data.terraform_remote_state.talos_configure.outputs.kubeconfig)
+      SERVER             = data.terraform_remote_state.talos_configure.outputs.first_node_ip
+      VAULT_TOKEN        = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
       BOOKORBIT_DATABASE_CREDENTIALS = sensitive(jsonencode({
         username = "bookorbit"
         password = random_password.cnpg_bookorbit_password.result
@@ -869,8 +874,7 @@ resource "null_resource" "vault_secret_cnpg_bookorbit" {
     }
     command = <<-EOT
       set -euo pipefail
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
+      source "$INFRA_ROOT/scripts/common.sh"
       printf '%s\n%s' "$VAULT_TOKEN" "$BOOKORBIT_DATABASE_CREDENTIALS" | kubectl_wrapper exec -i -n vault vault-0 -- sh -ec '
         IFS= read -r VAULT_TOKEN
         export VAULT_TOKEN
