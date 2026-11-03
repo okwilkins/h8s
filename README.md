@@ -38,6 +38,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 
 ```text
 ├── applications
+│   ├── bookorbit                   | Self-hosted library and reading platform.
 │   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
 │   ├── mazanoke                    | Browser-based image optimizer.

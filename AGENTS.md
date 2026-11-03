@@ -117,6 +117,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 
 ```text
 ├── applications
+│   ├── bookorbit                   | Self-hosted library and reading platform.
 │   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
 │   ├── mazanoke                    | Browser-based image optimizer.
