@@ -45,15 +45,33 @@
         },
         {
             "customType": "regex",
-            "description": "Update CloudNativePG PostgreSQL images",
+            "description": "Update CloudNativePG PostgreSQL and pgvector images",
             "managerFilePatterns": [
                 "/storage/cloudnative-pg/.*\\.yaml$/"
             ],
             "matchStrings": [
-                "imageName:\\s+(?<depName>[^\\s:]+):(?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+                "imageName:\\s+(?<depName>[^\\s:]+):(?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?",
+                "reference:\\s+(?<depName>ghcr\\.io/cloudnative-pg/pgvector):(?<currentValue>\\d+\\.\\d+\\.\\d+-18-trixie)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
             ],
+            "depTypeTemplate": "image",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "description": "Update CloudNativePG pgvector extension versions",
+            "managerFilePatterns": [
+                "/^storage/cloudnative-pg/.*/database\\.yaml$/"
+            ],
+            "matchStrings": [
+                "# renovate: pgvector=18-trixie\\r?\\n(?<indentation>[ \\t]*)version: \\\"(?<extensionVersion>\\d+\\.\\d+\\.\\d+)\\\""
+            ],
+            "depNameTemplate": "ghcr.io/cloudnative-pg/pgvector",
+            "depTypeTemplate": "extension",
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker",
+            "currentValueTemplate": "{{{extensionVersion}}}-18-trixie",
+            "autoReplaceStringTemplate": "# renovate: pgvector=18-trixie\n{{{indentation}}}version: \"{{{lookup (split newValue '-') 0}}}\""
         },
         {
             "customType": "regex",
@@ -111,6 +129,25 @@
         }
     ],
     "packageRules": [
+        {
+            "description": "Update the pgvector image and SQL extension together, retaining PostgreSQL 18 and Trixie compatibility",
+            "matchPackageNames": [
+                "ghcr.io/cloudnative-pg/pgvector"
+            ],
+            "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+-18-trixie$/",
+            "groupName": "CloudNativePG pgvector",
+            "groupSlug": "cloudnativepg-pgvector"
+        },
+        {
+            "description": "Retain digest pins on the pgvector image, not the SQL extension version",
+            "matchPackageNames": [
+                "ghcr.io/cloudnative-pg/pgvector"
+            ],
+            "matchDepTypes": [
+                "image"
+            ],
+            "pinDigests": true
+        },
         {
             "description": "Label major updates for manual review",
             "matchUpdateTypes": [
