@@ -4,4 +4,5 @@ namespace: harbor
 resources:
   - ./cluster.yaml
   - ./database.yaml
+  - ./pod-monitor.yaml
   - ./user-credential-secret.yaml
