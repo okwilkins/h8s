@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: bookorbit
+  namespace: bookorbit
+  labels:
+    app.kubernetes.io/name: bookorbit
+    app.kubernetes.io/part-of: bookorbit
+    app.kubernetes.io/component: database
+spec:
+  name: bookorbit
+  owner: bookorbit
+  databaseReclaimPolicy: retain
+  cluster:
+    name: cnpg-bookorbit-prod
+  extensions:
+    - name: uuid-ossp
+      schema: public
+    - name: pg_trgm
+      schema: public
+    - name: unaccent
+      schema: public
+    - name: vector
+      schema: public
+      # Keep aligned with the pgvector image in cluster.yaml.
+      version: "0.8.7"
