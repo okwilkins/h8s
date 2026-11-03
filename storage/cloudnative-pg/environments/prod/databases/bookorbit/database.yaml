@@ -22,5 +22,5 @@ spec:
       schema: public
     - name: vector
       schema: public
-      # Keep aligned with the pgvector image in cluster.yaml.
+      # renovate: pgvector=18-trixie
       version: "0.8.7"
