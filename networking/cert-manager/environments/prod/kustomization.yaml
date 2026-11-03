@@ -16,3 +16,4 @@ resources:
   - ./certificates/convert-okwilkins-dev.yaml
   - ./certificates/okwilkins-dev.yaml
   - ./certificates/link-okwilkins-dev.yaml
+  - ./certificates/books-okwilkins-dev.yaml

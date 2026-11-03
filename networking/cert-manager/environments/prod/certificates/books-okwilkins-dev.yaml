@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: books-okwilkins-dev
+  namespace: bookorbit
+  labels:
+    app.kubernetes.io/name: bookorbit
+    app.kubernetes.io/part-of: bookorbit
+spec:
+  secretName: books-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: books.okwilkins.dev
+  dnsNames:
+    - books.okwilkins.dev
