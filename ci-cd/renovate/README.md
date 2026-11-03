@@ -58,6 +58,8 @@ renovate:
   mendRnvGithubAppId: ""
 ```
 
+The bot user ID is pinned in `extraEnvVars` to avoid an unauthenticated GitHub lookup that can block startup when the IP rate limit is exhausted. If replacing the GitHub App, update it using the `id` returned by `https://api.github.com/users/<app-name>[bot]`.
+
 ### 4. Install GitHub App on Repository
 
 **Important**: The `mendRnvAutodiscoverFilter` setting does not work properly in Renovate CE. Instead, you must restrict the GitHub App to only the repositories you want Renovate to process.

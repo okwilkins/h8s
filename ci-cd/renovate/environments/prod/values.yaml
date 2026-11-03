@@ -37,6 +37,9 @@ renovate:
   mendRnvPrometheusMetricsEnabled: "true"
 
   extraEnvVars:
+    # Avoid an unauthenticated GitHub lookup during startup.
+    - name: MEND_RNV_GITHUB_BOT_USER_ID
+      value: "265123023"
     - name: MEND_RNV_GITHUB_APP_KEY
       valueFrom:
         secretKeyRef:
