@@ -167,3 +167,15 @@ spec:
         certificateRefs:
           - name: link-okwilkins-dev-tls
             namespace: chhoto-url
+    - protocol: HTTPS
+      name: home-lan-bookorbit
+      hostname: books.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: books-okwilkins-dev-tls
+            namespace: bookorbit
