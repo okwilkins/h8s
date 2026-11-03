@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookorbit
+  namespace: bookorbit
+  labels:
+    app.kubernetes.io/name: bookorbit
+    app.kubernetes.io/part-of: bookorbit
+    app.kubernetes.io/component: web
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bookorbit
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bookorbit
+        app.kubernetes.io/part-of: bookorbit
+        app.kubernetes.io/component: web
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: harbor-credentials
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bookorbit
+          image: harbor.okwilkins.dev/ghcr-cache/bookorbit/bookorbit:3.6.0@sha256:bbb5da52e96dbbff1dd36f55454f9845e6cde264b4b3428a3ea783124a4ca62e
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: APP_URL
+              value: https://books.okwilkins.dev
+            - name: POSTGRES_HOST
+              value: cnpg-bookorbit-prod-rw.bookorbit.svc.cluster.local
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: bookorbit
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cnpg-bookorbit-prod-app-user-credentials
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cnpg-bookorbit-prod-app-user-credentials
+                  key: password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: bookorbit-secret
+                  key: jwt-secret
+            - name: SETUP_BOOTSTRAP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bookorbit-secret
+                  key: setup-bootstrap-token
+            - name: LIBRARY_BROWSE_ROOT
+              value: /books
+            - name: BOOKORBIT_FIX_PERMISSIONS
+              value: "false"
+            - name: NODE_MAX_OLD_SPACE_SIZE
+              value: auto
+            - name: HOME
+              value: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              memory: 4Gi
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: books
+              mountPath: /books
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: books
+          persistentVolumeClaim:
+            claimName: bookorbit-books-pvc
+        - name: data
+          persistentVolumeClaim:
+            claimName: bookorbit-data-pvc
+        - name: tmp
+          emptyDir: {}
