@@ -47,6 +47,11 @@ spec:
               value: "3000"
             - name: APP_URL
               value: https://books.okwilkins.dev
+            # Authelia resolves to the LAN gateway and uses the Vault CA.
+            - name: OIDC_ALLOW_LOCAL_ISSUERS
+              value: "true"
+            - name: NODE_EXTRA_CA_CERTS
+              value: /etc/ssl/certs/oidc-provider/ca.crt
             - name: POSTGRES_HOST
               value: cnpg-bookorbit-prod-rw.bookorbit.svc.cluster.local
             - name: POSTGRES_PORT
@@ -118,6 +123,9 @@ spec:
               mountPath: /data
             - name: tmp
               mountPath: /tmp
+            - name: oidc-provider-ca
+              mountPath: /etc/ssl/certs/oidc-provider
+              readOnly: true
       volumes:
         - name: books
           persistentVolumeClaim:
@@ -127,3 +135,9 @@ spec:
             claimName: bookorbit-data-pvc
         - name: tmp
           emptyDir: {}
+        - name: oidc-provider-ca
+          secret:
+            secretName: books-okwilkins-dev-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
