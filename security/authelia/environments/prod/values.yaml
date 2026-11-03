@@ -215,6 +215,23 @@ configMap:
             - email
             - groups
 
+        - client_id: bookorbit
+          client_name: BookOrbit
+          public: true
+          authorization_policy: two_factor
+          consent_mode: pre-configured
+          pre_configured_consent_duration: '30 days'
+          require_pkce: true
+          pkce_challenge_method: S256
+          redirect_uris:
+            - https://books.okwilkins.dev/oauth2-callback
+          scopes:
+            - openid
+            - profile
+            - email
+            - groups
+          token_endpoint_auth_method: none
+
   storage:
     local:
       enabled: false
