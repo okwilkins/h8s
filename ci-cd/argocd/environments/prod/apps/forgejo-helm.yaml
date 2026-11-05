@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: forgejo-helm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/part-of: forgejo
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: code.forgejo.org/forgejo-helm
+      chart: forgejo
+      targetRevision: 17.3.2
+      helm:
+        releaseName: forgejo
+        valueFiles:
+          - $h8s/applications/forgejo/environments/prod/values.yaml
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      ref: h8s
+    - repoURL: https://github.com/okwilkins/h8s
+      targetRevision: HEAD
+      path: applications/forgejo/environments/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: forgejo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - PruneLast=true
+      - ServerSideApply=true
