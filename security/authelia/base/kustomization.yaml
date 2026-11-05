@@ -10,3 +10,4 @@ resources:
   - ./grafana-client-secret.yaml
   - ./argocd-client-secret.yaml
   - ./searxng-client-secret.yaml
+  - ./forgejo-client-secret.yaml
