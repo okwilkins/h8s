@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: git-okwilkins-dev
+  namespace: forgejo
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/part-of: forgejo
+spec:
+  secretName: git-okwilkins-dev-tls
+  issuerRef:
+    name: vault-issuer
+    kind: ClusterIssuer
+  commonName: git.okwilkins.dev
+  dnsNames:
+    - git.okwilkins.dev
