@@ -120,6 +120,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   ├── bookorbit                   | Self-hosted library and reading platform.
 │   ├── chhoto-url                  | Self-hosted URL shortener.
 │   ├── excalidraw                  | Self-hosted Excalidraw.
+│   ├── forgejo                     | Self-hosted Git hosting.
 │   ├── mazanoke                    | Browser-based image optimizer.
 │   ├── personal-website            | My website at okwilkins.dev.
 │   └── searxng                     | Privacy-focused metasearch engine.
