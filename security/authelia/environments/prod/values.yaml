@@ -65,6 +65,9 @@ pod:
     - name: searxng-client-secret
       secret:
         secretName: authelia-searxng-client-secret
+    - name: forgejo-client-secret
+      secret:
+        secretName: authelia-forgejo-client-secret
   extraVolumeMounts:
     - name: users-config
       mountPath: /config
@@ -79,6 +82,9 @@ pod:
       readOnly: true
     - name: searxng-client-secret
       mountPath: /secrets/searxng-client-secret
+      readOnly: true
+    - name: forgejo-client-secret
+      mountPath: /secrets/forgejo-client-secret
       readOnly: true
 
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
@@ -231,6 +237,31 @@ configMap:
             - email
             - groups
           token_endpoint_auth_method: none
+
+        - client_id: forgejo
+          client_name: Forgejo
+          client_secret:
+            path: /secrets/forgejo-client-secret/client-secret-hash
+          public: false
+          authorization_policy: two_factor
+          consent_mode: pre-configured
+          pre_configured_consent_duration: '30 days'
+          require_pkce: true
+          pkce_challenge_method: S256
+          redirect_uris:
+            - https://git.okwilkins.dev/user/oauth2/authelia/callback
+          scopes:
+            - openid
+            - profile
+            - email
+            - groups
+          response_types:
+            - code
+          grant_types:
+            - authorization_code
+          access_token_signed_response_alg: none
+          userinfo_signed_response_alg: none
+          token_endpoint_auth_method: client_secret_basic
 
   storage:
     local:
