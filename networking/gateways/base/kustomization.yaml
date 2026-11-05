@@ -30,6 +30,7 @@ resources:
   - ./http-routes/authelia.yaml
   - ./http-routes/chhoto-url.yaml
   - ./http-routes/bookorbit.yaml
+  - ./http-routes/forgejo.yaml
   # Reference grants
   - ./reference-grants/default-gateway-argocd-tls.yaml
   - ./reference-grants/default-gateway-grafana-tls.yaml
@@ -44,3 +45,4 @@ resources:
   - ./reference-grants/default-gateway-authelia-tls.yaml
   - ./reference-grants/default-gateway-chhoto-url-tls.yaml
   - ./reference-grants/default-gateway-bookorbit-tls.yaml
+  - ./reference-grants/default-gateway-forgejo-tls.yaml

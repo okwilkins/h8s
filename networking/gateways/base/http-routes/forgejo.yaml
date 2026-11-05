@@ -1,0 +1,35 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: forgejo
+  namespace: forgejo
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/part-of: forgejo
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: default
+    - name: cloudflare-gateway
+      namespace: cloudflare
+  hostnames:
+    - git.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      timeouts:
+        request: 0s
+        backendRequest: 0s
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Proto
+                value: https
+              - name: X-Forwarded-Host
+                value: git.okwilkins.dev
+      backendRefs:
+        - name: forgejo-http
+          port: 3000
