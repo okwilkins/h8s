@@ -1,0 +1,15 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: forgejo
+  namespace: forgejo
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/part-of: forgejo
+    app.kubernetes.io/component: database
+spec:
+  name: forgejo
+  owner: forgejo
+  databaseReclaimPolicy: retain
+  cluster:
+    name: cnpg-forgejo-prod

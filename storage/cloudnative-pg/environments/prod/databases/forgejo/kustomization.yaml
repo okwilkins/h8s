@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: forgejo
+resources:
+  - ./cluster.yaml
+  - ./database.yaml
+  - ./pod-monitor.yaml
+  - ./user-credential-secret.yaml
