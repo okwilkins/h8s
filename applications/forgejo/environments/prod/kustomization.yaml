@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/
+  - ./secrets/admin-secret.yaml
+  - ./secrets/forgejo-secret.yaml
+  - ./secrets/metrics-secret.yaml
+  - ./secrets/oidc-secret.yaml

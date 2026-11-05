@@ -1,0 +1,122 @@
+# https://artifacthub.io/packages/helm/forgejo-helm/forgejo
+
+image:
+  tag: 15.0.11-rootless
+  digest: sha256:3cd6bc2b74c87cbde0a0fd527c9665cb416f5a0540dee54fe5afb3fa2df9f40c
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 2Gi
+
+initContainers:
+  resources:
+    limits:
+      memory: 1Gi
+
+serviceAccount:
+  create: true
+
+persistence:
+  claimName: forgejo-data
+  storageClass: longhorn-encrypted
+  size: 20Gi
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/encrypted-backup: enabled
+
+deployment:
+  labels:
+    app.kubernetes.io/part-of: forgejo
+  env:
+    # Authelia resolves through the LAN gateway, which uses the Vault CA.
+    - name: SSL_CERT_DIR
+      value: /etc/ssl/certs:/etc/ssl/certs/oidc-provider
+
+extraVolumes:
+  - name: oidc-provider-ca
+    secret:
+      secretName: git-okwilkins-dev-tls
+      items:
+        - key: ca.crt
+          path: ca.crt
+
+extraInitVolumeMounts:
+  - name: oidc-provider-ca
+    mountPath: /etc/ssl/certs/oidc-provider
+    readOnly: true
+
+extraContainerVolumeMounts:
+  - name: oidc-provider-ca
+    mountPath: /etc/ssl/certs/oidc-provider
+    readOnly: true
+
+gitea:
+  admin:
+    existingSecret: forgejo-admin-secret
+    email: forgejo-admin@okwilkins.dev
+  oauth:
+    - name: authelia
+      provider: openidConnect
+      existingSecret: forgejo-oidc-secret
+      autoDiscoverUrl: https://auth.okwilkins.dev/.well-known/openid-configuration
+      scopes: "openid email profile groups"
+      groupClaimName: groups
+      adminGroup: admins
+  metrics:
+    enabled: true
+  additionalConfigSources:
+    - secret:
+        secretName: forgejo-secret
+  additionalConfigFromEnvs:
+    - name: FORGEJO__DATABASE__USER
+      valueFrom:
+        secretKeyRef:
+          name: cnpg-forgejo-prod-app-user-credentials
+          key: username
+    - name: FORGEJO__DATABASE__PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: cnpg-forgejo-prod-app-user-credentials
+          key: password
+  config:
+    server:
+      DOMAIN: git.okwilkins.dev
+      ROOT_URL: https://git.okwilkins.dev/
+      SSH_DOMAIN: git-ssh.okwilkins.dev
+    database:
+      DB_TYPE: postgres
+      HOST: cnpg-forgejo-prod-rw.forgejo.svc.cluster.local:5432
+      NAME: forgejo
+      SSL_MODE: require
+    repository:
+      DEFAULT_PRIVATE: private
+    security:
+      REVERSE_PROXY_TRUSTED_PROXIES: 127.0.0.0/8,::1/128,10.244.0.0/16,192.168.1.0/24
+    service:
+      # Only users authenticated by Authelia can create accounts.
+      ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+      SHOW_REGISTRATION_BUTTON: false
+    openid:
+      ENABLE_OPENID_SIGNIN: false
+      ENABLE_OPENID_SIGNUP: false
+    oauth2_client:
+      ENABLE_AUTO_REGISTRATION: true
+
+test:
+  enabled: false
