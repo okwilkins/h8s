@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: forgejo
+  labels:
+    name: forgejo
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/part-of: forgejo
+    harbor-image-pulls: "true"
