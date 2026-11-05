@@ -15,6 +15,7 @@ resources:
   - ./vault-dashboard.yaml
   - ./cert-manager-dashboard.yaml
   - ./argo-workflows-dashboard.yaml
+  - ./forgejo-dashboard.yaml
   - ./fluent-bit-dashboard.yaml
   - ./victoria-logs-dashboard.yaml
   - ./personal-website-dashboard.yaml
