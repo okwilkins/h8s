@@ -1,0 +1,45 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-forgejo-prod
+  namespace: forgejo
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/part-of: forgejo
+    app.kubernetes.io/component: database
+  annotations:
+    argocd.argoproj.io/sync-wave: "-100"
+spec:
+  description: Postgres cluster for Forgejo
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie@sha256:64abc98a4387361afd6821a3a99f975763bbd87bbdde9449e75ad6002528a318
+  imagePullPolicy: IfNotPresent
+  instances: 1
+  inheritedMetadata:
+    labels:
+      recurring-job.longhorn.io/source: enabled
+      recurring-job-group.longhorn.io/encrypted-backup: enabled
+  storage:
+    size: 5Gi
+    storageClass: longhorn-encrypted
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  bootstrap:
+    initdb:
+      database: forgejo
+      owner: forgejo
+      secret:
+        name: cnpg-forgejo-prod-app-user-credentials
+  managed:
+    roles:
+      - name: forgejo
+        ensure: present
+        login: true
+        superuser: false
+        passwordSecret:
+          name: cnpg-forgejo-prod-app-user-credentials
+  enableSuperuserAccess: false

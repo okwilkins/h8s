@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-forgejo-prod
+  namespace: forgejo
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/part-of: forgejo
+    app.kubernetes.io/component: database
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: cnpg-forgejo-prod
+      cnpg.io/podRole: instance
+  podMetricsEndpoints:
+    - port: metrics

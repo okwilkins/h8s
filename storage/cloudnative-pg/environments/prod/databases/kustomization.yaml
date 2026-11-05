@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ./authelia/
   - ./bookorbit/
+  - ./forgejo/
   - ./harbor/
 patches:
   # Ensure the secret exists before servers
