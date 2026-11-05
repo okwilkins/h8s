@@ -179,3 +179,15 @@ spec:
         certificateRefs:
           - name: books-okwilkins-dev-tls
             namespace: bookorbit
+    - protocol: HTTPS
+      name: home-lan-forgejo
+      hostname: git.okwilkins.dev
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: git-okwilkins-dev-tls
+            namespace: forgejo
