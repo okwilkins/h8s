@@ -27,6 +27,10 @@ This was done as Backblaze B2 does not have locking built in.
 Kubernetes access comes directly from the sensitive stage `03` state outputs, so no local kubeconfig or home context is required.
 Harbor must be running, and External Secrets Operator must have created its login Secrets from Vault before applying this stage.
 
+Forgejo must also be running with `forgejo-admin-secret` synced in the `forgejo` namespace.
+Vault must be unsealed with its KV mount configured, and stage `06` state must contain its bootstrap credentials.
+Apply stage `07` first and wait for ESO to create `renovate-forgejo-credentials` in the `renovate` namespace.
+
 ```bash
 task --dir "$INFRA_ROOT" platform:configure
 ```

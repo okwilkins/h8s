@@ -8,6 +8,10 @@ terraform {
       source  = "goharbor/harbor"
       version = "3.12.5"
     }
+    forgejo = {
+      source  = "svalabs/forgejo"
+      version = "1.7.0"
+    }
   }
 }
 
@@ -40,3 +44,9 @@ provider "harbor" {
   username = local.harbor_user
 }
 
+# Access token creation requires basic authentication, not an API token.
+provider "forgejo" {
+  host     = var.forgejo_url
+  username = data.kubernetes_secret_v1.forgejo_admin_secret.data.username
+  password = data.kubernetes_secret_v1.forgejo_admin_secret.data.password
+}
