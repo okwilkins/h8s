@@ -10,12 +10,16 @@ Add these published application routes to the existing tunnel, with SSH before a
 
 | Hostname | Service |
 | --- | --- |
-| `git.okwilkins.dev` | `http://cilium-gateway-cloudflare-gateway.cloudflare.svc.cluster.local:80` |
+| `git.okwilkins.dev` | `http://20.0.0.0:80` |
 | `git-ssh.okwilkins.dev` | `ssh://forgejo-ssh.forgejo.svc.cluster.local:22` |
+
+The HTTP origin uses the same Gateway as the existing tunnel routes; Cloudflare serves HTTPS publicly. The existing cluster connector handles both routes.
 
 Do not put an interactive Cloudflare Access login in front of the HTTPS route; Git clients use Forgejo tokens. The SSH route can have an Access policy.
 
 ## SSH
+
+The tunnel carries SSH over WebSockets, not a public TCP/22 port, so each SSH client needs `cloudflared`. HTTPS clone/push does not need it.
 
 Add your SSH public key in Forgejo, install `cloudflared` on your client, and add this to `~/.ssh/config`:
 
@@ -26,7 +30,7 @@ Host git-ssh.okwilkins.dev
 ```
 
 ```bash
-git clone git@git-ssh.okwilkins.dev:okwilkins/example.git
+ssh -T git@git-ssh.okwilkins.dev
 ```
 
 ## Emergency login
