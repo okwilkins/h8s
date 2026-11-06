@@ -5,6 +5,14 @@ metadata:
   namespace: coredns-lan
 data:
   Corefile: |-
+    git-ssh.okwilkins.dev:53 {
+        # The SSH client helper must reach Cloudflare, not the LAN HTTPS gateway.
+        forward . tls://1.1.1.1 tls://1.0.0.1 {
+            tls_servername cloudflare-dns.com
+        }
+        cache 30
+        errors
+    }
     okwilkins.dev:53 {
         ready
         log . {
