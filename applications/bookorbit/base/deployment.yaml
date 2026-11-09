@@ -35,7 +35,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: bookorbit
-          image: harbor.okwilkins.dev/ghcr-cache/bookorbit/bookorbit:3.6.0@sha256:bbb5da52e96dbbff1dd36f55454f9845e6cde264b4b3428a3ea783124a4ca62e
+          image: harbor.okwilkins.dev/ghcr-cache/bookorbit/bookorbit:3.7.0@sha256:0d5f4a31576a2bcd96afa77b8eac75c3b8df395f0f9b9215995de59236f22b95
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
