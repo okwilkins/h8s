@@ -44,7 +44,7 @@ spec:
               mountPath: /etc/searxng
       containers:
         - name: searxng
-          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.10.29-cff884f98
+          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.2-cccbc9e15
           ports:
             - name: http
               containerPort: 8080
