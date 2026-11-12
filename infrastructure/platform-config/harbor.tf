@@ -54,7 +54,8 @@ locals {
 ############
 resource "harbor_project" "main" {
   name                        = "main"
-  deployment_security         = "critical"
+  deployment_security         = null # Disable vulnerability-based pull blocking
+  vulnerability_scanning      = true
   public                      = true
   enable_content_trust_cosign = true
 }
