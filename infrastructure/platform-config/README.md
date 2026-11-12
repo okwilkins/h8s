@@ -7,8 +7,8 @@ Terraform configurations for managing platform-level resources that don't have m
 This manages Harbor container registry resources including:
 - Projects (main, docker-hub-cache, ghcr-cache)
 - Registries (Docker Hub, Quay, GHCR pull-through caches)
-- Users and robot accounts
-- Project memberships and permissions
+- Authelia OIDC authentication (`admins` grants Harbor administrator access)
+- Robot accounts and permissions
 
 ## Getting Started
 
@@ -37,9 +37,10 @@ task --dir "$INFRA_ROOT" platform:configure
 
 ### Using Harbor Pull-Through Caches
 
-Login to Harbor:
+Sign in at https://harbor.okwilkins.dev with Authelia, then copy your **CLI secret** from **User Profile**. Use it as the password below, not your Authelia password:
+
 ```bash
-docker login harbor.okwilkins.dev -u oli
+docker login harbor.okwilkins.dev -u okwilkins
 ```
 
 Pull through caches:
@@ -48,3 +49,4 @@ docker pull harbor.okwilkins.dev/docker-hub-cache/hello-world:latest
 ```
 
 Pattern: `harbor.okwilkins.dev/<project>/<image>:<tag>`
+
