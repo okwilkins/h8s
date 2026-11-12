@@ -23,6 +23,8 @@
           ln -s ${pkgs.pkgsStatic.busybox}/bin/rm $out/bin/rm
           ln -s ${pkgs.pkgsStatic.busybox}/bin/cat $out/bin/cat
           ln -s ${pkgs.pkgsStatic.busybox}/bin/echo $out/bin/echo
+          ln -s ${pkgs.pkgsStatic.busybox}/bin/mktemp $out/bin/mktemp
+          ln -s ${pkgs.pkgsStatic.busybox}/bin/sleep $out/bin/sleep
         '';
         minimalShadow = pkgs.runCommand "minimal-shadow" { } ''
           mkdir -p $out/bin
