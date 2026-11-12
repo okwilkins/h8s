@@ -12,3 +12,4 @@ resources:
   - ./argo-workflows-client-secret.yaml
   - ./searxng-client-secret.yaml
   - ./forgejo-client-secret.yaml
+  - ./harbor-client-secret.yaml

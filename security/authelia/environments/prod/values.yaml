@@ -71,6 +71,9 @@ pod:
     - name: forgejo-client-secret
       secret:
         secretName: authelia-forgejo-client-secret
+    - name: harbor-client-secret
+      secret:
+        secretName: authelia-harbor-client-secret
   extraVolumeMounts:
     - name: users-config
       mountPath: /config
@@ -91,6 +94,9 @@ pod:
       readOnly: true
     - name: forgejo-client-secret
       mountPath: /secrets/forgejo-client-secret
+      readOnly: true
+    - name: harbor-client-secret
+      mountPath: /secrets/harbor-client-secret
       readOnly: true
 
 # https://github.com/authelia/authelia/blob/v4.39.16/config.template.yml
@@ -153,6 +159,12 @@ configMap:
           key:
             path: /secrets/oidc-rsa-key/oidc-rsa-key
       claims_policies:
+        harbor:
+          id_token:
+            - email
+            - name
+            - groups
+            - preferred_username
         grafana:
           id_token:
             - email
@@ -160,6 +172,32 @@ configMap:
             - groups
             - preferred_username
       clients:
+        - client_id: harbor
+          client_name: Harbor
+          client_secret:
+            path: /secrets/harbor-client-secret/client-secret-hash
+          public: false
+          authorization_policy: two_factor
+          claims_policy: harbor
+          consent_mode: pre-configured
+          pre_configured_consent_duration: '30 days'
+          require_pkce: false
+          redirect_uris:
+            - https://harbor.okwilkins.dev/c/oidc/callback
+          scopes:
+            - openid
+            - offline_access
+            - profile
+            - groups
+            - email
+          response_types:
+            - code
+          grant_types:
+            - authorization_code
+            - refresh_token
+          access_token_signed_response_alg: none
+          userinfo_signed_response_alg: none
+          token_endpoint_auth_method: client_secret_basic
         - client_id: grafana
           client_name: Grafana
           client_secret:
