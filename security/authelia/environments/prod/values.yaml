@@ -62,6 +62,9 @@ pod:
     - name: argocd-client-secret
       secret:
         secretName: authelia-argocd-client-secret
+    - name: argo-workflows-client-secret
+      secret:
+        secretName: authelia-argo-workflows-client-secret
     - name: searxng-client-secret
       secret:
         secretName: authelia-searxng-client-secret
@@ -79,6 +82,9 @@ pod:
       readOnly: true
     - name: argocd-client-secret
       mountPath: /secrets/argocd-client-secret
+      readOnly: true
+    - name: argo-workflows-client-secret
+      mountPath: /secrets/argo-workflows-client-secret
       readOnly: true
     - name: searxng-client-secret
       mountPath: /secrets/searxng-client-secret
@@ -188,6 +194,27 @@ configMap:
             - openid
             - groups
             - email
+        - client_id: argo-workflows
+          client_name: Argo Workflows
+          client_secret:
+            path: /secrets/argo-workflows-client-secret/client-secret-hash
+          public: false
+          authorization_policy: two_factor
+          consent_mode: pre-configured
+          pre_configured_consent_duration: '7 days'
+          token_endpoint_auth_method: client_secret_basic
+          # Argo Workflows 4.1 does not send a PKCE challenge.
+          require_pkce: false
+          redirect_uris:
+            - https://workflows.okwilkins.dev/oauth2/callback
+          scopes:
+            - openid
+            - email
+            - groups
+          response_types:
+            - code
+          grant_types:
+            - authorization_code
         - client_id: argocd-cli
           client_name: Argo CD (CLI)
           public: true
