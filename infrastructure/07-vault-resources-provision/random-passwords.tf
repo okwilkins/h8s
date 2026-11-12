@@ -8,12 +8,6 @@ resource "random_password" "harbor_admin_password" {
   override_special = "!#%&*()-_=+[]{}<>?"
 }
 
-resource "random_password" "harbor_main_user_password" {
-  length           = 32
-  special          = true
-  override_special = "!#%&*()-_=+[]{}<>?"
-}
-
 resource "random_password" "harbor_dagger_robot_secret" {
   length           = 32
   special          = true
