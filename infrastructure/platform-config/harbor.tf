@@ -22,9 +22,9 @@ data "kubernetes_secret_v1" "harbor_image_pull_robot_secret" {
   }
 }
 
-data "kubernetes_secret_v1" "main_user_secret" {
+data "kubernetes_secret_v1" "harbor_oidc_secret" {
   metadata {
-    name      = "harbor-main-user-secret"
+    name      = "harbor-oidc"
     namespace = "harbor"
   }
 }
@@ -98,32 +98,22 @@ resource "harbor_registry" "ghcr" {
   endpoint_url  = "https://ghcr.io"
 }
 
-#########
-# Users #
-#########
-resource "harbor_user" "main" {
-  username  = "oli"
-  password  = data.kubernetes_secret_v1.main_user_secret.data.PASSWORD
-  full_name = "Oliver Kenyon Wilkins"
-  email     = "okwilkins@googlemail.com"
-}
-
-resource "harbor_project_member_user" "oli_docker_cache_member" {
-  project_id = harbor_project.docker_cache.id
-  user_name  = harbor_user.main.username
-  role       = "guest"
-}
-
-# resource "harbor_project_member_user" "oli_quay_cache_member" {
-#   project_id = harbor_project.quay_cache.id
-#   user_name  = harbor_user.main.username
-#   role       = "guest"
-# }
-
-resource "harbor_project_member_user" "oli_ghcr_cache_member" {
-  project_id = harbor_project.ghcr_cache.id
-  user_name  = harbor_user.main.username
-  role       = "guest"
+##################
+# Authentication #
+##################
+resource "harbor_config_auth" "authelia" {
+  auth_mode          = "oidc_auth"
+  primary_auth_mode  = true
+  oidc_name          = "Authelia"
+  oidc_endpoint      = "https://auth.okwilkins.dev"
+  oidc_client_id     = data.kubernetes_secret_v1.harbor_oidc_secret.data["client-id"]
+  oidc_client_secret = data.kubernetes_secret_v1.harbor_oidc_secret.data["client-secret"]
+  oidc_scope         = "openid,profile,email,groups,offline_access"
+  oidc_verify_cert   = true
+  oidc_auto_onboard  = true
+  oidc_user_claim    = "preferred_username"
+  oidc_groups_claim  = "groups"
+  oidc_admin_group   = "admins"
 }
 
 ##################
