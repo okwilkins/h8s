@@ -1,4 +1,4 @@
-# https://artifacthub.io/packages/helm/argo/argo-workflows/0.45.19?modal=values
+# https://artifacthub.io/packages/helm/argo/argo-workflows/2.0.18?modal=values
 
 workflow:
   serviceAccount:
@@ -15,3 +15,39 @@ controller:
     enabled: true
   serviceMonitor:
     enabled: true
+
+server:
+  authModes:
+    - sso
+    - client
+  sso:
+    enabled: true
+    issuer: https://auth.okwilkins.dev
+    clientId:
+      name: argo-workflows-oidc
+      key: client-id
+    clientSecret:
+      name: argo-workflows-oidc
+      key: client-secret
+    redirectUrl: https://workflows.okwilkins.dev/oauth2/callback
+    scopes:
+      - email
+      - groups
+    userInfoPath: /api/oidc/userinfo
+    rbac:
+      enabled: true
+    sessionExpiry: 10h
+  extraEnv:
+    - name: SSL_CERT_DIR
+      value: /etc/ssl/certs:/etc/argo-oidc-ca
+  volumes:
+    - name: oidc-provider-ca
+      secret:
+        secretName: workflows-okwilkins-dev-tls
+        items:
+          - key: ca.crt
+            path: okwilkins-dev-ca.crt
+  volumeMounts:
+    - name: oidc-provider-ca
+      mountPath: /etc/argo-oidc-ca
+      readOnly: true
