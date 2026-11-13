@@ -104,9 +104,11 @@ data "talos_machine_configuration" "nodes" {
             port    = 7445
           }
         }
-        # IPv6 forwarding for the Tailscale exit node (IPv4 forwarding is on by default in Talos).
         sysctls = {
+          # IPv6 forwarding for the Tailscale exit node (IPv4 forwarding is on by default in Talos).
           "net.ipv6.conf.all.forwarding" = "1"
+          # Enable user namespaces for rootless image builds on all cluster nodes.
+          "user.max_user_namespaces" = "256"
         }
         kubelet = {
           nodeIP = {
