@@ -17,42 +17,33 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        minimalUtils = pkgs.runCommand "minimal-utils" { } ''
-          mkdir -p $out/bin
-          ln -s ${pkgs.pkgsStatic.busybox}/bin/sh $out/bin/sh
-          ln -s ${pkgs.pkgsStatic.busybox}/bin/rm $out/bin/rm
-          ln -s ${pkgs.pkgsStatic.busybox}/bin/cat $out/bin/cat
-          ln -s ${pkgs.pkgsStatic.busybox}/bin/echo $out/bin/echo
-          ln -s ${pkgs.pkgsStatic.busybox}/bin/mktemp $out/bin/mktemp
-          ln -s ${pkgs.pkgsStatic.busybox}/bin/sleep $out/bin/sleep
-        '';
-        minimalShadow = pkgs.runCommand "minimal-shadow" { } ''
-          mkdir -p $out/bin
-          ln -s ${pkgs.shadow}/bin/useradd $out/bin/useradd
-          ln -s ${pkgs.shadow}/bin/groupadd $out/bin/groupadd
-          ln -s ${pkgs.shadow}/bin/usermod $out/bin/usermod
-        '';
+        buildah = pkgs.buildah.override { crun = null; };
         tools = [
-          minimalUtils
-          minimalShadow
-          pkgs.gitMinimal
-          pkgs.cosign
-          pkgs.jq
-          pkgs.go-task
-          pkgs.buildah
+          pkgs.pkgsStatic.busybox
+          buildah
         ];
       in
       {
         devShells.default = pkgs.mkShellNoCC {
           buildInputs = tools;
         };
-
         packages.tools = pkgs.buildEnv {
           name = "tools";
           paths = tools;
           pathsToLink = [ "/bin" ];
         };
-
+        packages.image-tools = pkgs.buildEnv {
+          name = "image-tools";
+          paths = tools ++ [
+            pkgs.shadow
+            pkgs.fuse-overlayfs
+          ];
+          pathsToLink = [ "/bin" ];
+        };
+        packages.prepare-rootfs = pkgs.writers.writePython3Bin "prepare-rootfs" {
+          doCheck = false;
+        } ./prepare-rootfs.py;
+        packages.setcap = pkgs.pkgsStatic.libcap.override { withGo = false; };
         defaultPackage = self.packages.${system}.tools;
       }
     );
