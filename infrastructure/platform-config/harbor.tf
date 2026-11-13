@@ -8,10 +8,10 @@ data "kubernetes_secret_v1" "harbor_admin_secret" {
   }
 }
 
-data "kubernetes_secret_v1" "harbor_dagger_robot_secret" {
+data "kubernetes_secret_v1" "harbor_argo_workflows_credentials" {
   metadata {
-    name      = "harbor-dagger-robot-secret"
-    namespace = "harbor"
+    name      = "harbor-argo-workflows-credentials"
+    namespace = "argo-workflows"
   }
 }
 
@@ -120,11 +120,12 @@ resource "harbor_config_auth" "authelia" {
 ##################
 # Robot Accounts #
 ##################
-resource "harbor_robot_account" "terraform" {
-  name        = "dagger"
-  description = "robot for dagger to perform ci-cd operations"
+resource "harbor_robot_account" "argo_workflows" {
+  name        = "argo-workflows"
+  description = "Dedicated image build and publishing account for Argo Workflows"
   level       = "system"
-  secret      = data.kubernetes_secret_v1.harbor_dagger_robot_secret.data.SECRET
+  secret      = data.kubernetes_secret_v1.harbor_argo_workflows_credentials.data.password
+
   permissions {
     access {
       action   = "push"
@@ -133,18 +134,6 @@ resource "harbor_robot_account" "terraform" {
     access {
       action   = "pull"
       resource = "repository"
-    }
-    access {
-      action   = "create"
-      resource = "artifact"
-    }
-    access {
-      action   = "read"
-      resource = "artifact"
-    }
-    access {
-      action   = "delete"
-      resource = "artifact"
     }
     kind      = "project"
     namespace = harbor_project.main.name
@@ -157,21 +146,12 @@ resource "harbor_robot_account" "terraform" {
     kind      = "project"
     namespace = harbor_project.docker_cache.name
   }
-  # permissions {
-  #   access {
-  #     action   = "pull"
-  #     resource = "repository"
-  #   }
-  #   kind      = "project"
-  #   namespace = harbor_project.quay_cache.name
-  # }
-  permissions {
-    access {
-      action   = "pull"
-      resource = "repository"
+
+  lifecycle {
+    postcondition {
+      condition     = self.full_name == data.kubernetes_secret_v1.harbor_argo_workflows_credentials.data.username
+      error_message = "The workflow credentials username must match the full Harbor robot name, including its prefix."
     }
-    kind      = "project"
-    namespace = harbor_project.ghcr_cache.name
   }
 }
 

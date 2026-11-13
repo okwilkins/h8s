@@ -65,26 +65,35 @@ resource "null_resource" "vault_secret_harbor_admin" {
   depends_on = [data.terraform_remote_state.vault_init]
 }
 
-resource "null_resource" "vault_secret_harbor_dagger" {
+locals {
+  harbor_argo_workflows_credentials = {
+    username = "robot$argo-workflows"
+    password = random_password.harbor_argo_workflows_robot_password.result
+  }
+}
+
+resource "null_resource" "vault_secret_harbor_argo_workflows" {
   triggers = {
-    secret_hash = md5("SECRET=${random_password.harbor_dagger_robot_secret.result}")
+    credentials_hash = sha256(jsonencode(local.harbor_argo_workflows_credentials))
   }
 
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     environment = {
-      VAULT_TOKEN = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+      INFRA_ROOT          = var.infra_root
+      KUBECONFIG_CONTENT  = sensitive(data.terraform_remote_state.talos_configure.outputs.kubeconfig)
+      SERVER              = data.terraform_remote_state.talos_configure.outputs.first_node_ip
+      VAULT_TOKEN         = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+      HARBOR_CREDENTIALS  = sensitive(jsonencode(local.harbor_argo_workflows_credentials))
     }
-
     command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault kv put kubernetes-homelab/harbor/dagger-robot-secret \\
-          SECRET='${random_password.harbor_dagger_robot_secret.result}' || exit 1
-      "
+      set -euo pipefail
+      source "$INFRA_ROOT/scripts/common.sh"
+      printf '%s\n%s' "$VAULT_TOKEN" "$HARBOR_CREDENTIALS" | kubectl_wrapper exec -i -n vault vault-0 -- sh -ec '
+        IFS= read -r VAULT_TOKEN
+        export VAULT_TOKEN
+        vault kv put kubernetes-homelab/harbor/argo-workflows - >/dev/null
+      '
     EOT
   }
 
