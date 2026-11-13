@@ -1,0 +1,175 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: image-buildah
+  namespace: argo-workflows
+  labels:
+    app.kubernetes.io/name: image-buildah
+    app.kubernetes.io/part-of: argo-workflows
+spec:
+  entrypoint: build-and-push
+  serviceAccountName: argo-workflow
+  arguments:
+    parameters:
+      - name: revision
+        description: Full 40-character Git commit SHA to build.
+      - name: builder-digest
+        description: Published image-buildah runner digest (sha256:...), not a local image ID.
+  workflowMetadata:
+    labels:
+      app.kubernetes.io/name: image-buildah
+      app.kubernetes.io/part-of: argo-workflows
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  synchronization:
+    mutexes:
+      - name: image-buildah
+  activeDeadlineSeconds: 3600
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+  podGC:
+    strategy: OnWorkflowSuccess
+    deleteDelayDuration: 10m
+  templates:
+    - name: build-and-push
+      inputs:
+        artifacts:
+          - name: source-code
+            path: /workspace
+            git:
+              repo: https://github.com/okwilkins/h8s.git
+              revision: "{{workflow.parameters.revision}}"
+          - name: storage-config
+            path: /tmp/storage.conf
+            raw:
+              data: |
+                [storage]
+                driver = "vfs"
+                graphroot = "/storage/graph"
+                rootless_storage_path = "/storage/graph"
+                runroot = "/storage/run"
+      outputs:
+        parameters:
+          - name: image-digest
+            globalName: image-digest
+            valueFrom:
+              path: /tmp/image-digest
+          - name: image-reference
+            globalName: image-reference
+            valueFrom:
+              path: /tmp/image-reference
+      volumes:
+        - name: buildah-storage
+          emptyDir:
+            sizeLimit: 20Gi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 4Gi
+        - name: var-tmp
+          emptyDir:
+            sizeLimit: 4Gi
+        - name: harbor-auth
+          secret:
+            secretName: harbor-argo-workflows-credentials
+            defaultMode: 0440
+            items:
+              - key: username
+                path: username
+              - key: password
+                path: password
+        - name: registry-ca
+          secret:
+            secretName: workflows-okwilkins-dev-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
+      container:
+        image: "harbor.okwilkins.dev/main/image-buildah@{{workflow.parameters.builder-digest}}"
+        imagePullPolicy: IfNotPresent
+        workingDir: /workspace/images/image-buildah
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -eu
+            umask 077
+
+            if [ "${#GIT_REVISION}" -ne 40 ] || \
+              ! printf '%s\n' "$GIT_REVISION" | grep -Eq '^[0-9a-f]{40}$'; then
+              printf 'revision must be a full lowercase Git commit SHA.\n' >&2
+              exit 1
+            fi
+
+            mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
+            chmod 0700 "$XDG_RUNTIME_DIR"
+            trap 'rm -f "$REGISTRY_AUTH_FILE"' EXIT
+
+            repository=harbor.okwilkins.dev/main/image-buildah
+            image="$repository:$GIT_REVISION-amd64"
+
+            buildah login \
+              --username "$(cat /var/run/secrets/harbor/username)" \
+              --password-stdin \
+              harbor.okwilkins.dev < /var/run/secrets/harbor/password
+
+            buildah build \
+              --platform linux/amd64 \
+              --file Containerfile \
+              --tag "$image" \
+              .
+
+            buildah push \
+              --digestfile /tmp/image-digest \
+              "$image" \
+              "docker://$image"
+
+            printf '%s@%s\n' "$repository" "$(cat /tmp/image-digest)" > /tmp/image-reference
+            cat /tmp/image-reference
+        env:
+          - name: GIT_REVISION
+            value: "{{workflow.parameters.revision}}"
+          - name: CONTAINERS_STORAGE_CONF
+            value: /tmp/storage.conf
+          - name: XDG_RUNTIME_DIR
+            value: /tmp/run-1000
+          - name: XDG_CONFIG_HOME
+            value: /tmp/config
+          - name: REGISTRY_AUTH_FILE
+            value: /tmp/registry-auth.json
+        securityContext:
+          privileged: false
+          # File-capability mapping helpers must be able to gain SETUID/SETGID.
+          allowPrivilegeEscalation: true
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - SETUID
+              - SETGID
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+            ephemeral-storage: 8Gi
+          limits:
+            cpu: "2"
+            memory: 4Gi
+            ephemeral-storage: 30Gi
+        volumeMounts:
+          - name: buildah-storage
+            mountPath: /storage
+          - name: tmp
+            mountPath: /tmp
+          - name: var-tmp
+            mountPath: /var/tmp
+          - name: harbor-auth
+            mountPath: /var/run/secrets/harbor
+            readOnly: true
+          - name: registry-ca
+            mountPath: /etc/containers/certs.d/harbor.okwilkins.dev
+            readOnly: true
