@@ -58,13 +58,11 @@ spec:
         - - name: sbom
             templateRef:
               name: syft-sbom
-              template: generate-and-attest
+              template: generate-and-publish
             arguments:
               parameters:
                 - name: image-reference
                   value: "{{steps.build-and-push.outputs.parameters.image-reference}}"
-                - name: signer-digest
-                  value: "{{workflow.parameters.signer-digest}}"
     - name: build-and-push
       inputs:
         artifacts:
