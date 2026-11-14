@@ -145,6 +145,9 @@ spec:
           # File-capability mapping helpers must be able to gain SETUID/SETGID.
           allowPrivilegeEscalation: true
           readOnlyRootFilesystem: true
+          seccompProfile:
+            type: Localhost
+            localhostProfile: profiles/buildah.json
           capabilities:
             drop:
               - ALL
