@@ -26,10 +26,33 @@ resource "talos_machine_secrets" "this" {}
 # ============================================================
 # Generates the full machine config for each node, equivalent to the
 # `talosctl gen config --output-types controlplane` calls in gen_configs.sh.
-#
-# All patches are inlined as config_patches so all configuration lives in one place.
 
 locals {
+  # RuntimeDefault snapshot from Talos 1.14.3 / containerd 2.3.7, amd64, without capability expansions.
+  seccomp_runtime_default = jsondecode(file("${path.module}/seccomp-containerd-2.3.7-amd64.json"))
+
+  # Buildah's chroot isolation needs user/mount/UTS namespaces and mounts inside them.
+  buildah_seccomp_profile = merge(local.seccomp_runtime_default, {
+    syscalls = concat(local.seccomp_runtime_default.syscalls, [
+      {
+        names  = ["chroot", "mount", "pivot_root", "sethostname", "setns", "umount2"]
+        action = "SCMP_ACT_ALLOW"
+      },
+      {
+        names  = ["clone", "unshare"]
+        action = "SCMP_ACT_ALLOW"
+        args = [{
+          index = 0
+          # CLONE_NEWTIME | CLONE_NEWCGROUP | CLONE_NEWIPC | CLONE_NEWPID | CLONE_NEWNET.
+          # Keep those blocked while permitting user/mount/UTS namespaces.
+          value    = 1778385024
+          valueTwo = 0
+          op       = "SCMP_CMP_MASKED_EQ"
+        }]
+      },
+    ])
+  })
+
   # Extract the numeric suffix from the node name for use in hostname patch.
   # "controlplane-worker-2" -> "2"
   node_numbers = {
@@ -110,6 +133,12 @@ data "talos_machine_configuration" "nodes" {
           # Enable user namespaces for rootless image builds on all cluster nodes.
           "user.max_user_namespaces" = "256"
         }
+        seccompProfiles = [
+          {
+            name  = "buildah.json"
+            value = local.buildah_seccomp_profile
+          }
+        ]
         kubelet = {
           nodeIP = {
             validSubnets = var.node_ip_valid_subnets
