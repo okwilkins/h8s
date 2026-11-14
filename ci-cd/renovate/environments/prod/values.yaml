@@ -8,11 +8,12 @@ image:
 imagePullSecrets: harbor-credentials
 
 renovate:
-  # Permit only the Nix lock refresh needed after a stable channel update.
+  # Permit only the Buildah lock refresh and the trusted personal-website tool sync.
   config: |
     module.exports = {
       allowedCommands: [
         "^nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs$",
+        String.raw`^bash -o pipefail -c 'nix --extra-experimental-features "nix-command flakes" eval --raw --no-write-lock-file \.#lib\.x86_64-linux\.syncNixTools \| python3 - --install-tools'$`,
       ],
     };
 
