@@ -40,9 +40,18 @@ server:
 valkey:
   url: "redis://searxng-redis:6379/0"
 
+categories_as_tabs:
+  general:
+  GitHub:
+  Hacker News:
+
 engines:
-  # Keep specialist engines in their upstream categories, not general web search.
+  # Give each specialist engine its own search tab.
+  - name: github
+    categories: [GitHub]
+    disabled: false
   - name: hackernews
+    categories: [Hacker News]
     disabled: false
   - name: exaapi
     inactive: false
