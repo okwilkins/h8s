@@ -68,7 +68,7 @@ spec:
             mountPath: /sbom
         containers:
           - name: scan
-            image: docker.io/anchore/syft:v1.44.0@sha256:86fde6445b483d902fe011dd9f68c4987dd94e07da1e9edc004e3c2422650de6
+            image: docker.io/anchore/syft:v1.57.1@sha256:03215d0e98b661d0ecbc8575dbc14d65be1743b5de5df6410aecb7e80f95b060
             imagePullPolicy: IfNotPresent
             workingDir: /tmp
             command: ["/syft"]
