@@ -1,0 +1,122 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: cosign-sign-and-verify
+  namespace: argo-workflows
+  labels:
+    app.kubernetes.io/name: cosign-sign-and-verify
+    app.kubernetes.io/part-of: argo-workflows
+spec:
+  entrypoint: sign-and-verify
+  serviceAccountName: argo-workflow
+  arguments:
+    parameters:
+      - name: image-reference
+        description: Harbor main-project image reference pinned by SHA-256 digest.
+      - name: signer-digest
+        description: Published image-cosign runner digest (sha256:...), not a local image ID.
+  workflowMetadata:
+    labels:
+      app.kubernetes.io/name: cosign-sign-and-verify
+      app.kubernetes.io/part-of: argo-workflows
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+  podGC:
+    strategy: OnWorkflowSuccess
+    deleteDelayDuration: 10m
+  templates:
+    - name: sign-and-verify
+      activeDeadlineSeconds: 600
+      inputs:
+        parameters:
+          - name: image-reference
+          - name: signer-digest
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 128Mi
+        - name: cosign-key-pair
+          secret:
+            secretName: cosign-key-pair
+            defaultMode: 0440
+            items:
+              - key: cosign.key
+                path: cosign.key
+              - key: cosign.pub
+                path: cosign.pub
+        - name: harbor-auth
+          secret:
+            secretName: harbor-argo-workflows-credentials
+            defaultMode: 0440
+            items:
+              - key: username
+                path: username
+              - key: password
+                path: password
+        - name: registry-ca
+          secret:
+            secretName: workflows-okwilkins-dev-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
+      container:
+        image: "harbor.okwilkins.dev/main/image-cosign@{{inputs.parameters.signer-digest}}"
+        imagePullPolicy: IfNotPresent
+        workingDir: /tmp
+        command: ["/usr/local/bin/sign-and-verify"]
+        args: ["{{inputs.parameters.image-reference}}"]
+        env:
+          - name: REGISTRY
+            value: harbor.okwilkins.dev
+          - name: HARBOR_CREDENTIALS
+            value: /var/run/secrets/harbor
+          - name: COSIGN_KEYS
+            value: /var/run/secrets/cosign
+          - name: SSL_CERT_DIR
+            value: /etc/ssl/certs:/var/run/secrets/registry-ca
+          - name: SCAN_RETRIES
+            value: "60"
+          - name: SCAN_RETRY_DELAY
+            value: "5"
+          - name: COSIGN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cosign-key-pair
+                key: COSIGN_PASSWORD
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+            ephemeral-storage: 64Mi
+          limits:
+            cpu: "1"
+            memory: 512Mi
+            ephemeral-storage: 256Mi
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+          - name: cosign-key-pair
+            mountPath: /var/run/secrets/cosign
+            readOnly: true
+          - name: harbor-auth
+            mountPath: /var/run/secrets/harbor
+            readOnly: true
+          - name: registry-ca
+            mountPath: /var/run/secrets/registry-ca
+            readOnly: true
