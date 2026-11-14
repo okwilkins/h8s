@@ -19,7 +19,7 @@ spec:
       - name: builder-digest
         description: Published image-buildah runner digest (sha256:...), not a local image ID.
       - name: signer-digest
-        description: Published image-cosign runner digest (sha256:...), not a local image ID.
+        description: Published main/cosign runner digest (sha256:...), not a local image ID.
   workflowMetadata:
     labels:
       app.kubernetes.io/name: image-buildah
