@@ -73,6 +73,12 @@ spec:
         - name: var-tmp
           emptyDir:
             sizeLimit: 4Gi
+        - name: run-user
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: buildah-home
+          emptyDir:
+            sizeLimit: 64Mi
         - name: harbor-auth
           secret:
             secretName: harbor-argo-workflows-credentials
@@ -135,9 +141,9 @@ spec:
           - name: CONTAINERS_STORAGE_CONF
             value: /tmp/storage.conf
           - name: XDG_RUNTIME_DIR
-            value: /tmp/run-1000
+            value: /run/user/1000
           - name: XDG_CONFIG_HOME
-            value: /tmp/config
+            value: /home/buildah/.config
           - name: REGISTRY_AUTH_FILE
             value: /tmp/registry-auth.json
         securityContext:
@@ -170,6 +176,10 @@ spec:
             mountPath: /tmp
           - name: var-tmp
             mountPath: /var/tmp
+          - name: run-user
+            mountPath: /run/user
+          - name: buildah-home
+            mountPath: /home/buildah
           - name: harbor-auth
             mountPath: /var/run/secrets/harbor
             readOnly: true
