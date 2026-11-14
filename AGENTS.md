@@ -15,6 +15,15 @@ This is a **Kubernetes infrastructure-as-code repository** containing:
 
 It is **extremely** important that you use the internet. Kubernetes projects change frequently and you will likely implement the wrong thing if you do not utilise it.
 
+## Documentation Writing
+
+It's important to reduce cognitive overload for the reader to follow these rules:
+- Keep It Simple Stupid! Do not write unnecessary fluff and get to the point.
+- Only write documentation is it's **actually** necessary.
+- Use British English
+- Never use the passive voice.
+- Never use `;` or em dashes to join sentences.
+
 ## Build Commands
 
 ### Development Environment
@@ -184,12 +193,4 @@ configMapGenerator:
 
 ## Dependencies
 
-Tools available in nix shell:
-- kubectl
-- kubernetes-helm
-- talosctl
-- argocd
-- cilium-cli
-- task
-- jq
-- terraform
+To understand which tools available, inspect the `flake.nix`.
