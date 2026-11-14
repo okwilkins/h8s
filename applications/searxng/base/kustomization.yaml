@@ -17,6 +17,7 @@ configMapGenerator:
     namespace: searxng
     files:
       - settings.yml
+      - exa_summaries.py
     options:
       labels:
         app.kubernetes.io/name: searxng

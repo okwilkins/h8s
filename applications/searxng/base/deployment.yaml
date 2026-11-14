@@ -27,7 +27,9 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: init-config
-          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.2-cccbc9e15
+          # INFO: Change back to upstream docker pull-through cache when this PR is merged:
+          # https://github.com/searxng/searxng/pull/6950
+          image: harbor.okwilkins.dev/main/searxng@sha256:270d842806f9e49bcb71a2b783d3cb37cd57dcdfe5bcb33604ab3f8687cc39b8
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -50,6 +52,13 @@ spec:
               settings = yaml.safe_load(Path("/tmp/config/settings.yml").read_text())
               engine = next(item for item in settings["engines"] if item["name"] == "exaapi")
               engine["api_key"] = api_key
+              # Custom plugin settings replace the upstream list, so retain it.
+              defaults = yaml.safe_load(Path("/usr/local/searxng/searx/settings.yml").read_text())
+              settings["plugins"] = {
+                  **defaults["plugins"],
+                  **settings.get("plugins", {}),
+                  "searx.plugins.exa_summaries.SXNGPlugin": {"active": True},
+              }
               os.umask(0o077)
               Path("/etc/searxng/settings.yml").write_text(yaml.safe_dump(settings, sort_keys=False))
           resources:
@@ -69,7 +78,8 @@ spec:
               mountPath: /etc/searxng
       containers:
         - name: searxng
-          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.2-cccbc9e15
+          image: harbor.okwilkins.dev/main/searxng@sha256:270d842806f9e49bcb71a2b783d3cb37cd57dcdfe5bcb33604ab3f8687cc39b8
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
@@ -82,6 +92,10 @@ spec:
           volumeMounts:
             - name: config-writable
               mountPath: /etc/searxng
+            - name: config-source
+              mountPath: /usr/local/searxng/searx/plugins/exa_summaries.py
+              subPath: exa_summaries.py
+              readOnly: true
             - name: limiter-config
               mountPath: /etc/searxng/limiter.toml
               subPath: limiter.toml
