@@ -18,7 +18,7 @@ ARG BUILD_USER
 ARG BUILD_UID
 ARG BUILD_GID
 
-COPY common/rootfs.py cosign/prepare-rootfs.py cosign/sign-and-verify.py ./
+COPY common/rootfs.py cosign/prepare-rootfs.py cosign/cosign_common.py cosign/sign-and-verify.py cosign/attest-sbom.py ./
 RUN nix run .#rootfs-python -- prepare-rootfs.py /tmp/rootfs "${BUILD_USER}" "${BUILD_UID}" "${BUILD_GID}"
 
 FROM scratch
