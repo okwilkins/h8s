@@ -14,7 +14,7 @@ spec:
       - name: image-reference
         description: Harbor image reference pinned by SHA-256 digest.
       - name: signer-digest
-        description: Published image-cosign runner digest (sha256:...), not a local image ID.
+        description: Published main/cosign runner digest (sha256:...), not a local image ID.
   workflowMetadata:
     labels:
       app.kubernetes.io/name: cosign-sign-and-verify
@@ -67,7 +67,7 @@ spec:
               - key: ca.crt
                 path: ca.crt
       container:
-        image: "harbor.okwilkins.dev/main/image-cosign@{{inputs.parameters.signer-digest}}"
+        image: "harbor.okwilkins.dev/main/cosign@{{inputs.parameters.signer-digest}}"
         imagePullPolicy: IfNotPresent
         workingDir: /tmp
         command: ["/usr/local/bin/sign-and-verify"]
