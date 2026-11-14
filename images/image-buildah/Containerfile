@@ -10,7 +10,7 @@ RUN printf '%s\n' \
     'build-users-group =' >> /etc/nix/nix.conf
 
 WORKDIR /tmp/build
-COPY flake.nix flake.lock ./
+COPY image-buildah/flake.nix image-buildah/flake.lock ./
 
 RUN nix build .#image-tools && nix build .#setcap --out-link setcap
 
@@ -18,8 +18,8 @@ ARG BUILD_USER
 ARG BUILD_UID
 ARG BUILD_GID
 
-COPY prepare-rootfs.py ./
-RUN nix run .#prepare-rootfs -- /tmp/rootfs "${BUILD_USER}" "${BUILD_UID}" "${BUILD_GID}"
+COPY common/rootfs.py image-buildah/prepare-rootfs.py ./
+RUN nix run .#rootfs-python -- prepare-rootfs.py /tmp/rootfs "${BUILD_USER}" "${BUILD_UID}" "${BUILD_GID}"
 
 FROM scratch
 
@@ -48,4 +48,3 @@ VOLUME /var/tmp
 VOLUME /home/${BUILD_USER}/.local/share/containers
 
 USER ${BUILD_UID}:${BUILD_GID}
-

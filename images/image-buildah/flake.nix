@@ -40,9 +40,7 @@
           ];
           pathsToLink = [ "/bin" ];
         };
-        packages.prepare-rootfs = pkgs.writers.writePython3Bin "prepare-rootfs" {
-          doCheck = false;
-        } ./prepare-rootfs.py;
+        packages.rootfs-python = pkgs.python3Minimal;
         packages.setcap = pkgs.pkgsStatic.libcap.override { withGo = false; };
         defaultPackage = self.packages.${system}.tools;
       }
