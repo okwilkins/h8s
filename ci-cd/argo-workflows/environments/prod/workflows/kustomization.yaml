@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - ./cosign-sign-and-verify-workflow-template.yaml
   - ./image-buildah-workflow-template.yaml
+  - ./syft-sbom-workflow-template.yaml

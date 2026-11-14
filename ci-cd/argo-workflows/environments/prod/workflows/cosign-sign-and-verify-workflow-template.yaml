@@ -12,7 +12,7 @@ spec:
   arguments:
     parameters:
       - name: image-reference
-        description: Harbor main-project image reference pinned by SHA-256 digest.
+        description: Harbor image reference pinned by SHA-256 digest.
       - name: signer-digest
         description: Published image-cosign runner digest (sha256:...), not a local image ID.
   workflowMetadata:

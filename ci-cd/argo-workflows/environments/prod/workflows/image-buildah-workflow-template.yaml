@@ -11,6 +11,9 @@ spec:
   serviceAccountName: argo-workflow
   arguments:
     parameters:
+      - name: git-repository
+        description: Git repository URL to clone.
+        value: https://github.com/okwilkins/h8s.git
       - name: revision
         description: Full 40-character Git commit SHA to build.
       - name: builder-digest
@@ -52,13 +55,23 @@ spec:
                   value: "{{steps.build-and-push.outputs.parameters.image-reference}}"
                 - name: signer-digest
                   value: "{{workflow.parameters.signer-digest}}"
+        - - name: sbom
+            templateRef:
+              name: syft-sbom
+              template: generate-and-attest
+            arguments:
+              parameters:
+                - name: image-reference
+                  value: "{{steps.build-and-push.outputs.parameters.image-reference}}"
+                - name: signer-digest
+                  value: "{{workflow.parameters.signer-digest}}"
     - name: build-and-push
       inputs:
         artifacts:
           - name: source-code
             path: /workspace
             git:
-              repo: https://github.com/okwilkins/h8s.git
+              repo: "{{workflow.parameters.git-repository}}"
               revision: "{{workflow.parameters.revision}}"
       outputs:
         parameters:
