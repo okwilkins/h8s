@@ -51,6 +51,6 @@ engines:
     api_key: ""
     search_type: auto
     results_per_page: 10
-    content_mode: highlights
+    content_mode: text
     content_max_characters: 500
     timeout: 6.0
