@@ -7,14 +7,12 @@ metadata:
     app.kubernetes.io/name: syft-sbom
     app.kubernetes.io/part-of: argo-workflows
 spec:
-  entrypoint: generate-and-attest
+  entrypoint: generate-and-publish
   serviceAccountName: argo-workflow
   arguments:
     parameters:
       - name: image-reference
         description: Signed Harbor AMD64 image-manifest reference pinned by SHA-256 digest.
-      - name: signer-digest
-        description: Published image-cosign runner digest (sha256:...), not a local image ID.
   workflowMetadata:
     labels:
       app.kubernetes.io/name: syft-sbom
@@ -32,14 +30,13 @@ spec:
     strategy: OnWorkflowSuccess
     deleteDelayDuration: 10m
   templates:
-    - name: generate-and-attest
+    - name: generate-and-publish
       activeDeadlineSeconds: 900
       nodeSelector:
         kubernetes.io/arch: amd64
       inputs:
         parameters:
           - name: image-reference
-          - name: signer-digest
       volumes:
         - name: sbom
           emptyDir:
@@ -50,15 +47,6 @@ spec:
         - name: tmp
           emptyDir:
             sizeLimit: 128Mi
-        - name: cosign-key-pair
-          secret:
-            secretName: cosign-key-pair
-            defaultMode: 0440
-            items:
-              - key: cosign.key
-                path: cosign.key
-              - key: cosign.pub
-                path: cosign.pub
         - name: harbor-auth
           secret:
             secretName: harbor-argo-workflows-credentials
@@ -143,29 +131,58 @@ spec:
           - name: main
             dependencies:
               - scan
-            image: "harbor.okwilkins.dev/main/image-cosign@{{inputs.parameters.signer-digest}}"
+            image: ghcr.io/oras-project/oras:v1.3.3@sha256:a4c54befd87d0366e0ba3ac3a9536a5288c8a3735acd3b635cdace59a2c559c8
             imagePullPolicy: IfNotPresent
-            workingDir: /tmp
-            command: ["/usr/local/bin/attest-sbom"]
-            args: ["{{inputs.parameters.image-reference}}", "/sbom"]
+            workingDir: /sbom
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                umask 077
+                trap 'rm -f "$REGISTRY_AUTH_FILE"' EXIT
+
+                oras login \
+                  --registry-config "$REGISTRY_AUTH_FILE" \
+                  --ca-file "$REGISTRY_CA_CERT" \
+                  --username "$(cat "$HARBOR_CREDENTIALS/username")" \
+                  --password-stdin "$REGISTRY" < "$HARBOR_CREDENTIALS/password"
+
+                printf '{}\n' > /tmp/sbom-config.json
+
+                publish_sbom() {
+                  oras attach \
+                    --registry-config "$REGISTRY_AUTH_FILE" \
+                    --ca-file "$REGISTRY_CA_CERT" \
+                    --artifact-type "$2" \
+                    --config "/tmp/sbom-config.json:$2" \
+                    --annotation "org.opencontainers.artifact.description=$1" \
+                    "$IMAGE_REFERENCE" "$1:$3"
+
+                  checksum=$(sha256sum "$1")
+                  oras blob fetch \
+                    --registry-config "$REGISTRY_AUTH_FILE" \
+                    --ca-file "$REGISTRY_CA_CERT" \
+                    --output "/tmp/$1" \
+                    "${IMAGE_REFERENCE%@*}@sha256:${checksum%% *}"
+                  cmp "$1" "/tmp/$1"
+                  printf 'Published and checked %s for %s\n' "$1" "$IMAGE_REFERENCE"
+                }
+
+                publish_sbom sbom.spdx.json application/vnd.goharbor.harbor.sbom.v1 application/spdx+json
+                publish_sbom sbom.syft.json application/vnd.syft+json application/vnd.syft+json
             env:
+              - name: HOME
+                value: /tmp
+              - name: IMAGE_REFERENCE
+                value: "{{inputs.parameters.image-reference}}"
               - name: REGISTRY
                 value: harbor.okwilkins.dev
               - name: HARBOR_CREDENTIALS
                 value: /var/run/secrets/harbor
-              - name: COSIGN_KEYS
-                value: /var/run/secrets/cosign
-              - name: SSL_CERT_DIR
-                value: /etc/ssl/certs:/var/run/secrets/registry-ca
-              - name: SCAN_RETRIES
-                value: "60"
-              - name: SCAN_RETRY_DELAY
-                value: "5"
-              - name: COSIGN_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: cosign-key-pair
-                    key: COSIGN_PASSWORD
+              - name: REGISTRY_AUTH_FILE
+                value: /tmp/registry-auth.json
+              - name: REGISTRY_CA_CERT
+                value: /var/run/secrets/registry-ca/ca.crt
             securityContext:
               privileged: false
               allowPrivilegeEscalation: false
@@ -187,9 +204,6 @@ spec:
             volumeMounts:
               - name: tmp
                 mountPath: /tmp
-              - name: cosign-key-pair
-                mountPath: /var/run/secrets/cosign
-                readOnly: true
               - name: harbor-auth
                 mountPath: /var/run/secrets/harbor
                 readOnly: true
