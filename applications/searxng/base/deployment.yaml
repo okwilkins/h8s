@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: init-config
-          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.2-cccbc9e15
+          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.6-ac11e14c5
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -69,7 +69,7 @@ spec:
               mountPath: /etc/searxng
       containers:
         - name: searxng
-          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.2-cccbc9e15
+          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.6-ac11e14c5
           ports:
             - name: http
               containerPort: 8080
