@@ -87,9 +87,9 @@
         },
         {
             "customType": "regex",
-            "description": "Update stable nixpkgs channels in the Buildah image",
+            "description": "Update stable nixpkgs channels in workflow images",
             "managerFilePatterns": [
-                "/^images/image-buildah/flake\\.nix$/"
+                "/^images/(image-buildah|cosign)/flake\\.nix$/"
             ],
             "matchStrings": [
                 "nixpkgs\\.url\\s*=\\s*\"github:NixOS/nixpkgs/(?<currentValue>nixos-\\d{2}\\.\\d{2})\""
@@ -198,7 +198,8 @@
                 "nix"
             ],
             "matchFileNames": [
-                "images/image-buildah/flake.nix"
+                "images/image-buildah/flake.nix",
+                "images/cosign/flake.nix"
             ],
             "matchPackageNames": [
                 "https://github.com/NixOS/nixpkgs"
@@ -211,12 +212,13 @@
             "enabled": false
         },
         {
-            "description": "Refresh the Buildah flake lock after a stable channel update",
+            "description": "Refresh workflow image flake locks after stable channel updates",
             "matchManagers": [
                 "custom.regex"
             ],
             "matchFileNames": [
-                "images/image-buildah/flake.nix"
+                "images/image-buildah/flake.nix",
+                "images/cosign/flake.nix"
             ],
             "matchPackageNames": [
                 "https://github.com/NixOS/nixpkgs"
@@ -227,7 +229,8 @@
                 ],
                 "workingDirTemplate": "{{{packageFileDir}}}",
                 "fileFilters": [
-                    "images/image-buildah/flake.lock"
+                    "images/image-buildah/flake.lock",
+                    "images/cosign/flake.lock"
                 ],
                 "executionMode": "update",
                 "installTools": {
