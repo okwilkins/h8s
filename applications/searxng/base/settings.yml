@@ -1,0 +1,56 @@
+# https://docs.searxng.org/admin/settings/settings.html
+use_default_settings:
+  engines:
+    keep_only:
+      - wikipedia
+      - wikidata
+      - github
+      - hackernews
+      - exaapi
+
+general:
+  debug: false
+  instance_name: "Homelab Search"
+  privacypolicy_url: false
+  donation_url: false
+  contact_url: https://www.okwilkins.dev
+  enable_metrics: false
+
+brand:
+  new_issue_url: ""
+  docs_url: ""
+  public_instances: ""
+  wiki_url: ""
+  issue_url: ""
+
+search:
+  safe_search: 0
+  autocomplete: "duckduckgo"
+  max_page: 0
+  formats:
+    - html
+    - json
+
+server:
+  port: 8080
+  limiter: true
+  public_instance: true
+  image_proxy: true
+
+valkey:
+  url: "redis://searxng-redis:6379/0"
+
+engines:
+  # Keep specialist engines in their upstream categories, not general web search.
+  - name: hackernews
+    disabled: false
+  - name: exaapi
+    inactive: false
+    disabled: false
+    # The init container supplies the key from the ESO-managed Secret.
+    api_key: ""
+    search_type: auto
+    results_per_page: 10
+    content_mode: highlights
+    content_max_characters: 500
+    timeout: 6.0
