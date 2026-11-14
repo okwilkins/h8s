@@ -137,10 +137,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   ├── argo-workflows              | CI/CD pipelines (WIP).
 │   ├── argocd                      | GitOps CD for Kubernetes resources.
 │   └── renovate                    | Automated dependency updates.
-├── images
-│   ├── coredns
-│   ├── image-buildah
-│   └── terraform
+├── images                          | Images that are built and used in various projects.
 ├── infrastructure                  | 8-stage Terraform pipeline for cluster bootstrapping from bare metal via Proxmox and Talos + platform configuration.
 ├── namespaces                      | Holds all namespaces for the cluster.
 ├── networking
