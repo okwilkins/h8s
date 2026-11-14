@@ -1,0 +1,39 @@
+ARG BUILD_USER=cosign
+ARG BUILD_UID=1000
+ARG BUILD_GID=1000
+
+FROM harbor.okwilkins.dev/docker-hub-cache/nixos/nix:2.35.5 AS builder
+
+RUN printf '%s\n' \
+    'experimental-features = nix-command flakes' \
+    'filter-syscalls = false' \
+    'build-users-group =' >> /etc/nix/nix.conf
+
+WORKDIR /tmp/build
+COPY cosign/flake.nix cosign/flake.lock ./
+
+RUN nix build .#image-tools
+
+ARG BUILD_USER
+ARG BUILD_UID
+ARG BUILD_GID
+
+COPY common/rootfs.py cosign/prepare-rootfs.py cosign/sign-and-verify.py ./
+RUN nix run .#rootfs-python -- prepare-rootfs.py /tmp/rootfs "${BUILD_USER}" "${BUILD_UID}" "${BUILD_GID}"
+
+FROM scratch
+
+ARG BUILD_USER
+ARG BUILD_UID
+ARG BUILD_GID
+
+ENV PATH="/usr/local/bin:/opt/tools/bin"
+ENV HOME=/home/${BUILD_USER}
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+COPY --from=builder /tmp/rootfs/ /
+
+VOLUME /tmp
+
+USER ${BUILD_UID}:${BUILD_GID}
+ENTRYPOINT ["/usr/local/bin/sign-and-verify"]
