@@ -1,0 +1,198 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: syft-sbom
+  namespace: argo-workflows
+  labels:
+    app.kubernetes.io/name: syft-sbom
+    app.kubernetes.io/part-of: argo-workflows
+spec:
+  entrypoint: generate-and-attest
+  serviceAccountName: argo-workflow
+  arguments:
+    parameters:
+      - name: image-reference
+        description: Signed Harbor AMD64 image-manifest reference pinned by SHA-256 digest.
+      - name: signer-digest
+        description: Published image-cosign runner digest (sha256:...), not a local image ID.
+  workflowMetadata:
+    labels:
+      app.kubernetes.io/name: syft-sbom
+      app.kubernetes.io/part-of: argo-workflows
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+  podGC:
+    strategy: OnWorkflowSuccess
+    deleteDelayDuration: 10m
+  templates:
+    - name: generate-and-attest
+      activeDeadlineSeconds: 900
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      inputs:
+        parameters:
+          - name: image-reference
+          - name: signer-digest
+      volumes:
+        - name: sbom
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: scanner-tmp
+          emptyDir:
+            sizeLimit: 2Gi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 128Mi
+        - name: cosign-key-pair
+          secret:
+            secretName: cosign-key-pair
+            defaultMode: 0440
+            items:
+              - key: cosign.key
+                path: cosign.key
+              - key: cosign.pub
+                path: cosign.pub
+        - name: harbor-auth
+          secret:
+            secretName: harbor-argo-workflows-credentials
+            defaultMode: 0440
+            items:
+              - key: username
+                path: username
+              - key: password
+                path: password
+        - name: registry-ca
+          secret:
+            secretName: workflows-okwilkins-dev-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
+      containerSet:
+        volumeMounts:
+          - name: sbom
+            mountPath: /sbom
+        containers:
+          - name: scan
+            image: docker.io/anchore/syft:v1.44.0@sha256:86fde6445b483d902fe011dd9f68c4987dd94e07da1e9edc004e3c2422650de6
+            imagePullPolicy: IfNotPresent
+            workingDir: /tmp
+            command: ["/syft"]
+            args:
+              - scan
+              - "registry:{{inputs.parameters.image-reference}}"
+              - --platform
+              - linux/amd64
+              - --scope
+              - squashed
+              - --output
+              - syft-json=/sbom/sbom.syft.json
+              - --output
+              - spdx-json=/sbom/sbom.spdx.json
+            env:
+              - name: HOME
+                value: /tmp
+              - name: XDG_CACHE_HOME
+                value: /tmp/cache
+              - name: SYFT_CHECK_FOR_APP_UPDATE
+                value: "false"
+              - name: SYFT_REGISTRY_CA_CERT
+                value: /var/run/secrets/registry-ca/ca.crt
+              - name: SYFT_REGISTRY_AUTH_AUTHORITY
+                value: harbor.okwilkins.dev
+              - name: SYFT_REGISTRY_AUTH_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: harbor-argo-workflows-credentials
+                    key: username
+              - name: SYFT_REGISTRY_AUTH_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: harbor-argo-workflows-credentials
+                    key: password
+            securityContext:
+              privileged: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              seccompProfile:
+                type: RuntimeDefault
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+                ephemeral-storage: 1Gi
+              limits:
+                cpu: "2"
+                memory: 2Gi
+                ephemeral-storage: 4Gi
+            volumeMounts:
+              - name: scanner-tmp
+                mountPath: /tmp
+              - name: registry-ca
+                mountPath: /var/run/secrets/registry-ca
+                readOnly: true
+          - name: main
+            dependencies:
+              - scan
+            image: "harbor.okwilkins.dev/main/image-cosign@{{inputs.parameters.signer-digest}}"
+            imagePullPolicy: IfNotPresent
+            workingDir: /tmp
+            command: ["/usr/local/bin/attest-sbom"]
+            args: ["{{inputs.parameters.image-reference}}", "/sbom"]
+            env:
+              - name: REGISTRY
+                value: harbor.okwilkins.dev
+              - name: HARBOR_CREDENTIALS
+                value: /var/run/secrets/harbor
+              - name: COSIGN_KEYS
+                value: /var/run/secrets/cosign
+              - name: SSL_CERT_DIR
+                value: /etc/ssl/certs:/var/run/secrets/registry-ca
+              - name: SCAN_RETRIES
+                value: "60"
+              - name: SCAN_RETRY_DELAY
+                value: "5"
+              - name: COSIGN_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: cosign-key-pair
+                    key: COSIGN_PASSWORD
+            securityContext:
+              privileged: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              seccompProfile:
+                type: RuntimeDefault
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+                ephemeral-storage: 64Mi
+              limits:
+                cpu: "1"
+                memory: 512Mi
+                ephemeral-storage: 256Mi
+            volumeMounts:
+              - name: tmp
+                mountPath: /tmp
+              - name: cosign-key-pair
+                mountPath: /var/run/secrets/cosign
+                readOnly: true
+              - name: harbor-auth
+                mountPath: /var/run/secrets/harbor
+                readOnly: true
+              - name: registry-ca
+                mountPath: /var/run/secrets/registry-ca
+                readOnly: true
