@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: image-buildah
+  name: image-build
   namespace: argo-workflows
   labels:
-    app.kubernetes.io/name: image-buildah
+    app.kubernetes.io/name: image-build
     app.kubernetes.io/part-of: argo-workflows
 spec:
   entrypoint: publish
@@ -13,16 +13,24 @@ spec:
     parameters:
       - name: git-repository
         description: Git repository URL to clone.
-        value: https://github.com/okwilkins/h8s.git
       - name: revision
         description: Full 40-character Git commit SHA to build.
-      - name: builder-digest
-        description: Published image-buildah runner digest (sha256:...), not a local image ID.
-      - name: signer-digest
-        description: Published main/cosign runner digest (sha256:...), not a local image ID.
+      - name: containerfile
+        description: Containerfile or Dockerfile path relative to the Git checkout.
+      - name: build-context
+        description: Build context directory relative to the Git checkout.
+        value: .
+      - name: image-repository
+        description: Harbor image repository without a tag or digest.
+      - name: image-tag
+        description: Image tag to publish.
+      - name: builder-image
+        description: Full Buildah runner image reference pinned by SHA-256 digest.
+      - name: signer-image
+        description: Full Cosign runner image reference pinned by SHA-256 digest.
   workflowMetadata:
     labels:
-      app.kubernetes.io/name: image-buildah
+      app.kubernetes.io/name: image-build
       app.kubernetes.io/part-of: argo-workflows
   securityContext:
     runAsNonRoot: true
@@ -33,7 +41,7 @@ spec:
       type: RuntimeDefault
   synchronization:
     mutexes:
-      - name: image-buildah
+      - name: image-build
   activeDeadlineSeconds: 3600
   ttlStrategy:
     secondsAfterCompletion: 86400
@@ -53,8 +61,8 @@ spec:
               parameters:
                 - name: image-reference
                   value: "{{steps.build-and-push.outputs.parameters.image-reference}}"
-                - name: signer-digest
-                  value: "{{workflow.parameters.signer-digest}}"
+                - name: signer-image
+                  value: "{{workflow.parameters.signer-image}}"
         - - name: sbom
             templateRef:
               name: syft-sbom
@@ -64,6 +72,8 @@ spec:
                 - name: image-reference
                   value: "{{steps.build-and-push.outputs.parameters.image-reference}}"
     - name: build-and-push
+      nodeSelector:
+        kubernetes.io/arch: amd64
       inputs:
         artifacts:
           - name: source-code
@@ -113,9 +123,9 @@ spec:
               - key: ca.crt
                 path: ca.crt
       container:
-        image: "harbor.okwilkins.dev/main/image-buildah@{{workflow.parameters.builder-digest}}"
+        image: "{{workflow.parameters.builder-image}}"
         imagePullPolicy: IfNotPresent
-        workingDir: /workspace/images
+        workingDir: /workspace
         command: ["/bin/sh", "-c"]
         args:
           - |
@@ -128,12 +138,28 @@ spec:
               exit 1
             fi
 
+            for runner in "$BUILDER_IMAGE" "$SIGNER_IMAGE"; do
+              if ! printf '%s\n' "$runner" | grep -Eq '^[^[:space:]@]+@sha256:[0-9a-f]{64}$'; then
+                printf 'builder-image and signer-image must be full SHA-256-pinned image references.\n' >&2
+                exit 1
+              fi
+            done
+
+            if ! printf '%s\n' "$IMAGE_REPOSITORY" | grep -Eq '^harbor\.okwilkins\.dev/[a-z0-9][a-z0-9._/-]*$'; then
+              printf 'image-repository must be a Harbor repository without a tag or digest.\n' >&2
+              exit 1
+            fi
+
+            if ! printf '%s\n' "$IMAGE_TAG" | grep -Eq '^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$'; then
+              printf 'image-tag must be a valid image tag of at most 128 characters.\n' >&2
+              exit 1
+            fi
+
             mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
             chmod 0700 "$XDG_RUNTIME_DIR"
             trap 'rm -f "$REGISTRY_AUTH_FILE"' EXIT
 
-            repository=harbor.okwilkins.dev/main/image-buildah
-            image="$repository:$GIT_REVISION-amd64"
+            image="$IMAGE_REPOSITORY:$IMAGE_TAG"
 
             buildah login \
               --username "$(cat /var/run/secrets/harbor/username)" \
@@ -142,20 +168,32 @@ spec:
 
             buildah build \
               --platform linux/amd64 \
-              --file image-buildah/Containerfile \
+              --file "/workspace/$CONTAINERFILE" \
               --tag "$image" \
-              .
+              "/workspace/$BUILD_CONTEXT"
 
             buildah push \
               --digestfile /tmp/image-digest \
               "$image" \
               "docker://$image"
 
-            printf '%s@%s\n' "$repository" "$(cat /tmp/image-digest)" > /tmp/image-reference
+            printf '%s@%s\n' "$IMAGE_REPOSITORY" "$(cat /tmp/image-digest)" > /tmp/image-reference
             cat /tmp/image-reference
         env:
           - name: GIT_REVISION
             value: "{{workflow.parameters.revision}}"
+          - name: CONTAINERFILE
+            value: "{{workflow.parameters.containerfile}}"
+          - name: BUILD_CONTEXT
+            value: "{{workflow.parameters.build-context}}"
+          - name: IMAGE_REPOSITORY
+            value: "{{workflow.parameters.image-repository}}"
+          - name: IMAGE_TAG
+            value: "{{workflow.parameters.image-tag}}"
+          - name: BUILDER_IMAGE
+            value: "{{workflow.parameters.builder-image}}"
+          - name: SIGNER_IMAGE
+            value: "{{workflow.parameters.signer-image}}"
           - name: XDG_RUNTIME_DIR
             value: /run/user/1000
           - name: XDG_CONFIG_HOME
