@@ -27,19 +27,44 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: init-config
-          image: harbor.okwilkins.dev/docker-hub-cache/busybox:1.38.0
+          image: harbor.okwilkins.dev/docker-hub-cache/searxng/searxng:2026.11.2-cccbc9e15
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
           command:
-            - "sh"
-            - "-c"
-            - "cp /tmp/config/settings.yml /etc/searxng/settings.yml"
+            - /usr/local/searxng/.venv/bin/python
+            - -B
+            - -c
+            - |
+              import os
+              from pathlib import Path
+              import yaml
+
+              api_key = Path("/run/secrets/exa/api-key").read_text().strip()
+              if not api_key:
+                  raise SystemExit("Exa API key must not be empty")
+              settings = yaml.safe_load(Path("/tmp/config/settings.yml").read_text())
+              engine = next(item for item in settings["engines"] if item["name"] == "exaapi")
+              engine["api_key"] = api_key
+              os.umask(0o077)
+              Path("/etc/searxng/settings.yml").write_text(yaml.safe_dump(settings, sort_keys=False))
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
           volumeMounts:
             - name: config-source
               mountPath: /tmp/config
+              readOnly: true
+            - name: exa-api
+              mountPath: /run/secrets/exa
+              readOnly: true
             - name: config-writable
               mountPath: /etc/searxng
       containers:
@@ -149,6 +174,9 @@ spec:
             name: searxng-settings
         - name: config-writable
           emptyDir: {}
+        - name: exa-api
+          secret:
+            secretName: searxng-exa-api
         - name: limiter-config
           configMap:
             name: searxng-limiter

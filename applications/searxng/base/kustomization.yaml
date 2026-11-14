@@ -5,10 +5,19 @@ resources:
   - ./redis-service.yaml
   - ./deployment.yaml
   - ./redis-deployment.yaml
-  - ./configmap.yaml
+  - ./exa-api-secret.yaml
   - ./limiter-configmap.yaml
   - ./redis-configmap.yaml
   - ./cache-pvc.yaml
   - ./searxng-secret.yaml
   - ./searxng-oidc-secret.yaml
   - ./oauth2-cookie-secret.yaml
+configMapGenerator:
+  - name: searxng-settings
+    namespace: searxng
+    files:
+      - settings.yml
+    options:
+      labels:
+        app.kubernetes.io/name: searxng
+        app.kubernetes.io/part-of: searxng
