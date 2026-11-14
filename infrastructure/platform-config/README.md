@@ -35,7 +35,7 @@ Apply stage `07` first and wait for ESO to create `renovate-forgejo-credentials`
 task --dir "$INFRA_ROOT" platform:configure
 ```
 
-### Using Harbor Pull-Through Caches
+## Signing Into Harbor
 
 Sign in at https://harbor.okwilkins.dev with Authelia, then copy your **CLI secret** from **User Profile**. Use it as the password below, not your Authelia password:
 
