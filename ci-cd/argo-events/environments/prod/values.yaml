@@ -5,7 +5,7 @@ configs:
     versions:
       # renovate: image=docker.io/library/nats
       - version: 2.10.29
-        natsImage: harbor.okwilkins.dev/docker-hub-cache/library/nats:2.10.29
+        natsImage: harbor.okwilkins.dev/docker-hub-cache/library/nats:2.15.3
         metricsExporterImage: harbor.okwilkins.dev/docker-hub-cache/natsio/prometheus-nats-exporter:0.14.0
         configReloaderImage: harbor.okwilkins.dev/docker-hub-cache/natsio/nats-server-config-reloader:0.14.0
         startCommand: /nats-server
