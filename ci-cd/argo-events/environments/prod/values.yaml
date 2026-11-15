@@ -7,7 +7,7 @@ configs:
       - version: 2.10.29
         natsImage: docker.io/library/nats:2.10.29
         metricsExporterImage: docker.io/natsio/prometheus-nats-exporter:0.14.0
-        configReloaderImage: docker.io/natsio/nats-server-config-reloader:0.14.0
+        configReloaderImage: docker.io/natsio/nats-server-config-reloader:0.25.0
         startCommand: /nats-server
 
 global:
