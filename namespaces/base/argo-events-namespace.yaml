@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-events
+  labels:
+    name: argo-events
+    app.kubernetes.io/name: argo-events
+    app.kubernetes.io/part-of: argo-events
