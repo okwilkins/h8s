@@ -4,5 +4,43 @@ namespace: argo-events
 resources:
   - ../../base
   - ./github-eventsource.yaml
+  - ./image-build-sensor-service-account.yaml
+  - ./sensors/
   - ./pod-monitor.yaml
   - ./secrets/
+patches:
+  - target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: Sensor
+      labelSelector: app.kubernetes.io/component=image-build
+    patch: |
+      apiVersion: argoproj.io/v1alpha1
+      kind: Sensor
+      metadata:
+        name: image-build-defaults
+        namespace: argo-events
+      spec:
+        eventBusName: default
+        template:
+          serviceAccountName: image-build-sensor
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          container:
+            imagePullPolicy: IfNotPresent
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
