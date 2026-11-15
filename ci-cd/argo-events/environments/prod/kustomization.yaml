@@ -4,3 +4,4 @@ namespace: argo-events
 resources:
   - ../../base
   - ./pod-monitor.yaml
+  - ./secrets/
