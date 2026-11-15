@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: image-build-sensor
+  namespace: argo-workflows
+  labels:
+    app.kubernetes.io/name: image-build-sensor
+    app.kubernetes.io/part-of: argo-workflows
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+    verbs:
+      - create
