@@ -46,6 +46,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 │   ├── personal-website            | My website at okwilkins.dev.
 │   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd
+│   ├── argo-events                 | Event-driven workflow triggers.
 │   ├── argo-workflows              | CI/CD pipelines (WIP).
 │   ├── argocd                      | GitOps CD for Kubernetes resources.
 │   └── renovate                    | Automated dependency updates.

@@ -134,6 +134,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 │   ├── personal-website            | My website at okwilkins.dev.
 │   └── searxng                     | Privacy-focused metasearch engine.
 ├── ci-cd
+│   ├── argo-events                 | Event-driven workflow triggers.
 │   ├── argo-workflows              | CI/CD pipelines (WIP).
 │   ├── argocd                      | GitOps CD for Kubernetes resources.
 │   └── renovate                    | Automated dependency updates.
