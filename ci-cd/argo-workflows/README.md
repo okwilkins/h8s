@@ -12,3 +12,6 @@ Alternatively, use the workflow-admin service-account token:
 ARGO_TOKEN=$(kubectl get secret -n argo-workflows argo-workflows-ui-user-admin-sa-token -o json | jq -r '.data.token' | base64 -d)
 echo "Bearer $ARGO_TOKEN"
 ```
+
+See [Argo Events](../argo-events/README.md#github-webhook) for GitHub image-build triggers.
+
