@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: argo-events
+  namespace: argo-events
+  labels:
+    app.kubernetes.io/name: argo-events
+    app.kubernetes.io/part-of: argo-events
+spec:
+  selector:
+    matchExpressions:
+      - key: controller
+        operator: In
+        values:
+          - eventbus-controller
+          - eventsource-controller
+          - sensor-controller
+  podMetricsEndpoints:
+    - port: metrics
