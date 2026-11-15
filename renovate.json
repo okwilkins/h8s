@@ -33,6 +33,20 @@
     "customManagers": [
         {
             "customType": "regex",
+            "description": "Update Argo Events JetStream versions and controller image mappings",
+            "managerFilePatterns": [
+                "/^ci-cd/argo-events/.*\\.yaml$/"
+            ],
+            "matchStrings": [
+                "# renovate: image=docker\\.io/(?<imagePath>[^\\s]+)\\r?\\n[ \\t]*(?:- )?version:[ \\t]+(?<currentValue>[^\\s]+)",
+                "(?:natsImage|metricsExporterImage|configReloaderImage):[ \\t]+(?:docker\\.io/|harbor\\.okwilkins\\.dev/docker-hub-cache/)(?<imagePath>[^\\s:]+):(?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+            ],
+            "depNameTemplate": "docker.io/{{{imagePath}}}",
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
             "description": "Update Kustomize remote resource URLs",
             "managerFilePatterns": [
                 "/.*/kustomization\\.yaml$/"
