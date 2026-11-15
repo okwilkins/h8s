@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argo-events
+  namespace: argo-events
+  labels:
+    app.kubernetes.io/name: argo-events
+    app.kubernetes.io/part-of: argo-events
+spec:
+  parentRefs:
+    - name: cloudflare-gateway
+      namespace: cloudflare
+      sectionName: web
+  hostnames:
+    - events.okwilkins.dev
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /github
+          method: POST
+      backendRefs:
+        - name: github-eventsource-svc
+          port: 12000

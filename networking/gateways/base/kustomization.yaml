@@ -21,6 +21,7 @@ resources:
   - ./http-routes/argocd.yaml
   - ./http-routes/prometheus.yaml
   - ./http-routes/excalidraw.yaml
+  - ./http-routes/argo-events.yaml
   - ./http-routes/argo-workflows.yaml
   - ./http-routes/harbor.yaml
   - ./http-routes/searxng.yaml
