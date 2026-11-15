@@ -1,0 +1,95 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: github-status
+  namespace: argo-workflows
+  labels:
+    app.kubernetes.io/name: github-status
+    app.kubernetes.io/part-of: argo-workflows
+spec:
+  templates:
+    - name: report
+      inputs:
+        parameters:
+          - name: repository
+          - name: revision
+          - name: context
+          - name: state
+          - name: target-url
+      volumes:
+        - name: github-token
+          secret:
+            secretName: github-status
+            defaultMode: 0440
+        - name: tmp
+          emptyDir:
+            sizeLimit: 1Mi
+      container:
+        image: harbor.okwilkins.dev/docker-hub-cache/curlimages/curl:8.17.0@sha256:935d9100e9ba842cdb060de42472c7ca90cfe9a7c96e4dacb55e79e560b3ff40
+        imagePullPolicy: IfNotPresent
+        command: [sh, -c]
+        args:
+          - |
+            set -eu
+            umask 077
+
+            # Restrict interpolated JSON fields to safe, expected characters.
+            case "$REPOSITORY$REVISION$CONTEXT$TARGET_URL" in
+              *[!A-Za-z0-9_./:-]*) printf 'Invalid status input\n' >&2; exit 1 ;;
+            esac
+            printf '%s\n' "$REPOSITORY" | grep -Eq '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'
+            printf '%s\n' "$REVISION" | grep -Eq '^[0-9a-f]{40}$'
+            printf '%s\n' "$CONTEXT" | grep -Eq '^[A-Za-z0-9_./-]+$'
+            printf '%s\n' "$TARGET_URL" | grep -Eq '^https://workflows[.]okwilkins[.]dev/workflows/[a-z0-9.-]+/[a-z0-9.-]+$'
+            case "$STATE" in
+              pending) state=pending ;;
+              Succeeded) state=success ;;
+              Failed) state=failure ;;
+              Error) state=error ;;
+              *) printf 'Unknown workflow state\n' >&2; exit 1 ;;
+            esac
+
+            trap 'rm -f /tmp/github-headers /tmp/status.json' EXIT
+            printf 'Authorization: Bearer %s\nAccept: application/vnd.github+json\nX-GitHub-Api-Version: 2022-11-28\nContent-Type: application/json\n' \
+              "$(cat /var/run/secrets/github/token)" > /tmp/github-headers
+            printf '{"state":"%s","context":"%s","target_url":"%s"}' \
+              "$state" "$CONTEXT" "$TARGET_URL" > /tmp/status.json
+
+            curl --fail --silent --show-error \
+              --connect-timeout 10 --max-time 30 \
+              --retry 3 --retry-all-errors \
+              --header @/tmp/github-headers \
+              --data-binary @/tmp/status.json \
+              --output /dev/null \
+              "https://api.github.com/repos/$REPOSITORY/statuses/$REVISION"
+            printf 'Reported %s for %s at %s\n' "$state" "$CONTEXT" "$REVISION"
+        env:
+          - name: REPOSITORY
+            value: "{{inputs.parameters.repository}}"
+          - name: REVISION
+            value: "{{inputs.parameters.revision}}"
+          - name: CONTEXT
+            value: "{{inputs.parameters.context}}"
+          - name: STATE
+            value: "{{inputs.parameters.state}}"
+          - name: TARGET_URL
+            value: "{{inputs.parameters.target-url}}"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+        volumeMounts:
+          - name: github-token
+            mountPath: /var/run/secrets/github
+            readOnly: true
+          - name: tmp
+            mountPath: /tmp

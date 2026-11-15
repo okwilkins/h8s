@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/part-of: argo-workflows
 spec:
   entrypoint: publish
+  onExit: report-final-status
   serviceAccountName: argo-workflow
   arguments:
     parameters:
@@ -28,6 +29,11 @@ spec:
         description: Full Buildah runner image reference pinned by SHA-256 digest.
       - name: signer-image
         description: Full Cosign runner image reference pinned by SHA-256 digest.
+      - name: github-repository
+        description: Optional owner/repository for GitHub status reporting. Empty disables reporting.
+        value: ""
+      - name: github-status-context
+        value: argo/image-build
   workflowMetadata:
     labels:
       app.kubernetes.io/name: image-build
@@ -51,6 +57,23 @@ spec:
   templates:
     - name: publish
       steps:
+        - - name: report-pending
+            when: "{{=workflow.parameters['github-repository'] != ''}}"
+            templateRef:
+              name: github-status
+              template: report
+            arguments:
+              parameters:
+                - name: repository
+                  value: "{{workflow.parameters.github-repository}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: context
+                  value: "{{workflow.parameters.github-status-context}}"
+                - name: state
+                  value: pending
+                - name: target-url
+                  value: "https://workflows.okwilkins.dev/workflows/{{workflow.namespace}}/{{workflow.name}}"
         - - name: build-and-push
             template: build-and-push
         - - name: sign-and-verify
@@ -71,6 +94,25 @@ spec:
               parameters:
                 - name: image-reference
                   value: "{{steps.build-and-push.outputs.parameters.image-reference}}"
+    - name: report-final-status
+      steps:
+        - - name: report
+            when: "{{=workflow.parameters['github-repository'] != ''}}"
+            templateRef:
+              name: github-status
+              template: report
+            arguments:
+              parameters:
+                - name: repository
+                  value: "{{workflow.parameters.github-repository}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: context
+                  value: "{{workflow.parameters.github-status-context}}"
+                - name: state
+                  value: "{{workflow.status}}"
+                - name: target-url
+                  value: "https://workflows.okwilkins.dev/workflows/{{workflow.namespace}}/{{workflow.name}}"
     - name: build-and-push
       nodeSelector:
         kubernetes.io/arch: amd64
