@@ -9,7 +9,7 @@ metadata:
 spec:
   jetstream:
     # renovate: image=docker.io/library/nats
-    version: 2.10.29
+    version: 2.15.3
     replicas: 1
     streamConfig: |
       replicas: 1
