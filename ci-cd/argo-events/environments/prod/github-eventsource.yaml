@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: github
+  namespace: argo-events
+  labels:
+    app.kubernetes.io/name: argo-events
+    app.kubernetes.io/part-of: argo-events
+spec:
+  eventBusName: default
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: argo-events
+        app.kubernetes.io/part-of: argo-events
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    container:
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+  service:
+    metadata:
+      labels:
+        app.kubernetes.io/name: argo-events
+        app.kubernetes.io/part-of: argo-events
+    ports:
+      - name: github
+        port: 12000
+        targetPort: 12000
+  github:
+    h8s:
+      repositories:
+        - owner: okwilkins
+          names:
+            - h8s
+      webhook:
+        endpoint: /github
+        port: "12000"
+        method: POST
+        url: https://events.okwilkins.dev
+      events:
+        - push
+      webhookSecret:
+        name: github-webhook
+        key: secret
+      insecure: false
+      active: true
+      contentType: json
+      filter:
+        expression: >-
+          body.repository.full_name == 'okwilkins/h8s' &&
+          body['X-GitHub-Event'] in ['ping', 'push']

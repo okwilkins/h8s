@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: argo-events
 resources:
   - ../../base
+  - ./github-eventsource.yaml
   - ./pod-monitor.yaml
   - ./secrets/
