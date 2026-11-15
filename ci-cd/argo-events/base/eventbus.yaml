@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+  namespace: argo-events
+  labels:
+    app.kubernetes.io/name: argo-events
+    app.kubernetes.io/part-of: argo-events
+spec:
+  jetstream:
+    # renovate: image=docker.io/library/nats
+    version: 2.10.29
+    replicas: 1
+    streamConfig: |
+      replicas: 1
+    persistence:
+      storageClassName: longhorn-encrypted
+      accessMode: ReadWriteOnce
+      volumeSize: 2Gi
+    settings: |
+      max_memory_store: 64MB
+      max_file_store: 1GB
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
+      seccompProfile:
+        type: RuntimeDefault
+    containerTemplate:
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+    reloaderContainerTemplate:
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          memory: 64Mi
+    metricsContainerTemplate:
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
