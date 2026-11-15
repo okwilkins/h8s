@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: image-build-sensor
+  namespace: argo-workflows
+  labels:
+    app.kubernetes.io/name: image-build-sensor
+    app.kubernetes.io/part-of: argo-workflows
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: image-build-sensor
+subjects:
+  - kind: ServiceAccount
+    name: image-build-sensor
+    namespace: argo-events
