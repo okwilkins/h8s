@@ -1,0 +1,104 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: readme-badges-image
+  namespace: argo-events
+  labels:
+    app.kubernetes.io/name: readme-badges-image
+    app.kubernetes.io/part-of: argo-events
+    app.kubernetes.io/component: workflow-trigger
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: readme-badges-image
+        app.kubernetes.io/part-of: argo-events
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: h8s
+      filters:
+        script: |
+          local body = event.body
+          if body == nil or body["X-GitHub-Event"] ~= "push"
+              or body.repository == nil or body.repository.full_name ~= "okwilkins/h8s"
+              or body.ref ~= "refs/heads/main" or body.deleted ~= false then
+            return false
+          end
+
+          if type(body.after) ~= "string" or #body.after ~= 40
+              or not body.after:match("^[0-9a-f]+$") then
+            return false
+          end
+
+          for _, commit in ipairs(body.commits or {}) do
+            for _, change in ipairs({"added", "modified", "removed"}) do
+              for _, path in ipairs(commit[change] or {}) do
+                if path:match("^images/readme%-badges/") or path:match("^images/common/") then
+                  return true
+                end
+              end
+            end
+          end
+          return false
+  # Fixed names block duplicate commits until the Workflow TTL removes them.
+  triggers:
+    - template:
+        name: build-readme-badges
+        conditions: push
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                name: readme-badges
+                namespace: argo-workflows
+                labels:
+                  app.kubernetes.io/name: image-build
+                  app.kubernetes.io/part-of: argo-workflows
+              spec:
+                workflowTemplateRef:
+                  name: image-build
+                arguments:
+                  parameters:
+                    - name: git-repository
+                      value: https://github.com/okwilkins/h8s.git
+                    - name: revision
+                      value: ""
+                    - name: containerfile
+                      value: images/readme-badges/Containerfile
+                    - name: build-context
+                      value: images
+                    - name: image-repository
+                      value: harbor.okwilkins.dev/main/readme-badges
+                    - name: image-tag
+                      value: ""
+                    - name: builder-image
+                      value: harbor.okwilkins.dev/main/image-buildah@sha256:674624f56107b89f0703a63e3d6df950d954678605689d558caf76ff60b73d7c
+                    - name: signer-image
+                      value: harbor.okwilkins.dev/main/cosign@sha256:9253f2a44f3ae52f850c033665d7778dca288ae719af543056730f656cc7c38a
+                    - name: github-repository
+                      value: okwilkins/h8s
+                    - name: github-status-context
+                      value: argo/readme-badges
+          parameters:
+            - src:
+                dependencyName: push
+                dataTemplate: "readme-badges-{{ .Input.body.after }}-amd64"
+              dest: metadata.name
+            - src:
+                dependencyName: push
+                dataKey: body.after
+              dest: spec.arguments.parameters.1.value
+            - src:
+                dependencyName: push
+                dataTemplate: "{{ .Input.body.after }}-amd64"
+              dest: spec.arguments.parameters.5.value
+      atLeastOnce: true
+      retryStrategy:
+        steps: 5
+        duration: 5s
+        factor: 2
+        jitter: 0.2

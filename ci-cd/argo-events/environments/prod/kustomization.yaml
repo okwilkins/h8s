@@ -13,12 +13,12 @@ patches:
       group: argoproj.io
       version: v1alpha1
       kind: Sensor
-      labelSelector: app.kubernetes.io/component=image-build
-    patch: |
+      labelSelector: app.kubernetes.io/component=workflow-trigger
+    patch: |-
       apiVersion: argoproj.io/v1alpha1
       kind: Sensor
       metadata:
-        name: image-build-defaults
+        name: workflow-trigger-defaults
         namespace: argo-events
       spec:
         eventBusName: default
