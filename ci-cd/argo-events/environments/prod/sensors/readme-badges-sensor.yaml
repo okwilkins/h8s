@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: readme-badges
+  namespace: argo-events
+  labels:
+    app.kubernetes.io/name: readme-badges
+    app.kubernetes.io/part-of: argo-events
+    app.kubernetes.io/component: readme-badges
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: readme-badges
+        app.kubernetes.io/part-of: argo-events
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: h8s
+      filters:
+        script: |
+          local body = event.body
+          if body == nil or body["X-GitHub-Event"] ~= "push"
+              or body.repository == nil or body.repository.full_name ~= "okwilkins/h8s"
+              or body.ref ~= "refs/heads/main" or body.deleted ~= false then
+            return false
+          end
+          if type(body.after) ~= "string" or #body.after ~= 40
+              or not body.after:match("^[0-9a-f]+$") then
+            return false
+          end
+          local sources = {
+            ["infrastructure/shared/common.auto.tfvars"] = true,
+            ["infrastructure/03-talos-configure/main.tf"] = true,
+            ["ci-cd/argocd/environments/prod/apps/cilium-helm.yaml"] = true,
+            ["ci-cd/argocd/environments/prod/apps/argocd-helm.yaml"] = true,
+            ["ci-cd/argo-workflows/environments/prod/workflows/readme-badges-workflow-template.yaml"] = true,
+          }
+          for _, commit in ipairs(body.commits or {}) do
+            for _, change in ipairs({"added", "modified", "removed"}) do
+              for _, path in ipairs(commit[change] or {}) do
+                if sources[path] then
+                  return true
+                end
+              end
+            end
+          end
+          return false
+  triggers:
+    - template:
+        name: update-readme-badges
+        conditions: push
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                name: readme-badges
+                namespace: argo-workflows
+                labels:
+                  app.kubernetes.io/name: readme-badges
+                  app.kubernetes.io/part-of: argo-workflows
+              spec:
+                workflowTemplateRef:
+                  name: readme-badges
+          parameters:
+            - src:
+                dependencyName: push
+                dataTemplate: "readme-badges-{{ .Input.body.after }}"
+              dest: metadata.name
+      atLeastOnce: true
+      retryStrategy:
+        steps: 5
+        duration: 5s
+        factor: 2
+        jitter: 0.2
