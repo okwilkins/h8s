@@ -39,7 +39,7 @@ spec:
           # Save a Vault Raft snapshot before the main container uploads it to B2.
           initContainers:
             - name: snapshot
-              image: hashicorp/vault:2.2.1@sha256:962a92876e168d68eaaa24b0b8b49bbce1cb63024060a67bba95cd158a366fc2
+              image: hashicorp/vault:2.2.2@sha256:dfa48c2fa2b0099ccb47681ec5c4804bf5aec9d6879ecfee07ad4b92a5427ad6
               imagePullPolicy: IfNotPresent
               command:
                 - /bin/sh
