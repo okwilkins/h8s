@@ -9,6 +9,7 @@ secret:
     cnpg-authelia-prod-app-user-credentials: {}
     authelia-session-secret: {}
     authelia-hmac-secret: {}
+    authelia-password-reset-jwt-secret: {}
     authelia-oidc-rsa-key: {}
     authelia-searxng-client-secret: {}
 
@@ -104,6 +105,13 @@ configMap:
   log:
     level: info
   theme: auto
+
+  identity_validation:
+    reset_password:
+      secret:
+        disabled: false
+        secret_name: authelia-password-reset-jwt-secret
+        path: jwt-secret
 
   # TODO: Add metrics
   # telemetry:
