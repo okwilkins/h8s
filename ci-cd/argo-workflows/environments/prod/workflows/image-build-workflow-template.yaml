@@ -10,6 +10,8 @@ spec:
   entrypoint: publish
   onExit: report-final-status
   serviceAccountName: argo-workflow
+  imagePullSecrets:
+    - name: harbor-credentials
   arguments:
     parameters:
       - name: git-repository
