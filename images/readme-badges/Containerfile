@@ -1,0 +1,39 @@
+ARG BUILD_USER=badges
+ARG BUILD_UID=1000
+ARG BUILD_GID=1000
+
+FROM harbor.okwilkins.dev/docker-hub-cache/nixos/nix:2.35.6 AS builder
+
+RUN printf '%s\n' \
+    'experimental-features = nix-command flakes' \
+    'filter-syscalls = false' \
+    'build-users-group =' >> /etc/nix/nix.conf
+
+WORKDIR /tmp/build
+COPY readme-badges/flake.nix readme-badges/flake.lock ./
+
+RUN nix build --no-update-lock-file .#image-tools
+
+ARG BUILD_USER
+ARG BUILD_UID
+ARG BUILD_GID
+
+COPY common/rootfs.py readme-badges/prepare-rootfs.py readme-badges/update-badges.py ./
+RUN nix run --no-update-lock-file .#rootfs-python -- prepare-rootfs.py /tmp/rootfs "${BUILD_USER}" "${BUILD_UID}" "${BUILD_GID}"
+
+FROM scratch
+
+ARG BUILD_USER
+ARG BUILD_UID
+ARG BUILD_GID
+
+ENV PATH="/usr/local/bin:/opt/tools/bin"
+ENV HOME=/home/${BUILD_USER}
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV GITHUB_BRANCH=automation/readme-badges
+ENV GITHUB_TOKEN_FILE=/var/run/secrets/github/token
+
+COPY --from=builder /tmp/rootfs/ /
+
+USER ${BUILD_UID}:${BUILD_GID}
+ENTRYPOINT ["/usr/local/bin/update-badges"]
