@@ -4,3 +4,4 @@ metadata:
   name: argo-workflows
   labels:
     name: argo-workflows
+    harbor-image-pulls: "true"
