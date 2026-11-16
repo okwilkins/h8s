@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: readme-badges
+  namespace: argo-workflows
+  labels:
+    app.kubernetes.io/name: readme-badges
+    app.kubernetes.io/part-of: argo-workflows
+spec:
+  entrypoint: update
+  serviceAccountName: argo-workflow
+  arguments:
+    parameters:
+      - name: updater-image
+        description: Full README badge updater image reference pinned by SHA-256 digest.
+  imagePullSecrets:
+    - name: harbor-credentials
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  synchronization:
+    mutexes:
+      - name: readme-badges
+  activeDeadlineSeconds: 300
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+  podGC:
+    strategy: OnWorkflowSuccess
+    deleteDelayDuration: 10m
+  templates:
+    - name: update
+      container:
+        image: "{{workflow.parameters.updater-image}}"
+        imagePullPolicy: IfNotPresent
+        command: [/usr/local/bin/update-badges]
+        env:
+          - name: GITHUB_REPOSITORY
+            value: okwilkins/h8s
+          - name: GITHUB_BRANCH
+            value: automation/readme-badges
+          - name: GITHUB_TOKEN_FILE
+            value: /var/run/secrets/github/token
+          - name: BADGE_SOURCES
+            value: |
+              {
+                "Talos": {
+                  "path": "infrastructure/shared/common.auto.tfvars",
+                  "pattern": "^talos_version\\s*=\\s*\"([^\"]+)\""
+                },
+                "Cilium": {
+                  "path": "ci-cd/argocd/environments/prod/apps/cilium-helm.yaml",
+                  "pattern": "^\\s*targetRevision: ([0-9.]+)\\s*$"
+                },
+                "ArgoCD_chart": {
+                  "path": "ci-cd/argocd/environments/prod/apps/argocd-helm.yaml",
+                  "pattern": "^\\s*targetRevision: ([0-9.]+)\\s*$"
+                },
+                "Kubernetes": {
+                  "path": "infrastructure/03-talos-configure/main.tf",
+                  "pattern": "^\\s*kubernetes_version\\s*=\\s*(null)\\s*(?:#.*)?$",
+                  "value": "Talos_default"
+                }
+              }
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 128Mi
+        volumeMounts:
+          - name: github-token
+            mountPath: /var/run/secrets/github
+            readOnly: true
+      volumes:
+        - name: github-token
+          secret:
+            secretName: github-readme-badges
+            defaultMode: 0440
