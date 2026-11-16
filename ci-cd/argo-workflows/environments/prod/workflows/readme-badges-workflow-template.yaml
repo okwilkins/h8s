@@ -34,7 +34,7 @@ spec:
   templates:
     - name: update
       container:
-        image: "{{workflow.parameters.updater-image}}"
+        image: harbor.okwilkins.dev/main/readme-badges@sha256:1f3c123a3db61ac5b89833322aca943757bf26cd414cd79b46b01edd086234cd
         imagePullPolicy: IfNotPresent
         command: [/usr/local/bin/update-badges]
         env:
