@@ -103,7 +103,7 @@
             "customType": "regex",
             "description": "Update stable nixpkgs channels in workflow images",
             "managerFilePatterns": [
-                "/^images/(image-buildah|cosign)/flake\\.nix$/"
+                "/^images/(image-buildah|cosign|readme-badges)/flake\\.nix$/"
             ],
             "matchStrings": [
                 "nixpkgs\\.url\\s*=\\s*\"github:NixOS/nixpkgs/(?<currentValue>nixos-\\d{2}\\.\\d{2})\""
