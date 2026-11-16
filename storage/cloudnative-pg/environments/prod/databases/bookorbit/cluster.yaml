@@ -46,6 +46,6 @@ spec:
     extensions:
       - name: pgvector
         image:
-          reference: ghcr.io/cloudnative-pg/pgvector:0.8.7-18-trixie@sha256:77dd77f7a4d10f55d83cd71d9f707cbbf79293fe857ccce4a19c113d538a2fa9
+          reference: ghcr.io/cloudnative-pg/pgvector:0.8.7-18-trixie@sha256:d00bec5031990855e70b8dfaab136fb961787e81b7b0d2f3939020a68de1961f
           pullPolicy: IfNotPresent
   enableSuperuserAccess: false
