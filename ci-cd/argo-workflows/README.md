@@ -15,3 +15,9 @@ echo "Bearer $ARGO_TOKEN"
 
 See [Argo Events](../argo-events/README.md#github-webhook) for GitHub image-build triggers.
 
+## GitHub Build Status
+
+1. Create a fine-grained GitHub token for the repository with **Commit statuses: Read and write**.
+2. Use SOPS to add it as `TF_VAR_github_commit_status_token` in the private `h8s-secrets/secrets.yaml`.
+3. Apply Terraform Stage 07 from `nix develop .#infra`.
+
