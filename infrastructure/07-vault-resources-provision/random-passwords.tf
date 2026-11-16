@@ -65,6 +65,11 @@ resource "random_password" "authelia_hmac_secret" {
   special = false
 }
 
+resource "random_password" "authelia_password_reset_jwt_secret" {
+  length  = 128
+  special = false
+}
+
 resource "random_password" "authelia_grafana_oidc_client_secret" {
   length  = 64
   special = false
