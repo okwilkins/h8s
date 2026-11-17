@@ -27,9 +27,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: init-config
-          # INFO: Change back to upstream docker pull-through cache when this PR is merged:
-          # https://github.com/searxng/searxng/pull/6950
-          image: harbor.okwilkins.dev/main/searxng@sha256:270d842806f9e49bcb71a2b783d3cb37cd57dcdfe5bcb33604ab3f8687cc39b8
+          image: harbor.okwilkins.dev/ghcr-cache/searxng/searxng:2026.11.17-d3a35cf45
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -78,8 +76,7 @@ spec:
               mountPath: /etc/searxng
       containers:
         - name: searxng
-          image: harbor.okwilkins.dev/main/searxng@sha256:270d842806f9e49bcb71a2b783d3cb37cd57dcdfe5bcb33604ab3f8687cc39b8
-          imagePullPolicy: IfNotPresent
+          image: harbor.okwilkins.dev/ghcr-cache/searxng/searxng:2026.11.17-d3a35cf45
           ports:
             - name: http
               containerPort: 8080
