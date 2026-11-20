@@ -11,6 +11,7 @@ spec:
   description: Postgres cluster for Harbor
   imageName: ghcr.io/cloudnative-pg/postgresql:18.7-minimal-trixie@sha256:452a15584e2aa1ce658c4ae8538b5dc157eb031d41b82fd19882e0c03bcec01d
   instances: 1
+  enablePDB: false
   inheritedMetadata:
     labels:
       recurring-job.longhorn.io/source: enabled
