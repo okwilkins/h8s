@@ -101,6 +101,13 @@ variable "nodes" {
     memory_mb = number
     disk_gb   = number
 
+    # Optional second VirtIO disk, mounted at /var/mnt/longhorn-extra by Talos.
+    # Leave unset on existing nodes to preserve their single-disk layout.
+    longhorn_disk = optional(object({
+      datastore_id = string
+      size_gb      = number
+    }))
+
     # Network
     # mac_address must match the static DHCP lease in your router so the node
     # always gets the expected IP. Format: "BC:24:11:xx:xx:xx".
@@ -120,6 +127,17 @@ variable "nodes" {
     # Whether this node should advertise itself as a Tailscale exit node.
     tailscale_exit_node = optional(bool, false)
   }))
+
+  validation {
+    condition = alltrue([
+      for node in values(var.nodes) : node.longhorn_disk == null ? true : (
+        trimspace(node.longhorn_disk.datastore_id) != "" &&
+        node.longhorn_disk.size_gb >= 2 &&
+        floor(node.longhorn_disk.size_gb) == node.longhorn_disk.size_gb
+      )
+    ])
+    error_message = "longhorn_disk requires a non-empty datastore_id and a whole-number size_gb of at least 2."
+  }
 }
 
 # ============================================================
