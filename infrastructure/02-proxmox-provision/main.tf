@@ -43,7 +43,20 @@ resource "proxmox_virtual_environment_vm" "nodes" {
     size         = each.value.disk_gb
     file_format  = "raw"
     discard      = "on"
-    ssd          = true
+  }
+
+  # Optional Longhorn data disk on a separate datastore.
+  dynamic "disk" {
+    for_each = each.value.longhorn_disk == null ? [] : [each.value.longhorn_disk]
+
+    content {
+      datastore_id = disk.value.datastore_id
+      interface    = "virtio1"
+      size         = disk.value.size_gb
+      file_format  = "raw"
+      discard      = "on"
+      serial       = "longhorn-extra"
+    }
   }
 
   # Talos ISO - used only for first boot / installation.

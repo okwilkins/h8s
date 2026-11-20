@@ -208,7 +208,25 @@ data "talos_machine_configuration" "nodes" {
         "TS_EXTRA_ARGS=--advertise-exit-node",
       ] : [])
     })
-  ] : [])
+    ] : [], each.value.longhorn_disk == null ? [] : [
+    # Match only the optional data disk, never the Talos installation disk.
+    # Talos propagates user-volume mounts into the kubelet container.
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "UserVolumeConfig"
+      name       = "longhorn-extra"
+      provisioning = {
+        diskSelector = {
+          match = "disk.serial == 'longhorn-extra'"
+        }
+        minSize = "1GiB"
+        grow    = true
+      }
+      filesystem = {
+        type = "ext4"
+      }
+    })
+  ])
 }
 
 # ============================================================
