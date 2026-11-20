@@ -8,119 +8,136 @@ tasks:
       - task --list
 
   # Talos Factory
-  talos:factory:install:
+  00:talos:factory:install:
+    aliases: [talos:factory:install]
     desc: "Generate Talos schematic with custom extensions"
     dir: '$INFRA_ROOT/00-talos-factory'
     cmds:
       - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
-  talos:factory:destroy:
+  00:talos:factory:destroy:
+    aliases: [talos:factory:destroy]
     desc: "Destroy Talos factory schematic"
     dir: '$INFRA_ROOT/00-talos-factory'
     cmds:
       - tofu destroy -auto-approve
 
   # Proxmox ISO - Download Talos ISO to Proxmox nodes
-  proxmox:iso:install:
+  01:proxmox:iso:install:
+    aliases: [proxmox:iso:install]
     desc: "Download Talos ISO to Proxmox nodes"
     dir: '$INFRA_ROOT/01-proxmox-iso-upload'
     cmds:
       - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
-  proxmox:iso:destroy:
+  01:proxmox:iso:destroy:
+    aliases: [proxmox:iso:destroy]
     desc: "Remove Talos ISO from Proxmox nodes"
     dir: '$INFRA_ROOT/01-proxmox-iso-upload'
     cmds:
       - tofu destroy -auto-approve
 
   # Proxmox Provision - Create VMs on Proxmox
-  proxmox:provision:install:
+  02:proxmox:provision:install:
+    aliases: [proxmox:provision:install]
     desc: "Create VMs on Proxmox"
     dir: '$INFRA_ROOT/02-proxmox-provision'
     cmds:
       - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
-  proxmox:provision:destroy:
+  02:proxmox:provision:destroy:
+    aliases: [proxmox:provision:destroy]
     desc: "Destroy Proxmox VMs"
     dir: '$INFRA_ROOT/02-proxmox-provision'
     cmds:
       - tofu destroy -auto-approve
 
   # Talos Configure - Configure nodes, bootstrap etcd, retrieve kubeconfig
-  talos:configure:install:
+  03:talos:configure:install:
+    aliases: [talos:configure:install]
     desc: "Configure Talos nodes, bootstrap etcd, retrieve kubeconfig"
     dir: '$INFRA_ROOT/03-talos-configure'
     cmds:
       - tofu init -lockfile=readonly
-      - tofu apply -auto-approve
+      - tofu apply -parallelism=1
 
-  talos:configure:destroy:
+  03:talos:configure:destroy:
+    aliases: [talos:configure:destroy]
     desc: "Destroy Talos configuration and nodes"
     dir: '$INFRA_ROOT/03-talos-configure'
     cmds:
       - tofu destroy -auto-approve
 
   # Cilium - Install Cilium CNI
-  cilium:install:
+  04:cilium:install:
+    aliases: [cilium:install]
     desc: "Install Cilium CNI"
     dir: '$INFRA_ROOT/04-cilium'
     cmds:
       - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
-  cilium:destroy:
+  04:cilium:destroy:
+    aliases: [cilium:destroy]
     desc: "Destroy Cilium CNI installation"
     dir: '$INFRA_ROOT/04-cilium'
     cmds:
       - tofu destroy -auto-approve
 
   # ArgoCD - Install ArgoCD for GitOps
-  argocd:install:
+  05:argocd:install:
+    aliases: [argocd:install]
     desc: "Install ArgoCD for GitOps"
     dir: '$INFRA_ROOT/05-argocd'
     cmds:
       - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
-  argocd:destroy:
+  05:argocd:destroy:
+    aliases: [argocd:destroy]
     desc: "Destroy ArgoCD installation"
     dir: '$INFRA_ROOT/05-argocd'
     cmds:
       - tofu destroy -auto-approve
 
   # Vault Init - Configure manually initialised and unsealed Vault
-  vault:init:
+  06:vault:init:
+    aliases: [vault:init]
     desc: "Configure Vault using credentials from encrypted state"
     dir: '$INFRA_ROOT/06-vault-init'
     cmds:
       - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
-  vault:destroy:
+  06:vault:destroy:
+    aliases: [vault:destroy]
     desc: "Destroy Vault outputs"
     dir: '$INFRA_ROOT/06-vault-init'
     cmds:
       - tofu destroy -auto-approve
 
   # Vault Secrets - Provision secrets in Vault
-  vault:secrets:install:
+  07:vault:secrets:install:
+    aliases: [vault:secrets:install]
     desc: "Provision all secrets in Vault (passwords, keys, external secrets)"
     dir: '$INFRA_ROOT/07-vault-resources-provision'
     cmds:
       - tofu init -lockfile=readonly
       - tofu apply -auto-approve
 
-  vault:secrets:destroy:
+  07:vault:secrets:destroy:
+    aliases: [vault:secrets:destroy]
     desc: "Destroy Vault secrets (secrets remain in Vault, only Terraform state removed)"
     dir: '$INFRA_ROOT/07-vault-resources-provision'
     cmds:
       - tofu destroy -auto-approve
 
   # Platform Configuration - Configure Harbor and other platform resources
-  platform:configure:
+  08:platform:configure:
+    aliases: [platform:configure]
     desc: "Configure Harbor registry and platform resources (run after cluster:bootstrap)"
     dir: '$INFRA_ROOT/platform-config'
     cmds:
@@ -129,20 +146,20 @@ tasks:
 
   # Composite tasks
   cluster:bootstrap:
-    desc: "Run all bootstrap stages in sequence (stages 1-8). Run 'task platform:configure' afterwards for Step 9."
+    desc: "Run stages 00–07 in sequence. Run 'task 08:platform:configure' afterwards."
     cmds:
-      - task: talos:factory:install
-      - task: proxmox:iso:install
-      - task: proxmox:provision:install
-      - task: talos:configure:install
-      - task: cilium:install
-      - task: argocd:install
-      - task: vault:init
-      - task: vault:secrets:install
+      - task: 00:talos:factory:install
+      - task: 01:proxmox:iso:install
+      - task: 02:proxmox:provision:install
+      - task: 03:talos:configure:install
+      - task: 04:cilium:install
+      - task: 05:argocd:install
+      - task: 06:vault:init
+      - task: 07:vault:secrets:install
 
   cluster:destroy:
     desc: "Destroy all resources in reverse order"
     cmds:
-      - task: proxmox:provision:destroy
-      - task: proxmox:iso:destroy
-      - task: talos:factory:destroy
+      - task: 02:proxmox:provision:destroy
+      - task: 01:proxmox:iso:destroy
+      - task: 00:talos:factory:destroy
