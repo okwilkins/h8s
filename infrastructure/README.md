@@ -195,6 +195,12 @@ Once `task cluster:bootstrap` completes successfully:
 
 > **Note:** The `platform:configure` task requires Harbor and its credentials to be available.
 
+#### Additional Longhorn Disk
+
+If you set `longhorn_disk`, wait for Talos to mount `/var/mnt/longhorn-extra`.
+In **Longhorn → Node → Edit Disks**, add that path as a filesystem disk and enable scheduling.
+Keep scheduling on for `/var/lib/longhorn` too.
+
 ### Tailscale
 
 #### Tailscale LAN Access
