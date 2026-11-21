@@ -15,17 +15,29 @@ spec:
       labels:
         app: excalidraw
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
         - name: harbor-credentials
       containers:
         - name: excalidraw
-          # NOTE: Using digest for reproducibility since only 'latest' tag exists
           image: harbor.okwilkins.dev/docker-hub-cache/excalidraw/excalidraw@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
           imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
           securityContext:
+            capabilities:
+              drop: [ALL]
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
           volumeMounts:
