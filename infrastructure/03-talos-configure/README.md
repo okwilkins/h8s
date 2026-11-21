@@ -1,5 +1,11 @@
 # Talos Configuration
 
+## Upgrades
+
+Check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix). Change either `talos_version` or `kubernetes_version` in [`shared/common.auto.tfvars`](../shared/common.auto.tfvars), then run `tofu apply` from this directory in the [infrastructure shell](../README.md#configure).
+
+Talos upgrades drain one node at a time and stop on failure. If Longhorn blocks a drain, let it restore healthy replicas before retrying.
+
 ## Rootless Buildah Seccomp Profile
 
 Stage `03` installs `buildah.json` on every node at `/var/lib/kubelet/seccomp/profiles/buildah.json`.

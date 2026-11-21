@@ -66,6 +66,7 @@ The following extensions are baked in:
 | `siderolabs/qemu-guest-agent`   | Proxmox VM communication (shutdown, IP reporting, snapshots) |
 | `siderolabs/iscsi-tools`        | Required by Longhorn for persistent storage                  |
 | `siderolabs/util-linux-tools`   | Required by Longhorn for persistent storage                  |
+| `siderolabs/tailscale`          | Tailnet access and route advertising                         |
 
 ### VM Configuration
 
@@ -73,7 +74,7 @@ VMs are created and configured entirely by Terraform. For reference, the setting
 
 - **BIOS/UEFI**: OVMF (UEFI)
 - **CPU type**: `x86-64-v2-AES`
-- **Disk**: VirtIO (`virtio0`), raw format, discard + SSD emulation enabled
+- **Disk**: VirtIO (`virtio0`), raw format with discard enabled
 - **Network**: LAN bridge (`vmbr0`), VirtIO model
 - **QEMU guest agent**: enabled (VirtIO channel)
 - **Boot order**: disk first, CDROM second (boots from ISO when disk is blank and from disk thereafter)
@@ -81,7 +82,7 @@ VMs are created and configured entirely by Terraform. For reference, the setting
 ## Prerequisites
 
 - Proxmox is installed and reachable on the LAN (see [Proxmox Setup](#proxmox-setup) above)
-- An SSH agent is running with a key authorised for `root` on the Proxmox host — the `bpg/proxmox` provider uses SSH for ISO upload
+- Proxmox API credentials can download the ISO to each node's local storage
 - Node IPs are reserved as static DHCP leases in your router so they don't change between reboots
 
 ## Configure
@@ -108,7 +109,7 @@ The encrypted `TF_VAR_*` entries supply sensitive configuration including:
 - Generate MAC addresses using: `printf "BC:24:11:%02X:%02X:%02X\n" $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256))`
 - Configure static DHCP leases in your router for each node's MAC address
 
-**Node names are the Kubernetes hostnames.** Keep them stable across rebuilds, renaming or swapping node entries will cause Longhorn to detect a disk UUID mismatch and refuse to start. Add new nodes by adding new keys. Never reorder or rename existing ones.
+**Node names are the Kubernetes hostnames.** Keep them stable across rebuilds, renaming or swapping node entries will cause Longhorn to detect a disk UUID mismatch and refuse to start. When adding a node, add its key and extend the upgrade chain in [`03-talos-configure/lifecycle.tf`](03-talos-configure/lifecycle.tf).
 
 ### Generating MAC Addresses
 
@@ -174,12 +175,16 @@ This command executes all 7 stages in sequence:
 4. Configures Talos nodes, bootstraps etcd, and retrieves credentials
 5. Installs Cilium CNI
 6. Installs ArgoCD for GitOps
-7. Configures Vault and provisions secrets, after manual initialisation and unsealing if required
+7. Checks Vault readiness and stores its initialisation credentials
+8. Provisions Vault secrets
 
-Apply takes several minutes. The slow steps are the ISO download to Proxmox (~500 MB) and waiting for Talos to install to disk and reboot before the ISO detachment and config apply can proceed.
+Apply takes several minutes. The slow steps are the ISO download to Proxmox (~500 MB) and waiting for Talos to install to disk and reboot.
 
 On a fresh installation, stage `06` stops until Vault has been initialised and unsealed.
-Follow [Fresh Vault Initialisation](#fresh-vault-initialisation), then rerun bootstrap.
+
+### Fresh Vault Initialisation
+
+Initialise Vault once, save the original JSON in Bitwarden and unseal it. Supply that JSON as `TF_VAR_vault_credentials` when you rerun bootstrap. Stage `06` only needs this input the first time.
 
 ### Complete the Setup
 
@@ -290,12 +295,9 @@ If VMs boot into the Proxmox UEFI shell instead of the Talos ISO:
 2. Verify the VM's boot order is set correctly (disk first, CDROM second)
 3. Ensure the ISO is attached to the VM's CDROM drive
 
-#### SSH authentication fails during ISO upload
+#### ISO download fails
 
-The `bpg/proxmox` provider requires SSH access to upload the ISO. Ensure:
-1. Your SSH agent is running: `eval $(ssh-agent -s)`
-2. Your key is added: `ssh-add ~/.ssh/id_rsa`
-3. You can SSH to the Proxmox host as root without password: `ssh root@<proxmox-ip>`
+Check the Proxmox API credentials, the target node's task log and its connection to `factory.talos.dev`. If the ISO version differs from the Talos pin, run stage `00` before retrying stage `01`.
 
 #### Talos nodes not joining the cluster
 
@@ -375,13 +377,15 @@ Normal bootstrap and scheduled operations do not initialise or unseal Vault.
 
 **Secret Rotation**: Update Vault secrets as needed. ESO will automatically sync changes to Kubernetes.
 
-## Upgrading Talos
+## Upgrading Talos and Kubernetes
 
-Change `talos_version` in `shared/common.auto.tfvars` and run the pipeline:
+Renovate tracks `talos_version` and `kubernetes_version` in [`shared/common.auto.tfvars`](shared/common.auto.tfvars). Change one pin at a time and apply only [Stage `03`](03-talos-configure/README.md#upgrades):
 
 ```bash
-task --dir "$INFRA_ROOT" cluster:bootstrap
+tofu -chdir="$INFRA_ROOT/03-talos-configure" apply
 ```
+
+Talos drains one node at a time and stops on failure. Each node has 30 minutes to drain within a 45-minute update. If Longhorn blocks a drain, wait for its volumes to regain healthy replicas outside that node before retrying. If Vault restarts, [unseal it](#ongoing-operations) once `vault-0` is running.
 
 ## Extracting the Vault CA Certificate
 

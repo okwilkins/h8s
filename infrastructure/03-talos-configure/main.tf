@@ -84,7 +84,7 @@ data "talos_machine_configuration" "nodes" {
   cluster_endpoint   = "https://${var.talos_cluster_vip}:6443"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
   talos_version      = var.talos_version
-  kubernetes_version = null # use the version bundled with talos_version
+  kubernetes_version = var.kubernetes_version
 
   config_patches = concat([
     # Hostname per node
@@ -95,16 +95,30 @@ data "talos_machine_configuration" "nodes" {
       auto       = "off"
     }),
 
-    # Per-node identity - hostname, install image, VIP on ens18.
+    # Installer settings use the 1.14 document format.
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "UnattendedInstallConfig"
+      installer = {
+        image = local.installer_image
+      }
+      provisioning = {
+        diskSelector = { match = "disk.dev_path == '/dev/vda'" }
+        wipe         = true
+      }
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "ResolverConfig"
+      nameservers = [
+        for address in ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"] : { address = address }
+      ]
+    }),
+
+    # Keep DHCP and the VIP. Advertise the LAN IP for etcd while listening on both networks.
     yamlencode({
       machine = {
-        install = {
-          disk  = "/dev/vda"
-          wipe  = true
-          image = "factory.talos.dev/installer/${data.terraform_remote_state.talos_factory.outputs.schematic_id}:${var.talos_version}"
-        }
         network = {
-          nameservers = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"]
           interfaces = [
             {
               interface = "ens18"
@@ -116,23 +130,37 @@ data "talos_machine_configuration" "nodes" {
           ]
         }
       }
+      cluster = {
+        etcd = {
+          advertisedSubnets = ["${each.value.ip_address}/32"]
+          listenSubnets     = ["0.0.0.0/0"]
+        }
+      }
     }),
 
-    # Machine-level features - KubePrism + Longhorn bind mount.
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "KubePrismConfig"
+      port       = 7445
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "SysctlConfig"
+      params = {
+        "net.ipv6.conf.all.forwarding" = "1"
+        "user.max_user_namespaces"     = "256"
+      }
+    }),
+
+    # KubeletConfig has no extraMounts field in 1.14. Retain the supported
+    # legacy kubelet block so Longhorn keeps its existing bind mount.
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "KubeletConfig"
+      "$patch"   = "delete"
+    }),
     yamlencode({
       machine = {
-        features = {
-          kubePrism = {
-            enabled = true
-            port    = 7445
-          }
-        }
-        sysctls = {
-          # IPv6 forwarding for the Tailscale exit node (IPv4 forwarding is on by default in Talos).
-          "net.ipv6.conf.all.forwarding" = "1"
-          # Enable user namespaces for rootless image builds on all cluster nodes.
-          "user.max_user_namespaces" = "256"
-        }
         seccompProfiles = [
           {
             name  = "buildah.json"
@@ -140,9 +168,8 @@ data "talos_machine_configuration" "nodes" {
           }
         ]
         kubelet = {
-          nodeIP = {
-            validSubnets = var.node_ip_valid_subnets
-          }
+          image                               = "ghcr.io/siderolabs/kubelet:${var.kubernetes_version}"
+          defaultRuntimeSeccompProfileEnabled = true
           extraMounts = [
             {
               destination = "/var/lib/longhorn"
@@ -155,36 +182,48 @@ data "talos_machine_configuration" "nodes" {
       }
     }),
 
-    # Cluster-level settings - Cilium CNI, no kube-proxy, VIP endpoint.
+    # Allow workloads on control-plane nodes and preserve node IP selection.
     yamlencode({
-      cluster = {
-        allowSchedulingOnControlPlanes = true
-        network = {
-          cni = {
-            name = "none"
-          }
-        }
-        proxy = {
-          disabled = true
-        }
-        coreDNS = {
-          disabled = false
-          image    = "docker.io/coredns/coredns:1.15.0@sha256:0a9d8c8ddf34347eb59aad9a8784f0710de88d6d112726d11d271f9bc6daca26"
-        }
-        controlPlane = {
-          endpoint = "https://${var.talos_cluster_vip}:6443"
-        }
-        # Allow Prometheus to reach the authenticated metrics endpoints.
-        controllerManager = {
-          extraArgs = {
-            "bind-address" = "0.0.0.0"
-          }
-        }
-        scheduler = {
-          extraArgs = {
-            "bind-address" = "0.0.0.0"
-          }
-        }
+      apiVersion = "v1alpha1"
+      kind       = "KubeNodeConfig"
+      nodeIP = {
+        validSubnets = var.node_ip_valid_subnets
+      }
+      taints = {
+        "node-role.kubernetes.io/control-plane" = { "$patch" = "delete" }
+      }
+    }),
+    # Cilium supplies the CNI instead of the generated Flannel deployment.
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "KubeFlannelCNIConfig"
+      "$patch"   = "delete"
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "KubeProxyConfig"
+      enabled    = false
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "KubeCoreDNSConfig"
+      enabled    = true
+      image      = "docker.io/coredns/coredns:1.15.0@sha256:0a9d8c8ddf34347eb59aad9a8784f0710de88d6d112726d11d271f9bc6daca26"
+    }),
+    # The generator already sets the cluster endpoint from cluster_endpoint.
+    # Keep the authenticated metrics endpoints reachable by Prometheus.
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "KubeControllerManagerConfig"
+      extraArgs = {
+        "bind-address" = "0.0.0.0"
+      }
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "KubeSchedulerConfig"
+      extraArgs = {
+        "bind-address" = "0.0.0.0"
       }
     }),
     ], lookup(local.tailscale_authkeys, each.key, "") != "" ? [
@@ -198,8 +237,7 @@ data "talos_machine_configuration" "nodes" {
         "TS_HOSTNAME=${each.key}",
         # TS_AUTH_ONCE=false: re-run `tailscale up` on every container start so
         # changes to TS_ROUTES/TS_EXTRA_ARGS apply without re-provisioning.
-        # Requires a reusable Tailscale auth key (single-use keys would fail
-        # after the first login).
+        # Requires a reusable Tailscale auth key (single-use keys would fail after the first login).
         "TS_AUTH_ONCE=false",
         "TS_ACCEPT_DNS=${lower(tostring(var.tailscale_accept_dns))}",
         ], length(local.tailscale_routes[each.key]) > 0 ? [
@@ -230,57 +268,6 @@ data "talos_machine_configuration" "nodes" {
 }
 
 # ============================================================
-# Apply Configurations to Nodes
-# ============================================================
-# Pushes the generated machine config to each node over the Talos API.
-# Replaces apply_configs.sh. On a fresh node (maintenance mode) Talos
-# requires --insecure; the provider handles this automatically when the
-# node is not yet part of a cluster.
-#
-# endpoint = each node's own IP because fresh nodes are not yet in a cluster,
-# so we cannot route through another node's API. See:
-# https://github.com/siderolabs/terraform-provider-talos/issues/199
-
-resource "talos_machine_configuration_apply" "nodes" {
-  for_each = var.nodes
-
-  client_configuration        = talos_machine_secrets.this.client_configuration
-  machine_configuration_input = data.talos_machine_configuration.nodes[each.key].machine_configuration
-
-  # For a fresh (maintenance-mode) node, endpoint must be the node's own IP
-  node     = each.value.ip_address
-  endpoint = each.value.ip_address
-
-  # `reset = false`: the provider's destroy is a no-op unless reset is set,
-  # and resetting a node wipes its ephemeral partition (taking any
-  # node-local data with it).  Destroying this resource must never touch
-  # the node itself.
-  on_destroy = {
-    graceful = true
-    reset    = false
-    reboot   = false
-  }
-
-  depends_on = [terraform_data.wait_for_nodes]
-}
-
-# ============================================================
-# Bootstrap etcd
-# ============================================================
-# Triggers etcd bootstrap on the first controlplane node. This only needs to
-# happen once - Talos detects an already-bootstrapped cluster and is idempotent.
-# Replaces the manual `talosctl bootstrap` step.
-
-resource "talos_machine_bootstrap" "this" {
-  client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = local.first_node_ip
-  endpoint             = local.first_node_ip
-
-  # All nodes must have their configs applied before etcd can bootstrap
-  depends_on = [talos_machine_configuration_apply.nodes]
-}
-
-# ============================================================
 # Kubeconfig
 # ============================================================
 # Retrieves the kubeconfig once the cluster is up. Replaces `talosctl kubeconfig`.
@@ -289,8 +276,7 @@ resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = local.first_node_ip
   endpoint             = local.first_node_ip
-
-  depends_on = [talos_machine_bootstrap.this]
+  depends_on           = [talos_cluster.this]
 }
 
 # ============================================================
