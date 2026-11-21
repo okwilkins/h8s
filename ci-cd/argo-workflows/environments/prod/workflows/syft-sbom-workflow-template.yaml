@@ -131,7 +131,7 @@ spec:
           - name: main
             dependencies:
               - scan
-            image: ghcr.io/oras-project/oras:v1.3.3@sha256:a4c54befd87d0366e0ba3ac3a9536a5288c8a3735acd3b635cdace59a2c559c8
+            image: ghcr.io/oras-project/oras:v1.4.0@sha256:5fabb4e523de1781443c227fca62782a51aeacd044413c07f54dc64935d7f013
             imagePullPolicy: IfNotPresent
             workingDir: /sbom
             command: ["/bin/sh", "-c"]
