@@ -9,7 +9,7 @@ tasks:
 
   # Talos Factory
   00:talos:factory:install:
-    aliases: [talos:factory:install]
+    aliases: ['talos:factory:install']
     desc: "Generate Talos schematic with custom extensions"
     dir: '$INFRA_ROOT/00-talos-factory'
     cmds:
@@ -17,7 +17,7 @@ tasks:
       - tofu apply -auto-approve
 
   00:talos:factory:destroy:
-    aliases: [talos:factory:destroy]
+    aliases: ['talos:factory:destroy']
     desc: "Destroy Talos factory schematic"
     dir: '$INFRA_ROOT/00-talos-factory'
     cmds:
@@ -25,7 +25,7 @@ tasks:
 
   # Proxmox ISO - Download Talos ISO to Proxmox nodes
   01:proxmox:iso:install:
-    aliases: [proxmox:iso:install]
+    aliases: ['proxmox:iso:install']
     desc: "Download Talos ISO to Proxmox nodes"
     dir: '$INFRA_ROOT/01-proxmox-iso-upload'
     cmds:
@@ -33,7 +33,7 @@ tasks:
       - tofu apply -auto-approve
 
   01:proxmox:iso:destroy:
-    aliases: [proxmox:iso:destroy]
+    aliases: ['proxmox:iso:destroy']
     desc: "Remove Talos ISO from Proxmox nodes"
     dir: '$INFRA_ROOT/01-proxmox-iso-upload'
     cmds:
@@ -41,7 +41,7 @@ tasks:
 
   # Proxmox Provision - Create VMs on Proxmox
   02:proxmox:provision:install:
-    aliases: [proxmox:provision:install]
+    aliases: ['proxmox:provision:install']
     desc: "Create VMs on Proxmox"
     dir: '$INFRA_ROOT/02-proxmox-provision'
     cmds:
@@ -49,7 +49,7 @@ tasks:
       - tofu apply -auto-approve
 
   02:proxmox:provision:destroy:
-    aliases: [proxmox:provision:destroy]
+    aliases: ['proxmox:provision:destroy']
     desc: "Destroy Proxmox VMs"
     dir: '$INFRA_ROOT/02-proxmox-provision'
     cmds:
@@ -57,15 +57,15 @@ tasks:
 
   # Talos Configure - Configure nodes, bootstrap etcd, retrieve kubeconfig
   03:talos:configure:install:
-    aliases: [talos:configure:install]
+    aliases: ['talos:configure:install']
     desc: "Configure Talos nodes, bootstrap etcd, retrieve kubeconfig"
     dir: '$INFRA_ROOT/03-talos-configure'
     cmds:
       - tofu init -lockfile=readonly
-      - tofu apply -parallelism=1
+      - tofu apply -auto-approve
 
   03:talos:configure:destroy:
-    aliases: [talos:configure:destroy]
+    aliases: ['talos:configure:destroy']
     desc: "Destroy Talos configuration and nodes"
     dir: '$INFRA_ROOT/03-talos-configure'
     cmds:
@@ -73,7 +73,7 @@ tasks:
 
   # Cilium - Install Cilium CNI
   04:cilium:install:
-    aliases: [cilium:install]
+    aliases: ['cilium:install']
     desc: "Install Cilium CNI"
     dir: '$INFRA_ROOT/04-cilium'
     cmds:
@@ -81,7 +81,7 @@ tasks:
       - tofu apply -auto-approve
 
   04:cilium:destroy:
-    aliases: [cilium:destroy]
+    aliases: ['cilium:destroy']
     desc: "Destroy Cilium CNI installation"
     dir: '$INFRA_ROOT/04-cilium'
     cmds:
@@ -89,7 +89,7 @@ tasks:
 
   # ArgoCD - Install ArgoCD for GitOps
   05:argocd:install:
-    aliases: [argocd:install]
+    aliases: ['argocd:install']
     desc: "Install ArgoCD for GitOps"
     dir: '$INFRA_ROOT/05-argocd'
     cmds:
@@ -97,7 +97,7 @@ tasks:
       - tofu apply -auto-approve
 
   05:argocd:destroy:
-    aliases: [argocd:destroy]
+    aliases: ['argocd:destroy']
     desc: "Destroy ArgoCD installation"
     dir: '$INFRA_ROOT/05-argocd'
     cmds:
@@ -105,7 +105,7 @@ tasks:
 
   # Vault Init - Configure manually initialised and unsealed Vault
   06:vault:init:
-    aliases: [vault:init]
+    aliases: ['vault:init']
     desc: "Configure Vault using credentials from encrypted state"
     dir: '$INFRA_ROOT/06-vault-init'
     cmds:
@@ -113,7 +113,7 @@ tasks:
       - tofu apply -auto-approve
 
   06:vault:destroy:
-    aliases: [vault:destroy]
+    aliases: ['vault:destroy']
     desc: "Destroy Vault outputs"
     dir: '$INFRA_ROOT/06-vault-init'
     cmds:
@@ -121,7 +121,7 @@ tasks:
 
   # Vault Secrets - Provision secrets in Vault
   07:vault:secrets:install:
-    aliases: [vault:secrets:install]
+    aliases: ['vault:secrets:install']
     desc: "Provision all secrets in Vault (passwords, keys, external secrets)"
     dir: '$INFRA_ROOT/07-vault-resources-provision'
     cmds:
@@ -129,7 +129,7 @@ tasks:
       - tofu apply -auto-approve
 
   07:vault:secrets:destroy:
-    aliases: [vault:secrets:destroy]
+    aliases: ['vault:secrets:destroy']
     desc: "Destroy Vault secrets (secrets remain in Vault, only Terraform state removed)"
     dir: '$INFRA_ROOT/07-vault-resources-provision'
     cmds:
@@ -137,7 +137,7 @@ tasks:
 
   # Platform Configuration - Configure Harbor and other platform resources
   08:platform:configure:
-    aliases: [platform:configure]
+    aliases: ['platform:configure']
     desc: "Configure Harbor registry and platform resources (run after cluster:bootstrap)"
     dir: '$INFRA_ROOT/platform-config'
     cmds:
