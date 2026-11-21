@@ -37,8 +37,8 @@ Two GMKtec G3 mini-PCs, each with:
 
 One wo-we mini-PC with:
 - CPU: AMD Ryzen 5 3501U (4 cores, 8 threads)
-- RAM: 16GB (dual channel)
-- Storage Two 256 GB NVMe drives (reserves 512 MiB for integrated graphics)
+- RAM: 16GB (dual channel, reserves 512 MiB for integrated graphics)
+- Storage Two 256 GB NVMe drives
 
 ## Proxmox Setup
 
