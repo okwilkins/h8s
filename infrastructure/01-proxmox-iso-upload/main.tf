@@ -26,5 +26,11 @@ resource "proxmox_virtual_environment_download_file" "talos_iso" {
 
   # Overwrite if Talos version or schematic changes (e.g. extension update)
   overwrite = true
-}
 
+  lifecycle {
+    precondition {
+      condition     = try(data.terraform_remote_state.talos_factory.outputs.image_urls.talos_version, null) == var.talos_version
+      error_message = "The Talos ISO version in Stage 00 state does not match talos_version. Apply Stage 00 before uploading ISOs."
+    }
+  }
+}

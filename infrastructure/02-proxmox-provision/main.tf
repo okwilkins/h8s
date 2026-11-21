@@ -94,6 +94,11 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   }
 
   lifecycle {
+    precondition {
+      condition     = try(startswith(split(":iso/", data.terraform_remote_state.proxmox_talos_iso_ids.outputs.proxmox_talos_iso_ids[each.value.pve_node])[1], "talos-${var.talos_version}-"), false)
+      error_message = "No Talos ${var.talos_version} ISO is available in Stage 01 state for ${each.value.pve_node}. Apply Stages 00 and 01 before provisioning VMs."
+    }
+
     ignore_changes = [
       boot_order,
     ]
