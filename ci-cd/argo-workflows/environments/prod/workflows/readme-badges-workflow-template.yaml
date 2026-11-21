@@ -60,9 +60,8 @@ spec:
                   "pattern": "^\\s*targetRevision: ([0-9.]+)\\s*$"
                 },
                 "Kubernetes": {
-                  "path": "infrastructure/03-talos-configure/main.tf",
-                  "pattern": "^\\s*kubernetes_version\\s*=\\s*(null)\\s*(?:#.*)?$",
-                  "value": "Talos_default"
+                  "path": "infrastructure/shared/common.auto.tfvars",
+                  "pattern": "^kubernetes_version\\s*=\\s*\"([^\"]+)\""
                 }
               }
         securityContext:
