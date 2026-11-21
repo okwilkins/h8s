@@ -34,7 +34,7 @@ spec:
   templates:
     - name: update
       container:
-        image: harbor.okwilkins.dev/main/readme-badges@sha256:1f3c123a3db61ac5b89833322aca943757bf26cd414cd79b46b01edd086234cd
+        image: harbor.okwilkins.dev/main/readme-badges@sha256:1f1f6868ca48146d10360449b00b15ac147b6392f1fcaae4919f37c190e6e1b0
         imagePullPolicy: IfNotPresent
         command: [/usr/local/bin/update-badges]
         env:
