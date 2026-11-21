@@ -1,0 +1,113 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: excalidraw-image
+  namespace: argo-events
+  annotations:
+    excalidraw-release: "9fbeaed54aaad8dc06d32ba176a9bc20fb827109"
+  labels:
+    app.kubernetes.io/name: excalidraw-image
+    app.kubernetes.io/part-of: argo-events
+    app.kubernetes.io/component: workflow-trigger
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: excalidraw-image
+        app.kubernetes.io/part-of: argo-events
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: h8s
+      filters:
+        script: |
+          local b = event.body
+          if not b or b["X-GitHub-Event"] ~= "push" or not b.repository
+              or b.repository.full_name ~= "okwilkins/h8s" or b.ref ~= "refs/heads/main"
+              or b.deleted ~= false or type(b.after) ~= "string"
+              or #b.after ~= 40 or not b.after:match("^[0-9a-f]+$") then return false end
+          for _, commit in ipairs(b.commits or {}) do
+            for _, change in ipairs({"added", "modified"}) do
+              for _, path in ipairs(commit[change] or {}) do
+                if path == "ci-cd/argo-events/environments/prod/sensors/excalidraw-image-sensor.yaml" then return true end
+              end
+            end
+          end
+          return false
+  # Fixed names block duplicate commits until the Workflow TTL removes them.
+  triggers:
+    - template:
+        name: build-excalidraw
+        conditions: push
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                name: excalidraw
+                namespace: argo-workflows
+                labels:
+                  app.kubernetes.io/name: image-build
+                  app.kubernetes.io/part-of: argo-workflows
+              spec:
+                workflowTemplateRef:
+                  name: image-build
+                templateDefaults:
+                  initContainers:
+                    - name: checkout-excalidraw
+                      image: harbor.okwilkins.dev/docker-hub-cache/alpine/git@sha256:2306e2b05ee0ef99f5d25b0779f645b24ae9f91ba187107503592fcdfe78da3a
+                      imagePullPolicy: IfNotPresent
+                      mirrorVolumeMounts: true
+                      command: ["/bin/sh", "-ec"]
+                      args:
+                        - |
+                          # Only the build pod has the h8s source artifact.
+                          test -d /workspace || exit 0
+                          cd /workspace
+                          sha=$(sed -nE 's/^ *excalidraw-release: "([0-9a-f]{40})"$/\1/p' ci-cd/argo-events/environments/prod/sensors/excalidraw-image-sensor.yaml)
+                          test "${#sha}" -eq 40
+                          git init -q upstream
+                          git -C upstream fetch --depth=1 https://github.com/excalidraw/excalidraw.git "$sha"
+                          git -C upstream checkout -q --detach "$sha"
+                      resources:
+                        requests: {cpu: 50m, memory: 64Mi}
+                        limits: {memory: 512Mi}
+                      securityContext:
+                        allowPrivilegeEscalation: false
+                        readOnlyRootFilesystem: true
+                        capabilities: {drop: [ALL]}
+                arguments:
+                  parameters:
+                    - name: git-repository
+                      value: https://github.com/okwilkins/h8s.git
+                    - name: revision
+                      value: ""
+                    - name: containerfile
+                      value: upstream/Dockerfile
+                    - name: build-context
+                      value: upstream
+                    - name: image-repository
+                      value: harbor.okwilkins.dev/main/excalidraw
+                    - name: image-tag
+                      value: release
+                    - name: builder-image
+                      value: harbor.okwilkins.dev/main/image-buildah@sha256:674624f56107b89f0703a63e3d6df950d954678605689d558caf76ff60b73d7c
+                    - name: signer-image
+                      value: harbor.okwilkins.dev/main/cosign@sha256:9253f2a44f3ae52f850c033665d7778dca288ae719af543056730f656cc7c38a
+          parameters:
+            - src:
+                dependencyName: push
+                dataTemplate: "excalidraw-{{ .Input.body.after }}"
+              dest: metadata.name
+            - src:
+                dependencyName: push
+                dataKey: body.after
+              dest: spec.arguments.parameters.1.value
+      atLeastOnce: true
+      retryStrategy:
+        steps: 5
+        duration: 5s
+        factor: 2
+        jitter: 0.2
