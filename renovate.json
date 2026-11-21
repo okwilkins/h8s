@@ -30,7 +30,26 @@
     "lockFileMaintenance": {
         "enabled": true
     },
+    "customDatasources": {
+        "harbor-main": {
+            "defaultRegistryUrlTemplate": "https://harbor.okwilkins.dev/api/v2.0/projects/main/repositories/{{packageName}}/artifacts?q=tags%3D*&sort=-push_time&page_size=100&with_accessory=true",
+            "transformTemplates": [
+                "{\"releases\": [$[type = 'IMAGE' and 'signature.cosign' in accessories.type][0].{'version': '1.0.0', 'digest': digest, 'releaseTimestamp': push_time}]}"
+            ]
+        }
+    },
     "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Track the newest signed Harbor main image by digest in workloads and Argo parameters",
+            "managerFilePatterns": ["/\\.ya?ml$/"],
+            "matchStrings": [
+                "(?:^|\\n)[ \\t]*(?:- )?(?:image|value):[ \\t]+[\"']?(?<depName>harbor\\.okwilkins\\.dev/main/(?<packageName>[a-z0-9][a-z0-9._-]*))@(?<currentDigest>sha256:[a-f0-9]{64})"
+            ],
+            "currentValueTemplate": "1.0.0",
+            "versioningTemplate": "semver",
+            "datasourceTemplate": "custom.harbor-main"
+        },
         {
             "customType": "regex",
             "description": "Update the Excalidraw release commit in its build sensor",
@@ -184,13 +203,10 @@
     ],
     "packageRules": [
         {
-            "description": "Update the Excalidraw deployment image manually",
-            "matchManagers": [
-                "kubernetes"
-            ],
-            "matchFileNames": [
-                "applications/excalidraw/base/deployment.yaml"
-            ],
+            "description": "Use the Harbor artifact datasource for project main digest pins",
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["harbor.okwilkins.dev/main/**"],
+            "matchCurrentValue": "latest",
             "enabled": false
         },
         {
