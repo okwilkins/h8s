@@ -60,7 +60,7 @@ spec:
                       mirrorVolumeMounts: true
                       env:
                         - name: EXCALIDRAW_COMMIT
-                          value: "2c3dcc06ec807e81ab9437eceb1a8f7a3c590743"
+                          value: "{{workflow.parameters.image-tag}}"
                       command: ["/bin/sh", "-ec"]
                       args:
                         - |
@@ -93,7 +93,7 @@ spec:
                     - name: image-repository
                       value: harbor.okwilkins.dev/main/excalidraw
                     - name: image-tag
-                      value: release
+                      value: "2c3dcc06ec807e81ab9437eceb1a8f7a3c590743"
                     - name: builder-image
                       value: harbor.okwilkins.dev/main/image-buildah@sha256:674624f56107b89f0703a63e3d6df950d954678605689d558caf76ff60b73d7c
                     - name: signer-image
