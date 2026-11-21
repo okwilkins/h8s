@@ -11,6 +11,10 @@ renovate:
   # Permit only the Buildah lock refresh and the trusted personal-website tool sync.
   config: |
     module.exports = {
+      hostRules: [{
+        matchHost: "https://harbor.okwilkins.dev",
+        httpsCertificateAuthority: require("node:fs").readFileSync("/etc/renovate/harbor/ca.crt", "utf8"),
+      }],
       allowedCommands: [
         "^nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs$",
         String.raw`^bash -o pipefail -c 'nix --extra-experimental-features "nix-command flakes" eval --raw --no-write-lock-file \.#lib\.x86_64-linux\.syncNixTools \| python3 - --install-tools'$`,
@@ -46,6 +50,15 @@ renovate:
         secretKeyRef:
           name: renovate-github-app-key
           key: PRIVATE_KEY
+
+extraVolumes:
+  - name: harbor-ca
+    secret:
+      secretName: renovate-harbor-ca
+extraVolumeMounts:
+  - name: harbor-ca
+    mountPath: /etc/renovate/harbor
+    readOnly: true
 
 # The SQLite database and Renovate cache will be stored here
 cachePersistence:
