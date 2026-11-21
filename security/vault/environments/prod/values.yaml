@@ -8,6 +8,8 @@ server:
   ha:
     enabled: true
     replicas: 1
+    disruptionBudget:
+      enabled: false
     apiAddr: http://vault-0.vault-internal.vault.svc.cluster.local:8200
     clusterAddr: https://vault-0.vault-internal.vault.svc.cluster.local:8201
     raft:
