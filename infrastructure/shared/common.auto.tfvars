@@ -2,8 +2,9 @@
 # Talos
 # ============================================================
 
-talos_version      = "v1.13.4"
+talos_version      = "v1.14.6"
 talos_cluster_name = "talos-homelab"
+kubernetes_version = "v1.37.2"
 
 # ============================================================
 # Proxmox
@@ -13,5 +14,3 @@ proxmox_iso_datastore = "local"
 
 # Datastore for VM disks (e.g. 'local-lvm', 'local-zfs')
 proxmox_disk_datastore = "local-lvm"
-
-

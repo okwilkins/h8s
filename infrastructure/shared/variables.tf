@@ -66,6 +66,11 @@ variable "talos_version" {
   default     = "v1.12.0"
 }
 
+variable "kubernetes_version" {
+  description = "Kubernetes version to embed in generated machine configuration."
+  type        = string
+}
+
 variable "talos_cluster_name" {
   description = "Kubernetes cluster name, used in generated configs and kubeconfig context."
   type        = string
