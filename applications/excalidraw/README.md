@@ -1,4 +1,4 @@
-# Excallidraw
+# Excalidraw
 
 <a href="https://draw.okwilkins.dev" target="_blank" rel="noopener">
   <picture>
