@@ -48,6 +48,7 @@ spec:
         - owner: okwilkins
           names:
             - h8s
+            - personal-website
       webhook:
         endpoint: /github
         port: "12000"
@@ -63,5 +64,5 @@ spec:
       contentType: json
       filter:
         expression: >-
-          body.repository.full_name == 'okwilkins/h8s' &&
+          body.repository.full_name in ['okwilkins/h8s', 'okwilkins/personal-website'] &&
           body['X-GitHub-Event'] in ['ping', 'push']
