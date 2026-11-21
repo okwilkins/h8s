@@ -1,18 +1,6 @@
-variable "github_readme_badges_token" {
-  description = "GitHub token with contents and pull-request write permission. Supply TF_VAR_github_readme_badges_token through the private SOPS secrets repo."
-  type        = string
-  sensitive   = true
-  nullable    = false
-
-  validation {
-    condition     = length(trimspace(var.github_readme_badges_token)) > 0
-    error_message = "The GitHub README badges token must not be empty."
-  }
-}
-
-resource "null_resource" "vault_secret_argo_workflows_github_readme_badges" {
+resource "null_resource" "vault_secret_argo_workflows_github_app" {
   triggers = {
-    credentials_hash = sha256(var.github_readme_badges_token)
+    credentials_hash = sha256(var.h8s_workflows_github_app_private_key)
   }
 
   provisioner "local-exec" {
@@ -23,7 +11,7 @@ resource "null_resource" "vault_secret_argo_workflows_github_readme_badges" {
       SERVER             = data.terraform_remote_state.talos_configure.outputs.first_node_ip
       VAULT_TOKEN        = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
       GITHUB_CREDENTIALS = sensitive(jsonencode({
-        token = var.github_readme_badges_token
+        private-key = var.h8s_workflows_github_app_private_key
       }))
     }
     command = <<-EOT
@@ -32,7 +20,7 @@ resource "null_resource" "vault_secret_argo_workflows_github_readme_badges" {
       printf '%s\n%s' "$VAULT_TOKEN" "$GITHUB_CREDENTIALS" | kubectl_wrapper exec -i -n vault vault-0 -- sh -ec '
         IFS= read -r VAULT_TOKEN
         export VAULT_TOKEN
-        vault kv put kubernetes-homelab/argo-workflows/github-readme-badges - >/dev/null
+        vault kv put kubernetes-homelab/argo-workflows/github-app - >/dev/null
       '
     EOT
   }

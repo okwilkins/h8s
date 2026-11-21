@@ -152,7 +152,8 @@ variable "nodes" {
 # via environment variables before running terraform apply:
 #
 #   export TF_VAR_cloudflare_tunnel_token="your-token-here"
-#   export TF_VAR_github_app_private_key="base64-encoded-key-content"
+#   export TF_VAR_h8s_renovate_github_app_private_key="base64-encoded-key-content"
+#   export TF_VAR_h8s_workflows_github_app_private_key="base64-encoded-key-content"
 #
 # To obtain these credentials:
 # - Cloudflare: See networking/cloudflared/README.md
@@ -167,8 +168,14 @@ variable "cloudflare_tunnel_token" {
   sensitive   = true
 }
 
-variable "github_app_private_key" {
+variable "h8s_renovate_github_app_private_key" {
   description = "Base64-encoded GitHub App private key for Renovate. See ci-cd/renovate/README.md for how to create the GitHub App and download the private key. Encode with: cat key.pem | base64 -w0"
+  type        = string
+  sensitive   = true
+}
+
+variable "h8s_workflows_github_app_private_key" {
+  description = "Base64-encoded PEM private key for the h8s-workflows GitHub App."
   type        = string
   sensitive   = true
 }
