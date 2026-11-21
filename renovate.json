@@ -33,6 +33,46 @@
     "customManagers": [
         {
             "customType": "regex",
+            "description": "Update the Excalidraw release commit in its build sensor",
+            "managerFilePatterns": [
+                "/^ci-cd/argo-events/environments/prod/sensors/excalidraw-image-sensor\\.yaml$/"
+            ],
+            "matchStrings": [
+                "- name: image-tag\\s+value: \"(?<currentDigest>[a-f0-9]{40})\""
+            ],
+            "currentValueTemplate": "release",
+            "depNameTemplate": "excalidraw/excalidraw",
+            "packageNameTemplate": "https://github.com/excalidraw/excalidraw.git",
+            "datasourceTemplate": "git-refs"
+        },
+        {
+            "customType": "regex",
+            "description": "Update the Talos bootstrap version",
+            "managerFilePatterns": [
+                "/^infrastructure/shared/common\\.auto\\.tfvars$/"
+            ],
+            "matchStrings": [
+                "(?:^|\\r?\\n)[ \\t]*talos_version[ \\t]*=[ \\t]*\"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\""
+            ],
+            "depNameTemplate": "siderolabs/talos",
+            "datasourceTemplate": "github-releases",
+            "versioningTemplate": "semver"
+        },
+        {
+            "customType": "regex",
+            "description": "Update the Kubernetes version pin",
+            "managerFilePatterns": [
+                "/^infrastructure/shared/common\\.auto\\.tfvars$/"
+            ],
+            "matchStrings": [
+                "(?:^|\\r?\\n)[ \\t]*kubernetes_version[ \\t]*=[ \\t]*\"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\""
+            ],
+            "depNameTemplate": "kubernetes/kubernetes",
+            "datasourceTemplate": "github-releases",
+            "versioningTemplate": "semver"
+        },
+        {
+            "customType": "regex",
             "description": "Update Argo Events JetStream versions and controller image mappings",
             "managerFilePatterns": [
                 "/^ci-cd/argo-events/.*\\.yaml$/"
@@ -143,6 +183,16 @@
         }
     ],
     "packageRules": [
+        {
+            "description": "Update the Excalidraw deployment image manually",
+            "matchManagers": [
+                "kubernetes"
+            ],
+            "matchFileNames": [
+                "applications/excalidraw/base/deployment.yaml"
+            ],
+            "enabled": false
+        },
         {
             "description": "Update the pgvector image and SQL extension together, retaining PostgreSQL 18 and Trixie compatibility",
             "matchPackageNames": [
