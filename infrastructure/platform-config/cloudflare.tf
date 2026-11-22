@@ -1,6 +1,4 @@
 locals {
-  cloudflare_account_id      = "3f494d30787d3739deeff3315846d895"
-  cloudflare_zone_id         = "b6a507b8d13e8cf8a513a54f53f0f80e"
   cloudflare_http_origin     = "http://20.0.0.0:80"
   cloudflare_tunnel_hostname = "${cloudflare_zero_trust_tunnel_cloudflared.h8s_prod.id}.cfargotunnel.com"
 

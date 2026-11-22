@@ -11,6 +11,9 @@ locals {
     skip_s3_checksum            = true
   }
 
+  cloudflare_account_id = "3f494d30787d3739deeff3315846d895"
+  cloudflare_zone_id    = "b6a507b8d13e8cf8a513a54f53f0f80e"
+
   first_node_name = tolist(sort(keys(var.nodes)))[0]
   first_node_ip   = var.nodes[local.first_node_name].ip_address
 

@@ -3,6 +3,20 @@ variable "infra_root" {
   type        = string
 }
 
+variable "nodes" {
+  description = "Bootstrap node values referenced by the shared locals."
+  type = map(object({
+    ip_address = string
+    pve_node   = string
+    proxmox_ip = string
+  }))
+}
+
+variable "proxmox_node_name" {
+  description = "Bootstrap Proxmox node name referenced by the shared locals."
+  type        = string
+}
+
 variable "forgejo_url" {
   description = "Forgejo instance URL (without /api/v1)."
   type        = string
