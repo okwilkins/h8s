@@ -62,8 +62,7 @@ Add two permission policies:
 | Scope | Dashboard selections | Token summary |
 | --- | --- | --- |
 | Entire Account | Argo Tunnel (Legacy): Read and Edit | Cloudflare Tunnel Read, Cloudflare Tunnel Write |
-| Specified Domains → `okwilkins.dev` | DNS: Read and Edit, Zone: Read | DNS Read, DNS Write, Zone Read |
-
-To manage WAF and rate limiting rules, also select **App Security → Zone WAF Rules → Edit** for `okwilkins.dev` (`Zone WAF Write`).
+| Specified Domains → `okwilkins.dev` | DNS: Read and Edit, Zone: Read, App Security → Zone WAF Rules: Read and Edit | DNS Read, DNS Write, Zone Read, Zone WAF Read, Zone WAF Write |
 
 The Kubernetes connector uses its own `TF_VAR_cloudflare_tunnel_token`.
+
