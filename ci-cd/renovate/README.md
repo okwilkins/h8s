@@ -41,13 +41,11 @@ Go to GitHub → Settings → Developer Settings → GitHub Apps → **New GitHu
 
 Note the **App ID** and generate a **private key** (download `.pem` file).
 
-Store this key in vault under `renovate/github-app`. Store a key of `private-key`, with the `.pem` file.
-
 Read more [here with the official docs](https://docs.mend.io/renovate/latest/set-up-mend-renovate-self-hosted-app-for-github).
 
 ### 2. Store Secret
 
-Create a secret at path `renovate/github-app` with key `private-key` containing the full contents of the downloaded `.pem` file.
+Store the base64-encoded PEM as `TF_VAR_h8s_renovate_github_app_private_key` in the private SOPS secrets. Stage `07` writes it to `renovate/github-app` in Vault.
 
 ### 3. Configure
 
@@ -77,4 +75,3 @@ The Renovate pod will automatically discover the repository on the next sync cyc
 ```bash
 kubectl delete pod -n renovate -l app.kubernetes.io/name=mend-renovate-ce
 ```
-
