@@ -31,6 +31,12 @@
         "enabled": true
     },
     "customDatasources": {
+        "website-releases": {
+            "defaultRegistryUrlTemplate": "https://harbor.okwilkins.dev/api/v2.0/projects/main/repositories/personal-website/artifacts?q=tags%3D*&sort=-push_time&page_size=100&with_accessory=true",
+            "transformTemplates": [
+                "{\"releases\": [$[type = 'IMAGE' and 'signature.cosign' in accessories.type].($d := digest; tags[$match(name, /^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$/)].{'version': name, 'digest': $d})]}"
+            ]
+        },
         "harbor-main": {
             "defaultRegistryUrlTemplate": "https://harbor.okwilkins.dev/api/v2.0/projects/main/repositories/{{packageName}}/artifacts?q=tags%3D*&sort=-push_time&page_size=100&with_accessory=true",
             "transformTemplates": [
@@ -39,6 +45,16 @@
         }
     },
     "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Update the website to signed stable release tags, starting from its existing Git SHA tag",
+            "managerFilePatterns": ["/^applications/personal-website/base/deployment\\.yaml$/"],
+            "matchStrings": ["(?<depName>harbor\\.okwilkins\\.dev/main/personal-website):(?:(?<releaseTag>\\d+\\.\\d+\\.\\d+)|7a10ff4)@(?<currentDigest>sha256:[a-f0-9]{64})"],
+            "currentValueTemplate": "{{#if releaseTag}}{{releaseTag}}{{else}}0.0.0{{/if}}",
+            "autoReplaceStringTemplate": "{{{depName}}}:{{{newValue}}}@{{{newDigest}}}",
+            "datasourceTemplate": "custom.website-releases",
+            "versioningTemplate": "semver"
+        },
         {
             "customType": "regex",
             "description": "Track the newest signed Harbor main image by digest in workloads and Argo parameters",
@@ -202,6 +218,13 @@
         }
     ],
     "packageRules": [
+        {
+            "description": "Use signed Harbor releases for the website deployment",
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["harbor.okwilkins.dev/main/personal-website"],
+            "matchFileNames": ["applications/personal-website/base/deployment.yaml"],
+            "enabled": false
+        },
         {
             "description": "Use the Harbor artifact datasource for project main digest pins",
             "matchDatasources": ["docker"],
