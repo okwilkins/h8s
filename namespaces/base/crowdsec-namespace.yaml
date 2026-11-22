@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: crowdsec
+  labels:
+    name: crowdsec
+    harbor-image-pulls: "true"
+    app.kubernetes.io/name: crowdsec
+    app.kubernetes.io/part-of: crowdsec
