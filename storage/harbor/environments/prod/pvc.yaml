@@ -61,7 +61,7 @@ metadata:
     app.kubernetes.io/name: harbor-trivy
     app.kubernetes.io/part-of: harbor
     recurring-job.longhorn.io/source: enabled
-    recurring-job-group.longhorn.io/encrypted-backup: enabled
+    recurring-job-group.longhorn.io/encrypted-backup-daily: enabled
 spec:
   accessModes:
     - ReadWriteOnce
