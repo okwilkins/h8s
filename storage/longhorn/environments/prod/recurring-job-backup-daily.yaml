@@ -1,0 +1,19 @@
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: encrypted-daily
+  namespace: longhorn-system
+  labels:
+    app.kubernetes.io/name: encrypted-daily
+    app.kubernetes.io/part-of: longhorn
+spec:
+  name: encrypted-daily
+  # Daily at 03:15 UTC.
+  cron: "15 3 * * *"
+  task: backup
+  groups:
+    - encrypted-backup-daily
+  retentionPolicy: age-based
+  retainAge: 720h
+  retain: 1
+  concurrency: 1
