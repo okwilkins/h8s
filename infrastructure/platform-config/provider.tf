@@ -1,5 +1,9 @@
 terraform {
   required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "5.29.0"
+    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "3.5.0"
@@ -14,6 +18,10 @@ terraform {
     }
   }
 }
+
+# The infrastructure shell exports TF_CLOUDFLARE_TOKEN as CLOUDFLARE_API_TOKEN.
+# The cloudflared connector token cannot authenticate the management API.
+provider "cloudflare" {}
 
 data "terraform_remote_state" "talos_configure" {
   backend = "s3"

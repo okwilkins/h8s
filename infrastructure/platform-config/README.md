@@ -2,14 +2,6 @@
 
 Terraform configurations for managing platform-level resources that don't have mature Kubernetes operators.
 
-## Harbor Configuration
-
-This manages Harbor container registry resources including:
-- Projects (main, docker-hub-cache, ghcr-cache)
-- Registries (Docker Hub, Quay, GHCR pull-through caches)
-- Authelia OIDC authentication (`admins` grants Harbor administrator access)
-- Robot accounts and permissions
-
 ## Getting Started
 
 From the repository root, open your infrastructure shell:
@@ -50,3 +42,28 @@ docker pull harbor.okwilkins.dev/docker-hub-cache/hello-world:latest
 
 Pattern: `harbor.okwilkins.dev/<project>/<image>:<tag>`
 
+
+## Harbor Configuration
+
+This manages Harbor container registry resources including:
+- Projects (main, docker-hub-cache, ghcr-cache)
+- Registries (Docker Hub, Quay, GHCR pull-through caches)
+- Authelia OIDC authentication (`admins` grants Harbor administrator access)
+- Robot accounts and permissions
+
+
+## Cloudflare
+
+Store `TF_CLOUDFLARE_TOKEN` in the private `h8s-secrets/secrets.yaml` using SOPS.
+The infrastructure shell exports it as `CLOUDFLARE_API_TOKEN` for the provider.
+
+Add two permission policies:
+
+| Scope | Dashboard selections | Token summary |
+| --- | --- | --- |
+| Entire Account | Argo Tunnel (Legacy): Read and Edit | Cloudflare Tunnel Read, Cloudflare Tunnel Write |
+| Specified Domains → `okwilkins.dev` | DNS: Read and Edit, Zone: Read | DNS Read, DNS Write, Zone Read |
+
+To manage WAF and rate limiting rules, also select **App Security → Zone WAF Rules → Edit** for `okwilkins.dev` (`Zone WAF Write`).
+
+The Kubernetes connector uses its own `TF_VAR_cloudflare_tunnel_token`.
