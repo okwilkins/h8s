@@ -63,3 +63,24 @@ spec:
           annotations:
             summary: Longhorn claim {{ $labels.pvc_namespace }}/{{ $labels.pvc }} has no backup in the last three hours.
             description: Check its recurring backup job in Longhorn. New claims have a three-hour grace period.
+        - alert: LonghornDailyBackupOverdue
+          expr: |
+            (time() - (
+              (longhorn_volume_last_backup_at > 0)
+              or on (pvc, pvc_namespace)
+              label_replace(label_replace(
+                kube_persistentvolumeclaim_created,
+                "pvc", "$1", "persistentvolumeclaim", "(.+)"
+              ), "pvc_namespace", "$1", "namespace", "(.+)")
+            ) > 108000)
+            and on (pvc, pvc_namespace)
+            label_replace(label_replace(
+              kube_persistentvolumeclaim_labels{label_recurring_job_group_longhorn_io_encrypted_backup_daily="enabled"},
+              "pvc", "$1", "persistentvolumeclaim", "(.+)"
+            ), "pvc_namespace", "$1", "namespace", "(.+)")
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Longhorn claim {{ $labels.pvc_namespace }}/{{ $labels.pvc }} has no backup in the last 30 hours.
+            description: Check its daily recurring backup job in Longhorn. New claims have a 30-hour grace period.

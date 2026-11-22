@@ -11,7 +11,7 @@ kube-state-metrics:
     - secrets
   # Exclude Vault from Longhorn backup alerts, as it uses native Raft backups.
   metricLabelsAllowlist:
-    - persistentvolumeclaims=[recurring-job-group.longhorn.io/encrypted-backup]
+    - persistentvolumeclaims=[recurring-job-group.longhorn.io/encrypted-backup,recurring-job-group.longhorn.io/encrypted-backup-daily]
 prometheus:
   prometheusSpec:
     securityContext:
