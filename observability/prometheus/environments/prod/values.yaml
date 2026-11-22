@@ -33,7 +33,7 @@ prometheus:
         metadata:
           labels:
             recurring-job.longhorn.io/source: enabled
-            recurring-job-group.longhorn.io/encrypted-backup: enabled
+            recurring-job-group.longhorn.io/encrypted-backup-daily: enabled
         spec:
           storageClassName: longhorn-encrypted
           accessModes:
