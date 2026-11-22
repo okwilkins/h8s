@@ -58,6 +58,9 @@
             h8s_exports="$(sops exec-env --pristine "$H8S_SECRETS_DIR/secrets.yaml" 'export -p')" || exit 1
             eval "$h8s_exports" 2>/dev/null || exit 1
             unset h8s_exports
+            if [ -n "''${TF_CLOUDFLARE_TOKEN:-}" ]; then
+              export CLOUDFLARE_API_TOKEN="$TF_CLOUDFLARE_TOKEN"
+            fi
           '';
         };
 
