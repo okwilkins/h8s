@@ -7,7 +7,6 @@ metadata:
     app.kubernetes.io/name: renovate
     app.kubernetes.io/part-of: renovate
     recurring-job.longhorn.io/source: enabled
-    recurring-job-group.longhorn.io/encrypted-backup: enabled
 spec:
   accessModes:
     - ReadWriteOnce
