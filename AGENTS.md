@@ -155,6 +155,7 @@ When wanting to do this, prompt the user to git commit and push. Never Git commi
 ├── security
 │   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
+│   ├── crowdsec                    | Detect gateway scanners and block them at Cloudflare.
 │   ├── external-secrets-operator   | Syncs secrets from Vault into the cluster.
 │   ├── trivy-operator              | Kubernetes vulnerability and configuration scanning.
 │   └── vault                       | Secrets storage and certificate authority.

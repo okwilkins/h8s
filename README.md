@@ -67,6 +67,7 @@ Most importantly: ***I find it fun!*** It keeps me excited and hungry at work an
 ├── security
 │   ├── authelia                    | Authentication and authorisation server with SSO and MFA.
 │   ├── cosign                      | Secrets to sign containers and binaries going to Harbor.
+│   ├── crowdsec                    | Detect gateway scanners and block them at Cloudflare.
 │   ├── external-secrets-operator   | Syncs secrets from Vault into the cluster.
 │   ├── trivy-operator              | Kubernetes vulnerability and configuration scanning.
 │   └── vault                       | Secrets storage and certificate authority.
