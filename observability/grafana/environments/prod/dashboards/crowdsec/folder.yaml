@@ -1,0 +1,7 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: crowdsec
+spec:
+  title: CrowdSec
+  parentFolderRef: security

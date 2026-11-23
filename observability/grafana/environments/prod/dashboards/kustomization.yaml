@@ -8,6 +8,7 @@ resources:
   - ./kubernetes/
   - ./cloudflared-dashboard.yaml
   - ./http-traffic-dashboard.yaml
+  - ./crowdsec/
   - ./cloudnative-pg-dashboard.yaml
   - ./harbor-dashboard.yaml
   - ./longhorn-dashboard.yaml

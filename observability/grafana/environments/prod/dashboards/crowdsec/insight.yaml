@@ -1,0 +1,10 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: crowdsec-insight
+spec:
+  folderRef: crowdsec
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prom-default
+  url: https://raw.githubusercontent.com/crowdsecurity/grafana-dashboards/0d34f686930aab1f11562bdf664ffad60c567e39/dashboards_v5/Crowdsec%20Insight.json
