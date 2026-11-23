@@ -1,3 +1,9 @@
+output "crowdsec_cloudflare_token" {
+  description = "CrowdSec bouncer's Cloudflare user API token, also stored in Vault."
+  value       = cloudflare_api_token.crowdsec_bouncer.value
+  sensitive   = true
+}
+
 output "forgejo_renovate_token" {
   description = "Forgejo Renovate runner's RENOVATE_TOKEN; also stored automatically in Vault."
   value       = forgejo_personal_access_token.renovate.token

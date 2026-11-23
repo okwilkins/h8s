@@ -3,6 +3,19 @@ variable "infra_root" {
   type        = string
 }
 
+variable "cloudflare_token_manager" {
+  description = "Cloudflare user token from the Create additional tokens template, used to manage user API tokens."
+  type        = string
+  sensitive   = true
+  ephemeral   = true
+  nullable    = false
+
+  validation {
+    condition     = length(trimspace(var.cloudflare_token_manager)) > 0
+    error_message = "Supply the Cloudflare token manager credential for platform-config."
+  }
+}
+
 variable "nodes" {
   description = "Bootstrap node values referenced by the shared locals."
   type = map(object({

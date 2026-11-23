@@ -20,13 +20,69 @@ locals {
 }
 
 # ============================================================
+# CrowdSec bouncer token
+# ============================================================
+
+# https://docs.crowdsec.net/u/bouncers/cloudflare/#cloudflare-api-token
+resource "cloudflare_api_token" "crowdsec_bouncer" {
+  provider = cloudflare.token_manager
+  name     = "h8s-crowdsec-bouncer"
+  policies = [
+    {
+      effect = "allow"
+      permission_groups = [
+        { id = "28f4b596e7d643029c524985477ae49a" }, # Workers Routes Write
+        { id = "c8fed203ed3043cba015a93ad1616f1f" }, # Zone Read
+        { id = "82e64a83756745bbbb1c9c2701bf816b" }, # DNS Read
+      ]
+      resources = jsonencode({ "com.cloudflare.api.account.zone.${local.cloudflare_zone_id}" = "*" })
+    },
+    {
+      effect = "allow"
+      permission_groups = [
+        { id = "c1fde68c7bcc44588cbb6ddbc16d6480" }, # Account Settings Read
+        { id = "755c05aa014b4f9ab263aa80b8167bd8" }, # Turnstile Sites Write
+        { id = "f7f0eda5697f475c90846e879bab8666" }, # Workers KV Storage Write
+        { id = "e086da7e2179491d91ee5f35b3ca210a" }, # Workers Scripts Write
+        { id = "b89a480218d04ceb98b4fe57ca29dc1f" }, # Account Analytics Read
+      ]
+      resources = jsonencode({ "com.cloudflare.api.account.${local.cloudflare_account_id}" = "*" })
+    },
+    {
+      effect            = "allow"
+      permission_groups = [{ id = "8acbe5bb0d54464ab867149d7f7cf8ac" }] # User Details Read
+      resources         = jsonencode({ "com.cloudflare.api.user.${local.cloudflare_user_id}" = "*" })
+    },
+  ]
+}
+
+# ============================================================
 # Tunnel
 # ============================================================
+
+resource "cloudflare_api_token" "tunnel_cloudflared" {
+  provider = cloudflare.token_manager
+  name     = "h8s-tunnel-cloudflared"
+  policies = [{
+    effect            = "allow"
+    permission_groups = [{ id = "c07321b023e944ff818fec44d8203567" }] # Cloudflare Tunnel Write
+    resources         = jsonencode({ "com.cloudflare.api.account.${local.cloudflare_account_id}" = "*" })
+  }]
+}
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "h8s_prod" {
   account_id = local.cloudflare_account_id
   config_src = "cloudflare"
   name       = "h8s_prod"
+}
+
+data "cloudflare_zero_trust_tunnel_cloudflared_token" "h8s_prod" {
+  provider   = cloudflare.tunnel_connector
+  account_id = local.cloudflare_account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.h8s_prod.id
+
+  # On a fresh install, wait for the management token before requesting the connector token.
+  depends_on = [cloudflare_api_token.tunnel_cloudflared]
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "h8s_prod" {
@@ -48,6 +104,42 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "h8s_prod" {
         service = "http_status:404"
       },
     ])
+  }
+}
+
+# ============================================================
+# Vault
+# ============================================================
+
+locals {
+  cloudflare_vault_tokens = {
+    "cloudflare/cloudflared-token" = data.cloudflare_zero_trust_tunnel_cloudflared_token.h8s_prod.token
+    "crowdsec/cloudflare-token"    = cloudflare_api_token.crowdsec_bouncer.value
+  }
+}
+
+resource "terraform_data" "vault_cloudflare_token" {
+  for_each         = toset([for path, _ in local.cloudflare_vault_tokens : path])
+  triggers_replace = [sha256(local.cloudflare_vault_tokens[each.key])]
+
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      INFRA_ROOT        = var.infra_root
+      VAULT_SECRET_PATH = "kubernetes-homelab/${each.key}"
+      TOKEN_VALUE       = sensitive(local.cloudflare_vault_tokens[each.key])
+    }
+    command = <<-EOT
+      source "${var.infra_root}/scripts/common.sh"
+      : "$${TOKEN_VALUE:?missing Cloudflare token for $VAULT_SECRET_PATH}"
+      load_tf_kube_env
+      VAULT_TOKEN="$(tofu -chdir="$INFRA_ROOT/06-vault-init" output -json vault_credentials | jq -er '.root_token')"
+      printf '%s\n%s' "$VAULT_TOKEN" "$TOKEN_VALUE" | kubectl_wrapper exec -i -n vault vault-0 -- sh -ec '
+        IFS= read -r VAULT_TOKEN
+        export VAULT_TOKEN
+        vault kv put "$1" token=- >/dev/null
+      ' sh "$VAULT_SECRET_PATH"
+    EOT
   }
 }
 

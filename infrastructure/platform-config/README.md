@@ -54,15 +54,24 @@ This manages Harbor container registry resources including:
 
 ## Cloudflare
 
-Store `TF_CLOUDFLARE_TOKEN` in the private `h8s-secrets/secrets.yaml` using SOPS.
-The infrastructure shell exports it as `CLOUDFLARE_API_TOKEN` for the provider.
+Store both tokens in the private `h8s-secrets/secrets.yaml` with SOPS. Reopen the infrastructure shell after saving.
 
-Add two permission policies:
+### Infrastructure token
+
+Set `TF_CLOUDFLARE_TOKEN` to the `h8s-terraform` account token. The shell exports it as `CLOUDFLARE_API_TOKEN`.
+OpenTofu uses it to manage tunnels, DNS records and firewall rules.
+
+Grant `h8s-terraform` these permissions:
 
 | Scope | Dashboard selections | Token summary |
 | --- | --- | --- |
 | Entire Account | Argo Tunnel (Legacy): Read and Edit | Cloudflare Tunnel Read, Cloudflare Tunnel Write |
-| Specified Domains → `okwilkins.dev` | DNS: Read and Edit, Zone: Read, App Security → Zone WAF Rules: Read and Edit | DNS Read, DNS Write, Zone Read, Zone WAF Read, Zone WAF Write |
+| Specified Domains: `okwilkins.dev` | DNS: Read and Edit, Zone: Read, Zone WAF Rules under App Security: Read and Edit | DNS Read, DNS Write, Zone Read, Zone WAF Read, Zone WAF Write |
 
-The Kubernetes connector uses its own `TF_VAR_cloudflare_tunnel_token`.
+### User token manager
 
+Create a user token named `h8s-token-manager` with Cloudflare's [Create additional tokens template](https://developers.cloudflare.com/fundamentals/api/how-to/create-via-api/). Under **User**, grant only **API Tokens Edit**. Store the token as `TF_VAR_cloudflare_token_manager`.
+
+OpenTofu uses this token to manage `h8s-tunnel-cloudflared` and the [CrowdSec bouncer token](https://docs.crowdsec.net/u/bouncers/cloudflare/#cloudflare-api-token). It stores the bouncer token in Vault at `kubernetes-homelab/crowdsec/cloudflare-token`.
+
+OpenTofu uses `h8s-tunnel-cloudflared` to fetch the connector token for `h8s_prod`. See the [cloudflared migration steps](../../networking/cloudflared/README.md#connector-token).

@@ -23,6 +23,17 @@ terraform {
 # The cloudflared connector token cannot authenticate the management API.
 provider "cloudflare" {}
 
+# Manage user API tokens with this provider. Tunnel, DNS and WAF use h8s-terraform.
+provider "cloudflare" {
+  alias     = "token_manager"
+  api_token = var.cloudflare_token_manager
+}
+
+provider "cloudflare" {
+  alias     = "tunnel_connector"
+  api_token = cloudflare_api_token.tunnel_cloudflared.value
+}
+
 data "terraform_remote_state" "talos_configure" {
   backend = "s3"
   config = merge(local.bootstrap_backend, {
