@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crowdsec-cloudflare-bouncer
+  namespace: crowdsec
+  labels:
+    app.kubernetes.io/name: crowdsec-cloudflare-bouncer
+    app.kubernetes.io/part-of: crowdsec
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: crowdsec-cloudflare-bouncer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: crowdsec-cloudflare-bouncer
+        app.kubernetes.io/part-of: crowdsec
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: harbor-credentials
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cloudflare-bouncer
+          image: harbor.okwilkins.dev/docker-hub-cache/crowdsecurity/cloudflare-worker-bouncer:v0.0.18
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: crowdsec-cloudflare
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 2112
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 2112
+            initialDelaySeconds: 120
+            periodSeconds: 30
+          volumeMounts:
+            - name: cloudflare
+              mountPath: /etc/crowdsec/bouncers
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: cloudflare
+          configMap:
+            name: crowdsec-cloudflare
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

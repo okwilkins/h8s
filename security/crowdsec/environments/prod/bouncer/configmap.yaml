@@ -1,0 +1,43 @@
+# Sync CrowdSec bans to Cloudflare so its Worker can block matching visitors
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-cloudflare
+  namespace: crowdsec
+  labels:
+    app.kubernetes.io/name: crowdsec-cloudflare-bouncer
+    app.kubernetes.io/part-of: crowdsec
+data:
+  crowdsec-cloudflare-worker-bouncer.yaml: |
+    crowdsec_config:
+      lapi_url: http://crowdsec-service.crowdsec.svc.cluster.local:8080/
+      lapi_key: ${API_KEY}
+      update_frequency: 10s
+      only_include_decisions_from: [cscli, crowdsec, CAPI]
+
+    cloudflare_config:
+      accounts:
+        - id: ${CLOUDFLARE_ACCOUNT_ID}
+          account_name: h8s
+          token: ${CLOUDFLARE_BOUNCER_TOKEN}
+          zones:
+            - zone_id: ${CLOUDFLARE_ZONE_ID}
+              actions: [ban]
+              default_action: ban
+              routes_to_protect: ["*okwilkins.dev/*"]
+              turnstile:
+                enabled: false
+      worker:
+        script_name: h8s-crowdsec
+        kv_namespace_name: h8s-crowdsec
+        decisions_sync_script_name: h8s-crowdsec-sync
+        analytics_dataset: h8s_crowdsec
+        log_only: false
+
+    log_level: info
+    log_media: stdout
+
+    prometheus:
+      enabled: true
+      listen_addr: 0.0.0.0
+      listen_port: "2112"

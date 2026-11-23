@@ -1,0 +1,174 @@
+# https://github.com/crowdsecurity/helm-charts/blob/crowdsec-0.24.3/charts/crowdsec/values.yaml
+
+container_runtime: containerd
+
+image:
+  repository: harbor.okwilkins.dev/docker-hub-cache/crowdsecurity/crowdsec
+  pullSecrets:
+    - name: harbor-credentials
+
+secrets:
+  externalSecret:
+    name: crowdsec-cloudflare
+    csLapiSecretKey: CS_LAPI_SECRET
+    registrationTokenKey: REGISTRATION_TOKEN
+
+agent:
+  # One agent tails the shared VictoriaLogs stream. Per-node agents would read the same events
+  isDeployment: true
+  hostVarLog: false
+
+  additionalAcquisition:
+    - source: victorialogs
+      mode: tail
+      url: http://victoria-logs-victoria-logs-single-server.monitoring.svc.cluster.local:9428
+      # Both gateways serve some of the same hosts
+      # Select the tunnel gateway and only the status codes that crowdsecurity/http-probing counts
+      query: |
+        log_type:="gateway-access" gateway_namespace:="cloudflare" gateway_name:="cloudflare-gateway" response_code:in("400","403","404")
+        | pack_json fields (cf_connecting_ip_reported, authority, path, response_code, start_time) as _msg
+        | fields _time, _msg
+      labels:
+        type: cilium-gateway
+
+  env:
+    - name: SCENARIOS
+      value: crowdsecurity/http-probing
+    - name: PARSERS
+      value: crowdsecurity/dateparse-enrich
+
+  metrics:
+    serviceMonitor:
+      enabled: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+lapi:
+  env:
+    - name: BOUNCER_KEY_cloudflare
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-cloudflare
+          key: API_KEY
+
+  # Separate claims carry the Longhorn labels for encrypted daily backups
+  persistentVolume:
+    data:
+      existingClaim: crowdsec-db-pvc
+    config:
+      existingClaim: crowdsec-config-pvc
+
+  metrics:
+    serviceMonitor:
+      enabled: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+config:
+  # Configure agent registration, the community feed and local database access
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration:
+          enabled: true
+          token: "${REGISTRATION_TOKEN}"
+          allowed_ranges:
+            - 10.244.0.0/16
+
+        disable_usage_metrics_export: true
+        online_client:
+          # Share local detections with CrowdSec so they appear in the Console after enrolment
+          sharing: true
+          pull:
+            community: true
+            blocklists: false
+
+    db_config:
+      use_wal: true
+
+  # Replacement log readers register again, so remove the old registration on graceful exit.
+  agent_config.yaml.local: |-
+    api:
+      client:
+        unregister_on_exit: true
+
+  # Extract the visitor IP, host, path, status and timestamp for scanner detection
+  parsers:
+    s01-parse:
+      gateway.yaml: |
+        name: local/cilium-gateway
+        description: Parse public gateway access logs
+
+        # Use the visitor IP from the tunnel gateway. Skip missing or invalid IPs
+        filter: |
+          evt.Line.Labels.type == 'cilium-gateway' &&
+          IsIP(JsonExtract(evt.Line.Raw, 'cf_connecting_ip_reported'))
+        onsuccess: next_stage
+
+        statics:
+          - meta: service
+            value: http
+          - meta: log_type
+            value: http_access-log
+          - meta: source_ip
+            expression: JsonExtract(evt.Line.Raw, 'cf_connecting_ip_reported')
+          - meta: target_fqdn
+            expression: JsonExtract(evt.Line.Raw, 'authority')
+          - meta: http_status
+            expression: JsonExtract(evt.Line.Raw, 'response_code')
+          - meta: http_path
+            expression: JsonExtract(evt.Line.Raw, 'path')
+
+          # The upstream probing scenario uses this exact spelling to exclude static assets
+          - parsed: static_ressource
+            expression: "string(JsonExtract(evt.Line.Raw, 'path') matches '(?i)\\\\.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|map)$')"
+          - target: evt.StrTime
+            expression: JsonExtract(evt.Line.Raw, 'start_time')
+
+  # Ban locally detected scanners for 15 minutes and notify Alertmanager
+  profiles.yaml: |
+    name: temporary_scanner_ban
+    filters:
+      - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.Scenario == "crowdsecurity/http-probing"
+
+    decisions:
+      - type: ban
+        duration: 15m
+    notifications:
+      - alertmanager
+    on_success: break
+
+  # Send local scanner ban alerts to Telegram through Alertmanager
+  notifications:
+    alertmanager.yaml: |
+      type: http
+      name: alertmanager
+      log_level: info
+
+      url: http://prometheus-stack-kube-prom-alertmanager.monitoring.svc.cluster.local:9093/api/v2/alerts
+      method: POST
+      headers:
+        Content-Type: application/json
+      group_wait: 30s
+      timeout: 10s
+      max_retry: 3
+
+      # The warning severity selects the Telegram route. Keep endsAt in step with the ban in profiles.yaml
+      format: |-
+        {{- $alerts := list -}}
+        {{- range . -}}
+          {{- $labels := dict "alertname" "CrowdSecLocalBan" "namespace" "crowdsec" "severity" "warning" "source_ip" .Source.Value -}}
+          {{- $annotations := dict "summary" (printf "CrowdSec issued a 15-minute ban for %s" .Source.Value) "description" (printf "Scenario: %s. Cloudflare enforcement follows the bouncer sync." .Scenario) -}}
+          {{- $alerts = append $alerts (dict "labels" $labels "annotations" $annotations "startsAt" .StartAt "endsAt" (date "2006-01-02T15:04:05Z07:00" (dateModify "15m" now))) -}}
+        {{- end -}}
+        {{ $alerts | toJson }}
