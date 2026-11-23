@@ -174,8 +174,8 @@ config:
       format: |-
         {{- $alerts := list -}}
         {{- range . -}}
-          {{- $labels := dict "alertname" "CrowdSecLocalBan" "namespace" "crowdsec" "severity" "warning" "source_ip" .Source.Value -}}
-          {{- $annotations := dict "summary" (printf "CrowdSec issued a 15-minute ban for %s" .Source.Value) "description" (printf "Scenario: %s. Cloudflare enforcement follows the bouncer sync." .Scenario) -}}
+          {{- $labels := dict "alertname" "CrowdSecLocalBan" "namespace" "crowdsec" "severity" "warning" "source_ip" .GetValue -}}
+          {{- $annotations := dict "summary" (printf "CrowdSec issued a 15-minute ban for %s" .GetValue) "description" (printf "Scenario: %s" .GetScenario) -}}
           {{- $alerts = append $alerts (dict "labels" $labels "annotations" $annotations "startsAt" .StartAt "endsAt" (date "2006-01-02T15:04:05Z07:00" (dateModify "15m" now))) -}}
         {{- end -}}
         {{ $alerts | toJson }}
