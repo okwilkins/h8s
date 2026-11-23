@@ -8,16 +8,18 @@ It also blocks addresses on CrowdSec's community blocklist.
 
 ## Setup
 
-1. Check the [Cloudflare provider token permissions](../../infrastructure/platform-config/README.md#cloudflare). In `nix develop .#infra`, review and apply `07-vault-resources-provision` for the local CrowdSec keys.
-2. Review and apply `platform-config` to create the bouncer token and store it in Vault. Push the manifests so Argo CD syncs them.
-3. In Cloudflare's **Worker Routes**, set **Request limit failure mode** to **Fail open** for each `h8s-crowdsec` route.
+1. Enable [Workers Analytics Engine](https://dash.cloudflare.com/?to=/:account/workers/analytics-engine) once in the Cloudflare dashboard. OpenTofu cannot enable it. Without it, Cloudflare rejects the bouncer's Worker with error `10089`.
+   If Cloudflare shows **Create Blank Dataset**, enter `h8s_crowdsec` for **Dataset Name** and `CROWDSECCFBOUNCER_AE` for **Dataset Binding**.
+2. Check the [Cloudflare provider token permissions](../../infrastructure/platform-config/README.md#cloudflare). In `nix develop .#infra`, review and apply `07-vault-resources-provision` for the local CrowdSec keys.
+3. Review and apply `platform-config` to create the bouncer token and store it in Vault. Push the manifests so Argo CD syncs them.
+4. Once the bouncer creates the route, open **Worker Routes** in the Cloudflare dashboard. For each `h8s-crowdsec` route, set **Request limit failure mode** to **Fail open**. If you reach the Worker request limit, visitors can still reach the site without the CrowdSec check.
 
 Cloudflare's [free KV write limit](https://developers.cloudflare.com/kv/platform/limits/) can prevent the first sync from loading the full community blocklist.
 
 ## CrowdSec Console
 
-1. Get an enrolment key from [Security Engines](https://app.crowdsec.net/security-engines) and store it in the private SOPS file.
-2. Pass the key through Vault and External Secrets Operator to Helm's `lapi.env` as `ENROLL_KEY`. Set `ENROLL_INSTANCE_NAME` to `h8s` and sync with Argo CD.
+1. Get an enrolment key from [Security Engines](https://app.crowdsec.net/security-engines). Store it as `TF_VAR_crowdsec_enroll_key` in the private `h8s-secrets/secrets.yaml` using SOPS.
+2. Reopen the infrastructure shell and apply stage 07 to write the key to Vault. Sync CrowdSec in Argo CD. The Local API reads `ENROLL_KEY` from the `crowdsec-console` Secret at startup.
 3. In the Console, accept the enrolment for `h8s` once. Run `kubectl -n crowdsec rollout restart deployment/crowdsec-lapi`.
 4. Open **Alert Explorer** to see new scanner alerts.
 
