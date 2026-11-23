@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: crowdsec
 resources:
   - cloudflare-secret.yaml
+  - secrets/crowdsec-console.yaml
   - bouncer
   - crowdsec-db-pvc.yaml
   - crowdsec-config-pvc.yaml

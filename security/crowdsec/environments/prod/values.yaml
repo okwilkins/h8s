@@ -55,6 +55,13 @@ lapi:
         secretKeyRef:
           name: crowdsec-cloudflare
           key: API_KEY
+    - name: ENROLL_KEY
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-console
+          key: ENROLL_KEY
+    - name: ENROLL_INSTANCE_NAME
+      value: h8s
 
   # Separate claims carry the Longhorn labels for encrypted daily backups
   persistentVolume:

@@ -52,3 +52,39 @@ resource "null_resource" "vault_secret_crowdsec_cloudflare" {
 
   depends_on = [data.terraform_remote_state.vault_init]
 }
+
+# CrowdSec Console enrolment
+variable "crowdsec_enroll_key" {
+  description = "CrowdSec Console enrolment key from the private SOPS secrets."
+  type        = string
+  sensitive   = true
+  nullable    = false
+
+  validation {
+    condition     = length(trimspace(var.crowdsec_enroll_key)) > 0
+    error_message = "Set TF_VAR_crowdsec_enroll_key to the CrowdSec Console enrolment key."
+  }
+}
+
+resource "terraform_data" "vault_secret_crowdsec_console" {
+  triggers_replace = [sha256(var.crowdsec_enroll_key)]
+
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    environment = {
+      VAULT_TOKEN        = sensitive(data.terraform_remote_state.vault_init.outputs.vault_credentials.root_token)
+      KUBECONFIG_CONTENT = sensitive(data.terraform_remote_state.talos_configure.outputs.kubeconfig)
+      KUBERNETES_SERVER  = "https://${data.terraform_remote_state.talos_configure.outputs.first_node_ip}:6443"
+      ENROLL_KEY         = var.crowdsec_enroll_key
+    }
+    command = <<-EOT
+      set -euo pipefail
+      printf '%s\n%s' "$VAULT_TOKEN" "$ENROLL_KEY" | kubectl --kubeconfig <(printf '%s' "$KUBECONFIG_CONTENT") \
+        --server="$KUBERNETES_SERVER" exec -i -n vault vault-0 -- sh -ec '
+          IFS= read -r VAULT_TOKEN
+          export VAULT_TOKEN
+          vault kv put kubernetes-homelab/crowdsec/console enroll_key=- >/dev/null
+        '
+    EOT
+  }
+}
