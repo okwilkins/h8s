@@ -2,13 +2,6 @@
 # CrowdSec Cloudflare Bouncer
 # ============================================================
 
-variable "crowdsec_cloudflare_token" {
-  description = "Dedicated Cloudflare user API token for the CrowdSec Worker bouncer."
-  type        = string
-  sensitive   = true
-  default     = null
-}
-
 resource "random_password" "crowdsec_lapi_secret" {
   length  = 64
   special = false
@@ -28,7 +21,6 @@ locals {
   crowdsec_cloudflare_credentials = jsonencode({
     account_id         = local.cloudflare_account_id
     zone_id            = local.cloudflare_zone_id
-    token              = var.crowdsec_cloudflare_token
     lapi_secret        = random_password.crowdsec_lapi_secret.result
     registration_token = random_password.crowdsec_registration_token.result
     bouncer_key        = random_password.crowdsec_bouncer_key.result
@@ -36,8 +28,6 @@ locals {
 }
 
 resource "null_resource" "vault_secret_crowdsec_cloudflare" {
-  count = nonsensitive(var.crowdsec_cloudflare_token != null) ? 1 : 0
-
   triggers = {
     credentials_hash = sha256(local.crowdsec_cloudflare_credentials)
   }
