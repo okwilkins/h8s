@@ -9,10 +9,6 @@ metadata:
 spec:
   entrypoint: update
   serviceAccountName: argo-workflow
-  arguments:
-    parameters:
-      - name: updater-image
-        description: Full README badge updater image reference pinned by SHA-256 digest.
   imagePullSecrets:
     - name: harbor-credentials
   securityContext:
