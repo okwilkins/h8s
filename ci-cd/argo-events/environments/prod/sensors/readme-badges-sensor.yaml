@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: readme-badges
     app.kubernetes.io/part-of: argo-events
-    app.kubernetes.io/component: readme-badges
+    app.kubernetes.io/component: workflow-trigger
 spec:
   template:
     metadata:
