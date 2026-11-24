@@ -55,7 +55,7 @@ spec:
                 templateDefaults:
                   initContainers:
                     - name: checkout-excalidraw
-                      image: harbor.okwilkins.dev/docker-hub-cache/alpine/git@sha256:2306e2b05ee0ef99f5d25b0779f645b24ae9f91ba187107503592fcdfe78da3a
+                      image: harbor.okwilkins.dev/docker-hub-cache/alpine/git@sha256:29cff25811f790b9f72fc266bf8009a5a911714c0e03c31c47339c50909d9aef
                       imagePullPolicy: IfNotPresent
                       mirrorVolumeMounts: true
                       env:
