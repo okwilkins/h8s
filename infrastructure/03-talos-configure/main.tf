@@ -111,7 +111,7 @@ data "talos_machine_configuration" "nodes" {
       apiVersion = "v1alpha1"
       kind       = "ResolverConfig"
       nameservers = [
-        for address in ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"] : { address = address }
+        for address in ["192.168.1.120", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"] : { address = address }
       ]
     }),
 
