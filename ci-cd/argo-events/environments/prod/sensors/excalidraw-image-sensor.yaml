@@ -95,7 +95,7 @@ spec:
                     - name: image-tag
                       value: "2c3dcc06ec807e81ab9437eceb1a8f7a3c590743"
                     - name: builder-image
-                      value: harbor.okwilkins.dev/main/image-buildah@sha256:c72738fd4587746dd87d162848aca7e2c66e9847a393b7561dc7d9a2e885d09f
+                      value: harbor.okwilkins.dev/main/image-buildah@sha256:7838314627d13cb005d562421ea998a8a550a589f24cb70d7142a7d2facbd92c
                     - name: signer-image
                       value: harbor.okwilkins.dev/main/cosign@sha256:bba3aa875e3fc5c04222bcdca8dc948304a22d132939e7f7b2299f3e0e4e7bb4
                     - name: github-repository
