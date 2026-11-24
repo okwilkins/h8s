@@ -79,7 +79,7 @@ spec:
                     - name: builder-image
                       value: harbor.okwilkins.dev/main/image-buildah@sha256:7838314627d13cb005d562421ea998a8a550a589f24cb70d7142a7d2facbd92c
                     - name: signer-image
-                      value: harbor.okwilkins.dev/main/cosign@sha256:bba3aa875e3fc5c04222bcdca8dc948304a22d132939e7f7b2299f3e0e4e7bb4
+                      value: harbor.okwilkins.dev/main/cosign@sha256:0873fe6b639d44f6973bc771ea19b39f545045731683070aede0da16417dcc83
                     - name: github-repository
                       value: okwilkins/h8s
                     - name: github-status-context
