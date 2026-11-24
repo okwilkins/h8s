@@ -26,7 +26,7 @@ spec:
         - name: harbor-credentials
       containers:
         - name: excalidraw
-          image: harbor.okwilkins.dev/main/excalidraw@sha256:dea4762b3028479169212d54a5c9d10229196ed06bd8c6f174e97575a5145cba
+          image: harbor.okwilkins.dev/main/excalidraw@sha256:00d7704c92c5253d0dba3c1ab4464a925c2586968d02ae79baf3f0e6a50feb36
           imagePullPolicy: Always
           ports:
             - name: http
