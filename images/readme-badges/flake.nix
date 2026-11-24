@@ -17,7 +17,11 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        tools = [ pkgs.python3 ];
+        tools = [
+          ((pkgs.python3Minimal.override { withOpenssl = true; }).overrideAttrs (old: {
+            allowedReferences = old.allowedReferences ++ [ pkgs.openssl.out ];
+          }))
+        ];
       in
       {
         devShells.default = pkgs.mkShellNoCC {
