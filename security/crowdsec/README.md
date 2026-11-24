@@ -23,6 +23,18 @@ Cloudflare's [free KV write limit](https://developers.cloudflare.com/kv/platform
 3. In the Console, accept the enrolment for `h8s` once. Run `kubectl -n crowdsec rollout restart deployment/crowdsec-lapi`.
 4. Open **Alert Explorer** to see new scanner alerts.
 
+## Count Blocked Requests
+
+Run this query against `h8s_crowdsec` in [Workers Analytics Engine](https://dash.cloudflare.com/?to=/:account/workers/analytics-engine) using the [SQL API](https://developers.cloudflare.com/analytics/analytics-engine/sql-api/). It counts requests the Worker blocked in the last 24 hours. The Worker records the IP version but not the visitor's address, so the dataset cannot count unique IPs.
+
+```sql
+SELECT SUM(_sample_interval * double1) AS blocked_requests
+FROM h8s_crowdsec
+WHERE timestamp >= NOW() - INTERVAL '1' DAY
+  AND blob1 = 'dropped'
+  AND blob4 = 'ban'
+```
+
 ## Configuration
 
 Edit [`values.yaml`](environments/prod/values.yaml) for detection and notifications. After Argo CD syncs a change to the [bouncer ConfigMap](environments/prod/bouncer/configmap.yaml), restart the bouncer:
