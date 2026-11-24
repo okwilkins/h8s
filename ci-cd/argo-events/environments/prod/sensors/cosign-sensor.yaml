@@ -17,30 +17,31 @@ spec:
     - name: push
       eventSourceName: github
       eventName: h8s
-      filters:
+      transform:
         script: |
-          local body = event.body
-          if body == nil or body["X-GitHub-Event"] ~= "push"
-              or body.repository == nil or body.repository.full_name ~= "okwilkins/h8s"
-              or body.ref ~= "refs/heads/main" or body.deleted ~= false then
-            return false
-          end
-
-          if type(body.after) ~= "string" or #body.after ~= 40
-              or not body.after:match("^[0-9a-f]+$") then
-            return false
-          end
-
-          for _, commit in ipairs(body.commits or {}) do
+          event.matchedSha = nil
+          local commits = (event.body or {}).commits or {}
+          for i = #commits, 1, -1 do
+            local commit = commits[i]
             for _, change in ipairs({"added", "modified", "removed"}) do
               for _, path in ipairs(commit[change] or {}) do
                 if path:match("^images/cosign/") or path:match("^images/common/") then
-                  return true
+                  event.matchedSha = commit.id
+                  return event
                 end
               end
             end
           end
-          return false
+          return event
+      filters:
+        script: |
+          local b = event.body
+          if not b or b["X-GitHub-Event"] ~= "push" or not b.repository
+              or b.repository.full_name ~= "okwilkins/h8s" or b.ref ~= "refs/heads/main"
+              or b.deleted ~= false or type(b.after) ~= "string"
+              or #b.after ~= 40 or not b.after:match("^[0-9a-f]+$") then return false end
+          local sha = event.matchedSha
+          return type(sha) == "string" and #sha == 40 and sha:match("^[0-9a-f]+$") ~= nil
   # Fixed names block duplicate commits until the Workflow TTL removes them.
   # A duplicate create logs AlreadyExists without starting another build.
   triggers:
@@ -87,15 +88,15 @@ spec:
           parameters:
             - src:
                 dependencyName: push
-                dataTemplate: "cosign-{{ .Input.body.after }}-amd64"
+                dataTemplate: "cosign-{{ .Input.matchedSha }}-amd64"
               dest: metadata.name
             - src:
                 dependencyName: push
-                dataKey: body.after
+                dataKey: matchedSha
               dest: spec.arguments.parameters.1.value
             - src:
                 dependencyName: push
-                dataTemplate: "{{ .Input.body.after }}-amd64"
+                dataTemplate: "{{ .Input.matchedSha }}-amd64"
               dest: spec.arguments.parameters.5.value
       atLeastOnce: true
       retryStrategy:

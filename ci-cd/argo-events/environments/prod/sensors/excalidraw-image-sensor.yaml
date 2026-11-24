@@ -17,6 +17,24 @@ spec:
     - name: push
       eventSourceName: github
       eventName: h8s
+      transform:
+        script: |
+          event.matchedSha = nil
+          local commits = (event.body or {}).commits or {}
+          for i = #commits, 1, -1 do
+            local commit = commits[i]
+            local subject = (commit.message or ""):match("^[^\r\n]*")
+            for _, change in ipairs({"added", "modified"}) do
+              for _, path in ipairs(commit[change] or {}) do
+                if path == "ci-cd/argo-events/environments/prod/sensors/excalidraw-image-sensor.yaml"
+                    and (" " .. subject .. " "):find(" excalidraw/excalidraw ", 1, true) then
+                  event.matchedSha = commit.id
+                  return event
+                end
+              end
+            end
+          end
+          return event
       filters:
         script: |
           local b = event.body
@@ -24,16 +42,8 @@ spec:
               or b.repository.full_name ~= "okwilkins/h8s" or b.ref ~= "refs/heads/main"
               or b.deleted ~= false or type(b.after) ~= "string"
               or #b.after ~= 40 or not b.after:match("^[0-9a-f]+$") then return false end
-          for _, commit in ipairs(b.commits or {}) do
-            local subject = (commit.message or ""):match("^[^\r\n]*")
-            for _, change in ipairs({"added", "modified"}) do
-              for _, path in ipairs(commit[change] or {}) do
-                if path == "ci-cd/argo-events/environments/prod/sensors/excalidraw-image-sensor.yaml"
-                    and (" " .. subject .. " "):find(" excalidraw/excalidraw ", 1, true) then return true end
-              end
-            end
-          end
-          return false
+          local sha = event.matchedSha
+          return type(sha) == "string" and #sha == 40 and sha:match("^[0-9a-f]+$") ~= nil
   # Fixed names block duplicate commits until the Workflow TTL removes them.
   triggers:
     - template:
@@ -107,11 +117,11 @@ spec:
           parameters:
             - src:
                 dependencyName: push
-                dataTemplate: "excalidraw-{{ .Input.body.after }}"
+                dataTemplate: "excalidraw-{{ .Input.matchedSha }}"
               dest: metadata.name
             - src:
                 dependencyName: push
-                dataKey: body.after
+                dataKey: matchedSha
               dest: spec.arguments.parameters.1.value
       atLeastOnce: true
       retryStrategy:
