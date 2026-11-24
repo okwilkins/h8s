@@ -45,7 +45,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: report
-              image: harbor.okwilkins.dev/docker-hub-cache/library/python:3.14.10-alpine@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67
+              image: harbor.okwilkins.dev/docker-hub-cache/library/python:3.15.2-alpine@sha256:0f9552bb28711333da16915ec146f5e6bb44a7fdac9ced15dc17c2e0206346dd
               imagePullPolicy: IfNotPresent
               command: ["python3", "-B", "/app/report.py"]
               envFrom:
