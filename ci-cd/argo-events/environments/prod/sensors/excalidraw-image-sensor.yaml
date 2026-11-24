@@ -25,9 +25,11 @@ spec:
               or b.deleted ~= false or type(b.after) ~= "string"
               or #b.after ~= 40 or not b.after:match("^[0-9a-f]+$") then return false end
           for _, commit in ipairs(b.commits or {}) do
+            local subject = (commit.message or ""):match("^[^\r\n]*")
             for _, change in ipairs({"added", "modified"}) do
               for _, path in ipairs(commit[change] or {}) do
-                if path == "ci-cd/argo-events/environments/prod/sensors/excalidraw-image-sensor.yaml" then return true end
+                if path == "ci-cd/argo-events/environments/prod/sensors/excalidraw-image-sensor.yaml"
+                    and (" " .. subject .. " "):find(" excalidraw/excalidraw ", 1, true) then return true end
               end
             end
           end
