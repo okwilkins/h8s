@@ -5,7 +5,7 @@ metadata:
   labels:
     dashboards: grafana
 spec:
-  version: 13.3.1
+  version: 13.3.2
   persistentVolumeClaim:
     metadata:
       labels:
