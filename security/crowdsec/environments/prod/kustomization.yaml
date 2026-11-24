@@ -4,6 +4,8 @@ namespace: crowdsec
 resources:
   - cloudflare-secret.yaml
   - secrets/crowdsec-console.yaml
+  - secrets/crowdsec-summary-analytics.yaml
   - bouncer
+  - daily-summary
   - crowdsec-db-pvc.yaml
   - crowdsec-config-pvc.yaml

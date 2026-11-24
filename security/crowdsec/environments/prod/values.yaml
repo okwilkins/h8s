@@ -67,6 +67,7 @@ lapi:
   persistentVolume:
     data:
       existingClaim: crowdsec-db-pvc
+      subPath: crowdsec
     config:
       existingClaim: crowdsec-config-pvc
 
@@ -142,7 +143,7 @@ config:
           - target: evt.StrTime
             expression: JsonExtract(evt.Line.Raw, 'start_time')
 
-  # Ban locally detected scanners for 15 minutes and notify Alertmanager
+  # The daily summary reads these decisions after the bans expire
   profiles.yaml: |
     name: temporary_scanner_ban
     filters:
@@ -151,31 +152,4 @@ config:
     decisions:
       - type: ban
         duration: 15m
-    notifications:
-      - alertmanager
     on_success: break
-
-  # Send local scanner ban alerts to Telegram through Alertmanager
-  notifications:
-    alertmanager.yaml: |
-      type: http
-      name: alertmanager
-      log_level: info
-
-      url: http://prometheus-stack-kube-prom-alertmanager.monitoring.svc.cluster.local:9093/api/v2/alerts
-      method: POST
-      headers:
-        Content-Type: application/json
-      group_wait: 30s
-      timeout: 10s
-      max_retry: 3
-
-      # The warning severity selects the Telegram route. Keep endsAt in step with the ban in profiles.yaml
-      format: |-
-        {{- $alerts := list -}}
-        {{- range . -}}
-          {{- $labels := dict "alertname" "CrowdSecLocalBan" "namespace" "crowdsec" "severity" "warning" "source_ip" .GetValue -}}
-          {{- $annotations := dict "summary" (printf "CrowdSec issued a 15-minute ban for %s" .GetValue) "description" (printf "Scenario: %s" .GetScenario) -}}
-          {{- $alerts = append $alerts (dict "labels" $labels "annotations" $annotations "startsAt" .StartAt "endsAt" (date "2006-01-02T15:04:05Z07:00" (dateModify "15m" now))) -}}
-        {{- end -}}
-        {{ $alerts | toJson }}

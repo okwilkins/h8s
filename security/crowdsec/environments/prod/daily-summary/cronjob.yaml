@@ -1,0 +1,81 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: crowdsec-daily-summary
+  namespace: crowdsec
+  labels:
+    app.kubernetes.io/name: crowdsec-daily-summary
+    app.kubernetes.io/part-of: crowdsec
+spec:
+  schedule: "0 0 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: crowdsec-daily-summary
+            app.kubernetes.io/part-of: crowdsec
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: harbor-credentials
+          # The Local API holds the ReadWriteOnce database volume on its node.
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      k8s-app: crowdsec
+                      type: lapi
+                  topologyKey: kubernetes.io/hostname
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            # LAPI creates the database and its WAL files as root:root with mode 0640.
+            runAsGroup: 0
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: report
+              image: harbor.okwilkins.dev/docker-hub-cache/library/python:3.14.10-alpine@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67
+              imagePullPolicy: IfNotPresent
+              command: ["python3", "-B", "/app/report.py"]
+              envFrom:
+                - secretRef:
+                    name: crowdsec-summary-analytics
+                    optional: true
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 64Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: script
+                  mountPath: /app
+                  readOnly: true
+                - name: database
+                  mountPath: /data
+                  subPath: crowdsec
+                  readOnly: true
+          volumes:
+            - name: script
+              configMap:
+                name: crowdsec-daily-summary
+            - name: database
+              persistentVolumeClaim:
+                claimName: crowdsec-db-pvc
+                readOnly: true

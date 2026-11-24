@@ -20,7 +20,7 @@ locals {
 }
 
 # ============================================================
-# CrowdSec bouncer token
+# CrowdSec tokens
 # ============================================================
 
 # https://docs.crowdsec.net/u/bouncers/cloudflare/#cloudflare-api-token
@@ -54,6 +54,16 @@ resource "cloudflare_api_token" "crowdsec_bouncer" {
       resources         = jsonencode({ "com.cloudflare.api.user.${local.cloudflare_user_id}" = "*" })
     },
   ]
+}
+
+resource "cloudflare_api_token" "crowdsec_summary" {
+  provider = cloudflare.token_manager
+  name     = "h8s-crowdsec-summary"
+  policies = [{
+    effect            = "allow"
+    permission_groups = [{ id = "b89a480218d04ceb98b4fe57ca29dc1f" }] # Account Analytics Read
+    resources         = jsonencode({ "com.cloudflare.api.account.${local.cloudflare_account_id}" = "*" })
+  }]
 }
 
 # ============================================================
@@ -113,8 +123,9 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "h8s_prod" {
 
 locals {
   cloudflare_vault_tokens = {
-    "cloudflare/cloudflared-token" = data.cloudflare_zero_trust_tunnel_cloudflared_token.h8s_prod.token
-    "crowdsec/cloudflare-token"    = cloudflare_api_token.crowdsec_bouncer.value
+    "cloudflare/cloudflared-token"        = data.cloudflare_zero_trust_tunnel_cloudflared_token.h8s_prod.token
+    "crowdsec/cloudflare-token"           = cloudflare_api_token.crowdsec_bouncer.value
+    "crowdsec/cloudflare-analytics-token" = cloudflare_api_token.crowdsec_summary.value
   }
 }
 
