@@ -51,6 +51,11 @@ terraform {
       version = "~> 3.6"
     }
 
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 5.14"
+    }
+
     tls = {
       # https://registry.terraform.io/providers/hashicorp/tls
       # https://github.com/hashicorp/terraform-provider-tls

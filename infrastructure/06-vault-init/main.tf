@@ -77,223 +77,100 @@ resource "null_resource" "vault_bootstrap" {
 # ============================================================
 # Enables Kubernetes auth method for service account authentication.
 
-resource "null_resource" "vault_k8s_auth" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
-    }
+provider "kubernetes" {
+  host                   = "https://${data.terraform_remote_state.talos_configure.outputs.first_node_ip}:6443"
+  cluster_ca_certificate = data.terraform_remote_state.talos_configure.outputs.ca_cert
+  client_certificate     = data.terraform_remote_state.talos_configure.outputs.client_cert
+  client_key             = data.terraform_remote_state.talos_configure.outputs.client_key
+}
 
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault auth list | grep -q kubernetes || vault auth enable kubernetes || exit 1
-        vault write auth/kubernetes/config \\
-          kubernetes_host=\"https://\$KUBERNETES_PORT_443_TCP_ADDR:443\" \\
-          kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt || exit 1
-        echo 'Kubernetes auth enabled'
-      "
-    EOT
+data "kubernetes_service_v1" "api" {
+  metadata {
+    name      = "kubernetes"
+    namespace = "default"
   }
+}
 
+resource "vault_auth_backend" "kubernetes" {
+  type       = "kubernetes"
   depends_on = [null_resource.vault_bootstrap]
+  lifecycle { prevent_destroy = true }
 }
 
-# ============================================================
-# Enable Vault KV v2 Secrets Engine
-# ============================================================
-# Enables the KV v2 secrets engine at the kubernetes-homelab path.
-
-resource "null_resource" "vault_enable_kv" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
-    }
-
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault secrets list | grep -q kubernetes-homelab || vault secrets enable -path=kubernetes-homelab kv-v2 || exit 1
-        echo 'KV v2 secrets engine enabled'
-      "
-    EOT
-  }
-
-  depends_on = [null_resource.vault_k8s_auth]
+resource "vault_kubernetes_auth_backend_config" "cluster" {
+  backend            = vault_auth_backend.kubernetes.path
+  kubernetes_host    = "https://${data.kubernetes_service_v1.api.spec[0].cluster_ip}:443"
+  kubernetes_ca_cert = data.terraform_remote_state.talos_configure.outputs.ca_cert
 }
 
-# ============================================================
-# Enable PKI Secrets Engine
-# ============================================================
-# Enables the PKI secrets engine for certificate management.
+resource "vault_mount" "kv" {
+  path       = "kubernetes-homelab"
+  type       = "kv"
+  options    = { version = "2" }
+  depends_on = [null_resource.vault_bootstrap]
+  lifecycle { prevent_destroy = true }
+}
 
-resource "null_resource" "vault_enable_pki" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
-    }
-
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        vault secrets list | grep -q pki || vault secrets enable pki || exit 1
-        vault secrets tune -max-lease-ttl=8760h pki || exit 1
-        echo 'PKI secrets engine enabled'
-      "
-    EOT
-  }
-
-  depends_on = [null_resource.vault_k8s_auth]
+resource "vault_mount" "pki" {
+  path                  = "pki"
+  type                  = "pki"
+  max_lease_ttl_seconds = 8760 * 3600
+  depends_on            = [null_resource.vault_bootstrap]
+  lifecycle { prevent_destroy = true }
 }
 
 # ============================================================
 # Create Policies
 # ============================================================
 
-resource "null_resource" "vault_policy_external_secrets" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+resource "vault_policy" "external_secrets_reader" {
+  name       = "external-secrets-reader"
+  policy     = <<-POLICY
+    path "kubernetes-homelab/data/*" {
+      capabilities = ["create", "read", "update", "delete", "patch"]
     }
-
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        
-        vault policy write external-secrets-reader - <<'POLICY'
-path \"kubernetes-homelab/data/*\" {
-  capabilities = [\"create\", \"read\", \"update\", \"delete\", \"patch\"]
-}
-path \"kubernetes-homelab/metadata/*\" {
-  capabilities = [\"list\", \"delete\"]
-}
-POLICY
-      "
-      
-      if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create external-secrets-reader policy"
-        exit 1
-      fi
-    EOT
-  }
-
-  depends_on = [null_resource.vault_enable_kv]
-}
-
-resource "null_resource" "vault_policy_pki" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+    path "kubernetes-homelab/metadata/*" {
+      capabilities = ["list", "delete"]
     }
+  POLICY
+  depends_on = [vault_mount.kv]
+}
 
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
+provider "vault" {
+  address = "http://127.0.0.1:18200"
+  token   = terraform_data.vault_credentials.output.root_token
+}
 
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        
-        vault policy write pki - <<'POLICY'
-path \"pki*\"                   { capabilities = [\"read\", \"list\"] }
-path \"pki/sign/okwilkins-dot-dev\"    { capabilities = [\"create\", \"update\"] }
-path \"pki/issue/okwilkins-dot-dev\"   { capabilities = [\"create\"] }
-POLICY
-      "
-      
-      if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create pki policy"
-        exit 1
-      fi
-    EOT
-  }
-
-  depends_on = [null_resource.vault_enable_pki]
+resource "vault_policy" "pki" {
+  name       = "pki"
+  policy     = <<-POLICY
+    path "pki*"                   { capabilities = ["read", "list"] }
+    path "pki/sign/okwilkins-dot-dev"    { capabilities = ["create", "update"] }
+    path "pki/issue/okwilkins-dot-dev"   { capabilities = ["create"] }
+  POLICY
+  depends_on = [vault_mount.pki]
 }
 
 # ============================================================
 # Create Kubernetes Auth Roles
 # ============================================================
 
-resource "null_resource" "vault_role_external_secrets" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
-    }
-
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        
-        vault write auth/kubernetes/role/external-secrets-vault-auth \\
-          bound_service_account_names=external-secrets-vault-auth \\
-          bound_service_account_namespaces=external-secrets \\
-          policies=external-secrets-reader \\
-          ttl=24h || exit 1
-        
-        echo 'external-secrets-vault-auth role created'
-      "
-      
-      if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create external-secrets-vault-auth role"
-        exit 1
-      fi
-    EOT
-  }
-
-  depends_on = [null_resource.vault_policy_external_secrets]
+resource "vault_kubernetes_auth_backend_role" "external_secrets" {
+  backend                          = vault_auth_backend.kubernetes.path
+  role_name                        = "external-secrets-vault-auth"
+  bound_service_account_names      = ["external-secrets-vault-auth"]
+  bound_service_account_namespaces = ["external-secrets"]
+  token_policies                   = [vault_policy.external_secrets_reader.name]
+  token_ttl                        = 24 * 60 * 60
 }
 
-resource "null_resource" "vault_role_vault_issuer" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
-    }
-
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        
-        vault write auth/kubernetes/role/vault-issuer \\
-          bound_service_account_names=vault-issuer \\
-          bound_service_account_namespaces=cert-manager \\
-          policies=pki \\
-          ttl=20m || exit 1
-        
-        echo 'vault-issuer role created'
-      "
-      
-      if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create vault-issuer role"
-        exit 1
-      fi
-    EOT
-  }
-
-  depends_on = [null_resource.vault_policy_pki]
+resource "vault_kubernetes_auth_backend_role" "vault_issuer" {
+  backend                          = vault_auth_backend.kubernetes.path
+  role_name                        = "vault-issuer"
+  bound_service_account_names      = ["vault-issuer"]
+  bound_service_account_namespaces = ["cert-manager"]
+  token_policies                   = [vault_policy.pki.name]
+  token_ttl                        = 20 * 60
 }
 
 # ============================================================
@@ -330,112 +207,47 @@ resource "null_resource" "vault_pki_root_ca" {
     EOT
   }
 
-  depends_on = [null_resource.vault_enable_pki]
+  depends_on = [vault_mount.pki]
 }
 
-resource "null_resource" "vault_pki_config_urls" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
-    }
-
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        
-        vault write pki/config/urls \\
-          issuing_certificates=\"http://127.0.0.1:8200/v1/pki/ca\" \\
-          crl_distribution_points=\"http://127.0.0.1:8200/v1/pki/crl\" || exit 1
-        
-        echo 'PKI URLs configured'
-      "
-      
-      if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to configure PKI URLs"
-        exit 1
-      fi
-    EOT
-  }
-
-  depends_on = [null_resource.vault_pki_root_ca]
+resource "vault_pki_secret_backend_config_urls" "pki" {
+  backend                 = vault_mount.pki.path
+  issuing_certificates    = ["http://127.0.0.1:8200/v1/pki/ca"]
+  crl_distribution_points = ["http://127.0.0.1:8200/v1/pki/crl"]
+  depends_on              = [null_resource.vault_pki_root_ca]
 }
 
-resource "null_resource" "vault_pki_role" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
-    }
-
-    command = <<-EOT
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-
-      kubectl_wrapper exec vault-0 -n vault -- /bin/sh -c "
-        export VAULT_TOKEN=\"$VAULT_TOKEN\"
-        
-        vault write pki/roles/okwilkins-dot-dev \\
-          allowed_domains=okwilkins.dev \\
-          allow_bare_domains=true \\
-          allow_subdomains=true \\
-          max_ttl=72h || exit 1
-        
-        echo 'PKI role created'
-      "
-      
-      if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create PKI role"
-        exit 1
-      fi
-    EOT
-  }
-
-  depends_on = [null_resource.vault_pki_config_urls]
+resource "vault_pki_secret_backend_role" "domain" {
+  backend            = vault_mount.pki.path
+  name               = "okwilkins-dot-dev"
+  allowed_domains    = ["okwilkins.dev"]
+  allow_bare_domains = true
+  allow_subdomains   = true
+  max_ttl            = 72 * 3600
+  depends_on         = [vault_pki_secret_backend_config_urls.pki]
 }
 
-# ============================================================
-# Vault Snapshot Authentication
-# ============================================================
-
-resource "null_resource" "vault_snapshot_auth" {
-  triggers = {
-    config_version = "1"
-  }
-
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    environment = {
-      VAULT_TOKEN = sensitive(terraform_data.vault_credentials.output.root_token)
+resource "vault_policy" "snapshot" {
+  name       = "vault-snapshot"
+  policy     = <<-POLICY
+    path "sys/storage/raft/snapshot" {
+      capabilities = ["read"]
     }
-    command = <<-EOT
-      set -euo pipefail
-      source "${var.infra_root}/scripts/common.sh"
-      load_tf_kube_env
-      printf '%s\n' "$VAULT_TOKEN" | kubectl_wrapper exec -i -n vault vault-0 -- sh -ec '
-        IFS= read -r VAULT_TOKEN
-        export VAULT_TOKEN
-        vault policy write vault-snapshot - <<POLICY
-      path "sys/storage/raft/snapshot" {
-        capabilities = ["read"]
-      }
-      path "auth/token/revoke-self" {
-        capabilities = ["update"]
-      }
-      POLICY
-        vault write auth/kubernetes/role/vault-snapshot \
-          bound_service_account_names=vault-snapshot \
-          bound_service_account_namespaces=vault \
-          audience=vault \
-          token_policies=vault-snapshot \
-          token_no_default_policy=true \
-          token_ttl=10m token_max_ttl=10m
-      '
-    EOT
-  }
+    path "auth/token/revoke-self" {
+      capabilities = ["update"]
+    }
+  POLICY
+  depends_on = [null_resource.vault_bootstrap]
+}
 
-  depends_on = [null_resource.vault_k8s_auth]
+resource "vault_kubernetes_auth_backend_role" "snapshot" {
+  backend                          = vault_auth_backend.kubernetes.path
+  role_name                        = "vault-snapshot"
+  bound_service_account_names      = ["vault-snapshot"]
+  bound_service_account_namespaces = ["vault"]
+  audience                         = "vault"
+  token_policies                   = [vault_policy.snapshot.name]
+  token_no_default_policy          = true
+  token_ttl                        = 600
+  token_max_ttl                    = 600
 }
