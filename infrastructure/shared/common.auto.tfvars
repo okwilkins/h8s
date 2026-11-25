@@ -4,7 +4,7 @@
 
 talos_version      = "v1.14.7"
 talos_cluster_name = "talos-homelab"
-kubernetes_version = "v1.37.2"
+kubernetes_version = "v1.37.3"
 
 # ============================================================
 # Proxmox
