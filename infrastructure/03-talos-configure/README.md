@@ -2,9 +2,11 @@
 
 ## Upgrades
 
-Check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix). Change either `talos_version` or `kubernetes_version` in [`shared/common.auto.tfvars`](../shared/common.auto.tfvars), then run `tofu apply` from this directory in the [infrastructure shell](../README.md#configure).
+Check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix). Change one pin at a time in [`shared/common.auto.tfvars`](../shared/common.auto.tfvars).
 
-Talos upgrades drain one node at a time and stop on failure. If Longhorn blocks a drain, let it restore healthy replicas before retrying.
+Run `tofu apply` from this directory in the [infrastructure shell](../README.md#configure) with kubectl credentials for the cluster. When the Talos installer image changes, OpenTofu waits up to 60 minutes before each worker for all Longhorn volumes to report `healthy`, including detached volumes. If a wait fails, inspect `kubectl -n longhorn-system get volumes.longhorn.io`, resolve the unhealthy volumes and rerun `tofu apply`.
+
+For initial bootstrap only, when Longhorn does not exist yet, use `TF_VAR_wait_for_longhorn=false` for the bootstrap invocation. Leave it unset for subsequent applies.
 
 ## Rootless Buildah Seccomp Profile
 

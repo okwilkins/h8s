@@ -4,6 +4,12 @@ This directory contains all infrastructure configuration for the cluster.
 
 ## Bootstrap
 
+Stages 06 and 07 use the Vault provider. Keep `kubectl -n vault port-forward pod/vault-0 18200:8200` running in another shell during their plans and applies.
+
+Stage 07 uses ordinary `tofu plan` and `tofu apply`. For seven Authelia passwords, the `external` data source calls `hash-password` from the infrastructure shell. Encrypted state contains these queries and their resulting hashes.
+
+Stage 03 trusts Harbor using the [public Vault CA certificate](03-talos-configure/vault-ca.pem). Update this certificate when the Vault root changes.
+
 OpenTofu configuration for bootstrapping a Talos Linux cluster on Proxmox from scratch.
 
 The bootstrap process runs through 9 sequential stages, each managed by its own OpenTofu configuration. Stages 1-8 are automated via `task cluster:bootstrap`. Stage 9 (Platform Configuration) must be run manually after bootstrap completes.
@@ -165,7 +171,7 @@ Keep an independent copy of the Vault recovery JSON.
 Run the complete bootstrap sequence:
 
 ```bash
-task --dir "$INFRA_ROOT" cluster:bootstrap
+TF_VAR_wait_for_longhorn=false task --dir "$INFRA_ROOT" cluster:bootstrap
 ```
 
 This command executes all 7 stages in sequence:
@@ -283,7 +289,7 @@ Talos restarts the node after etcd bootstrap, which can cause transient API unav
 Simply run the bootstrap again:
 
 ```bash
-task --dir "$INFRA_ROOT" cluster:bootstrap
+TF_VAR_wait_for_longhorn=false task --dir "$INFRA_ROOT" cluster:bootstrap
 ```
 
 The process is idempotent and will skip already-completed stages.

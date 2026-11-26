@@ -11,11 +11,29 @@ ephemeral "talos_cluster_kubeconfig" "drain" {
 }
 
 locals {
-  installer_image = "factory.talos.dev/metal-installer/${data.terraform_remote_state.talos_factory.outputs.schematic_id}:${var.talos_version}"
+  installer_image   = "factory.talos.dev/metal-installer/${data.terraform_remote_state.talos_factory.outputs.schematic_id}:${var.talos_version}"
+  wait_for_longhorn = "kubectl --server=https://${var.talos_cluster_vip}:6443 -n longhorn-system wait volumes.longhorn.io --all --for='jsonpath={.status.robustness}=healthy' --timeout=60m"
+}
+
+variable "wait_for_longhorn" {
+  description = "Wait for healthy Longhorn volumes before each Talos image rollout step. Disable only for initial bootstrap."
+  type        = bool
+  default     = true
+}
+
+resource "terraform_data" "before_worker_1" {
+  count            = var.wait_for_longhorn ? 1 : 0
+  triggers_replace = local.installer_image
+
+  provisioner "local-exec" {
+    command = local.wait_for_longhorn
+  }
 }
 
 # Explicit dependencies stop the rollout if a node upgrade fails.
 resource "talos_machine" "controlplane-worker-1" {
+  depends_on = [terraform_data.before_worker_1]
+
   client_configuration            = talos_machine_secrets.this.client_configuration
   machine_configuration           = data.talos_machine_configuration.nodes["controlplane-worker-1"].machine_configuration
   node                            = var.nodes["controlplane-worker-1"].ip_address
@@ -44,6 +62,16 @@ resource "talos_machine" "controlplane-worker-1" {
   }
 }
 
+resource "terraform_data" "before_worker_2" {
+  count            = var.wait_for_longhorn ? 1 : 0
+  triggers_replace = local.installer_image
+  depends_on       = [talos_machine.controlplane-worker-1]
+
+  provisioner "local-exec" {
+    command = local.wait_for_longhorn
+  }
+}
+
 resource "talos_machine" "controlplane-worker-2" {
   client_configuration            = talos_machine_secrets.this.client_configuration
   machine_configuration           = data.talos_machine_configuration.nodes["controlplane-worker-2"].machine_configuration
@@ -65,7 +93,17 @@ resource "talos_machine" "controlplane-worker-2" {
     update = "45m"
   }
 
-  depends_on = [talos_machine.controlplane-worker-1]
+  depends_on = [talos_machine.controlplane-worker-1, terraform_data.before_worker_2]
+}
+
+resource "terraform_data" "before_worker_3" {
+  count            = var.wait_for_longhorn ? 1 : 0
+  triggers_replace = local.installer_image
+  depends_on       = [talos_machine.controlplane-worker-2]
+
+  provisioner "local-exec" {
+    command = local.wait_for_longhorn
+  }
 }
 
 resource "talos_machine" "controlplane-worker-3" {
@@ -89,7 +127,7 @@ resource "talos_machine" "controlplane-worker-3" {
     update = "45m"
   }
 
-  depends_on = [talos_machine.controlplane-worker-2]
+  depends_on = [talos_machine.controlplane-worker-2, terraform_data.before_worker_3]
 }
 
 moved {
