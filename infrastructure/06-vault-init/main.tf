@@ -32,11 +32,6 @@ resource "terraform_data" "vault_credentials" {
   }
 }
 
-moved {
-  from = terraform_data.vault_recovery
-  to   = terraform_data.vault_credentials
-}
-
 # ============================================================
 # Wait for Kubernetes API
 # ============================================================
