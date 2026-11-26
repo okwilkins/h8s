@@ -6,14 +6,14 @@ terraform {
     # https://github.com/bpg/terraform-provider-proxmox
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.123"
+      version = "~> 0.124"
     }
 
     # https://registry.terraform.io/providers/siderolabs/talos
     # https://github.com/siderolabs/terraform-provider-talos
     talos = {
       source  = "siderolabs/talos"
-      version = "= 0.13.0-alpha.2"
+      version = "0.13.0-alpha.3"
     }
 
     helm = {
