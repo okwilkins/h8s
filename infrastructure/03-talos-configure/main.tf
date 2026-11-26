@@ -87,6 +87,12 @@ data "talos_machine_configuration" "nodes" {
   kubernetes_version = var.kubernetes_version
 
   config_patches = concat([
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "RegistryTLSConfig"
+      name       = "harbor.okwilkins.dev"
+      ca         = file("${path.module}/vault-ca.pem")
+    }),
     # Hostname per node
     yamlencode({
       apiVersion = "v1alpha1"
