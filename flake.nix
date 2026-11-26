@@ -17,6 +17,14 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+
+        hashPassword = pkgs.writers.writePython3Bin "hash-password" {
+          libraries = with pkgs.python3Packages; [
+            bcrypt
+            argon2-cffi
+          ];
+        } ./infrastructure/scripts/hash-password.py;
+
         tools = with pkgs; [
           kubectl
           kubernetes-helm
@@ -32,6 +40,7 @@
           authelia
           sops
           openssl
+          hashPassword
           age
           age-plugin-fido2-hmac
           pam_u2f
