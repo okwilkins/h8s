@@ -2,7 +2,7 @@
   description = "Flake for the Cosign signing image";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
